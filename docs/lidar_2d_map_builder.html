@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lidar_2d_map_builder - Aurora Python SDK</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px; }
+        h3 { color: #2980b9; }
+        h4 { color: #7f8c8d; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Consolas', monospace; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        .nav { background: #34495e; color: white; padding: 10px 0; margin: -40px -40px 40px -40px; border-radius: 8px 8px 0 0; }
+        .nav ul { list-style: none; padding: 0 20px; margin: 0; }
+        .nav li { display: inline-block; margin-right: 20px; }
+        .nav a { color: #3498db; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+        .signature { background: #e8f4fd; padding: 10px; border-left: 4px solid #3498db; margin: 10px 0; }
+        .docstring { margin: 15px 0; }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #3498db; color: white; padding: 10px; border-radius: 50%; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+            </ul>
+        </nav>
+        <h1>lidar_2d_map_builder</h1>
+<div class='docstring'>Aurora SDK LIDAR2DMapBuilder component.<br><br>Handles CoMap (2D LIDAR-based mapping) operations.</div>
+<h2>Classes</h2>
+<h3>LIDAR2DMapBuilder</h3>
+<div class='docstring'>LIDAR2DMapBuilder component for Aurora SDK.<br><br>Responsible for CoMap (2D LIDAR-based mapping) operations:<br>- 2D LIDAR map preview generation and rendering<br>- 2D occupancy grid map management<br>- Real-time 2D map building from LIDAR data<br>- Map preview image retrieval<br>- 2D map configuration and parameters<br><br>Note: This handles the 2D LIDAR-based mapping system (CoMap). <br>For the main 3D VSLAM mapping, see the MapManager component.</div>
+<h4>Methods</h4>
+<div class='signature'><code>start_lidar_2d_map_preview(self, resolution)</code></div>
+<div class='docstring'>Start LIDAR 2D map preview generation.<br><br>This starts the real-time generation of a 2D occupancy grid map<br>from LIDAR scan data, which can be retrieved as preview images.<br><br>Args:<br>    resolution: Map resolution in meters per pixel (default: 0.05m = 5cm)<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to start 2D map preview</div>
+<div class='signature'><code>stop_lidar_2d_map_preview(self)</code></div>
+<div class='docstring'>Stop LIDAR 2D map preview generation.<br><br>Stops the real-time 2D map generation process.<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to stop 2D map preview</div>
+<div class='signature'><code>get_lidar_2d_map_preview(self)</code></div>
+<div class='docstring'>Get current LIDAR 2D map preview image.<br><br>Retrieves the current state of the 2D occupancy grid map as an image.<br>The map shows obstacles (occupied cells), free space, and unknown areas.<br><br>Returns:<br>    Tuple of (map_image_data, map_info) or None if not available<br>    - map_image_data: Raw image data of the 2D map<br>    - map_info: Dictionary with map metadata (resolution, origin, etc.)<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to get 2D map preview</div>
+<div class='signature'><code>save_lidar_2d_map(self, file_path, format)</code></div>
+<div class='docstring'>Save current 2D LIDAR map to file.<br><br>Args:<br>    file_path: Path where to save the 2D map<br>    format: Map file format ("pgm", "png", "yaml", etc.)<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to save 2D map or not implemented</div>
+<div class='signature'><code>load_lidar_2d_map(self, file_path)</code></div>
+<div class='docstring'>Load 2D LIDAR map from file.<br><br>Args:<br>    file_path: Path to the 2D map file<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to load 2D map or not implemented</div>
+<div class='signature'><code>clear_lidar_2d_map(self)</code></div>
+<div class='docstring'>Clear the current 2D LIDAR map and restart building.<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to clear 2D map or not implemented</div>
+<div class='signature'><code>set_lidar_2d_map_parameters(self, resolution, map_size, origin)</code></div>
+<div class='docstring'>Set parameters for 2D LIDAR map building.<br><br>Args:<br>    resolution: Map resolution in meters per pixel<br>    map_size: Map size as (width, height) in pixels<br>    origin: Map origin as (x, y) in world coordinates<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to set parameters or not implemented</div>
+<div class='signature'><code>get_lidar_2d_map_info(self)</code></div>
+<div class='docstring'>Get information about the current 2D LIDAR map.<br><br>Returns:<br>    Dict containing 2D map information (resolution, size, coverage, etc.)<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to get 2D map info or not implemented</div>
+<div class='signature'><code>start_preview_map_background_update(self, options)</code></div>
+<div class='docstring'>Start LIDAR 2D preview map background update.<br><br>Args:<br>    options: GridMapGenerationOptions instance with map generation parameters<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to start background update</div>
+<div class='signature'><code>stop_preview_map_background_update(self)</code></div>
+<div class='docstring'>Stop LIDAR 2D preview map background update.<br><br>Raises:<br>    ConnectionError: If not connected to a device</div>
+<div class='signature'><code>is_preview_map_background_updating(self)</code></div>
+<div class='docstring'>Check if preview map background update is running.<br><br>Returns:<br>    bool: True if background update is running<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to check status</div>
+<div class='signature'><code>require_preview_map_redraw(self)</code></div>
+<div class='docstring'>Require a redraw of the preview map.<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to require redraw</div>
+<div class='signature'><code>get_and_reset_preview_map_dirty_rect(self)</code></div>
+<div class='docstring'>Get and reset the dirty rectangle of the preview map.<br><br>Returns:<br>    Tuple of (dirty_rect, map_changed) where:<br>    - dirty_rect: Rect instance with dirty area<br>    - map_changed: bool indicating if map has changed<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to get dirty rect</div>
+<div class='signature'><code>set_preview_map_auto_floor_detection(self, enable)</code></div>
+<div class='docstring'>Enable/disable auto floor detection for preview map.<br><br>Args:<br>    enable: bool, True to enable auto floor detection<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to set auto floor detection</div>
+<div class='signature'><code>is_preview_map_auto_floor_detection(self)</code></div>
+<div class='docstring'>Check if auto floor detection is enabled.<br><br>Returns:<br>    bool: True if auto floor detection is enabled<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to check status</div>
+<div class='signature'><code>get_preview_map(self)</code></div>
+<div class='docstring'>Get the preview map handle and data.<br><br>Returns:<br>    OccupancyGridMap2DRef-like object for accessing map data<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to get preview map</div>
+<div class='signature'><code>generate_fullmap_ondemand(self, options, wait_for_data_sync, timeout_ms)</code></div>
+<div class='docstring'>Generate a full 2D LiDAR map on-demand using slamtec_aurora_sdk_lidar2dmap_generate_fullmap.<br><br>This is the proper interface for on-demand map building, different from preview map<br>background update which is meant for real-time visualization.<br><br>Args:<br>    options: GridMapGenerationOptions for the map generation<br>    wait_for_data_sync: Whether to wait for map data sync (default: True)<br>    timeout_ms: Timeout in milliseconds (default: 60000)<br>    <br>Returns:<br>    GridMapRef: Reference to the generated map handle</div>
+<h3>GridMapRef</h3>
+<div class='docstring'>Reference to a 2D grid map for accessing map data with automatic cleanup.<br><br>This class handles both owned gridmaps (that need to be released) and<br>non-owned gridmaps (like preview map that should not be released).</div>
+<h4>Methods</h4>
+<div class='signature'><code>release(self)</code></div>
+<div class='docstring'>Release the grid map resources if owned.<br><br>This method is safe to call multiple times. It only releases<br>the gridmap if this object owns it (e.g., generated maps).<br>Built-in gridmaps like preview map are not released.</div>
+<div class='signature'><code>get_map_dimension(self)</code></div>
+<div class='docstring'>Get map dimension.</div>
+<div class='signature'><code>read_cell_data(self, fetch_rect, resolution, l2p_mapping)</code></div>
+<div class='docstring'>Read cell data from the map.<br><br>Args:<br>    fetch_rect: Rectangle area to fetch (in meters)<br>    resolution: Map resolution in meters per cell (default: 0.05m = 5cm)<br>    l2p_mapping: If True, perform log-odd to linear (0-255) mapping for visualization.<br>                If False, return raw data for navigation (default: True)<br><br>Returns:<br>    tuple: (cell_data_list, fetch_info)</div>
+        <a href="#" class="back-to-top">↑</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>c_bindings - Aurora Python SDK</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px; }
+        h3 { color: #2980b9; }
+        h4 { color: #7f8c8d; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Consolas', monospace; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        .nav { background: #34495e; color: white; padding: 10px 0; margin: -40px -40px 40px -40px; border-radius: 8px 8px 0 0; }
+        .nav ul { list-style: none; padding: 0 20px; margin: 0; }
+        .nav li { display: inline-block; margin-right: 20px; }
+        .nav a { color: #3498db; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+        .signature { background: #e8f4fd; padding: 10px; border-left: 4px solid #3498db; margin: 10px 0; }
+        .docstring { margin: 15px 0; }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #3498db; color: white; padding: 10px; border-radius: 50%; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+            </ul>
+        </nav>
+        <h1>c_bindings</h1>
+<div class='docstring'>Low-level C bindings for Aurora SDK using ctypes.</div>
+<h2>Classes</h2>
+<h3>CBindings</h3>
+<div class='docstring'>Low-level C bindings for Aurora SDK.</div>
+<h4>Methods</h4>
+<div class='signature'><code>get_version_info(self)</code></div>
+<div class='docstring'>Get SDK version information.</div>
+<div class='signature'><code>create_session(self)</code></div>
+<div class='docstring'>Create a new SDK session.</div>
+<div class='signature'><code>release_session(self, handle)</code></div>
+<div class='docstring'>Release SDK session.</div>
+<div class='signature'><code>get_discovered_servers(self, handle, max_count)</code></div>
+<div class='docstring'>Get list of discovered Aurora servers.</div>
+<div class='signature'><code>discover_devices(self, handle, timeout)</code></div>
+<div class='docstring'>Discover Aurora devices on the network.</div>
+<div class='signature'><code>connect_device(self, handle, device_info)</code></div>
+<div class='docstring'>Connect to Aurora device using device info dictionary from discovery.</div>
+<div class='signature'><code>connect_string(self, handle, connection_string)</code></div>
+<div class='docstring'>Connect to Aurora device using connection string.</div>
+<div class='signature'><code>connect(self, handle, server_info)</code></div>
+<div class='docstring'>Connect to Aurora server (legacy method).</div>
+<div class='signature'><code>disconnect(self, handle)</code></div>
+<div class='docstring'>Disconnect from Aurora server.</div>
+<div class='signature'><code>is_connected(self, handle)</code></div>
+<div class='docstring'>Check if connected to Aurora server.</div>
+<div class='signature'><code>set_map_data_syncing(self, handle, enable)</code></div>
+<div class='docstring'>Enable/disable map data syncing.</div>
+<div class='signature'><code>set_raw_data_subscription(self, handle, enable)</code></div>
+<div class='docstring'>Enable/disable raw data subscription.</div>
+<div class='signature'><code>get_current_pose_se3(self, handle)</code></div>
+<div class='docstring'>Get current pose in SE3 format.</div>
+<div class='signature'><code>get_current_pose(self, handle)</code></div>
+<div class='docstring'>Get current pose in Euler angle format.</div>
+<div class='signature'><code>get_device_basic_info(self, handle)</code></div>
+<div class='docstring'>Get device basic information.</div>
+<div class='signature'><code>peek_camera_preview_image(self, handle, timestamp_ns)</code></div>
+<div class='docstring'>Get camera preview image with actual pixel data.</div>
+<div class='signature'><code>peek_tracking_data(self, handle)</code></div>
+<div class='docstring'>Get tracking frame data with keypoints.</div>
+<div class='signature'><code>require_mapping_mode(self, handle, timeout_ms)</code></div>
+<div class='docstring'>Require the device to enter mapping mode.</div>
+<div class='signature'><code>resync_map_data(self, handle, invalidate_cache)</code></div>
+<div class='docstring'>Force resync of map data.</div>
+<div class='signature'><code>get_global_mapping_info_legacy(self, handle)</code></div>
+<div class='docstring'>Get global mapping information (legacy).</div>
+<div class='signature'><code>start_lidar2d_preview_map(self, handle, resolution)</code></div>
+<div class='docstring'>Start LIDAR 2D map preview generation.</div>
+<div class='signature'><code>stop_lidar2d_preview_map(self, handle)</code></div>
+<div class='docstring'>Stop LIDAR 2D map preview generation.</div>
+<div class='signature'><code>get_lidar2d_preview_map(self, handle)</code></div>
+<div class='docstring'>Get current LIDAR 2D map preview.</div>
+<div class='signature'><code>get_global_mapping_info(self, handle)</code></div>
+<div class='docstring'>Get global mapping information.</div>
+<div class='signature'><code>access_map_data(self, handle)</code></div>
+<div class='docstring'>Access visual map data (map points and keyframes).</div>
+<div class='signature'><code>peek_recent_lidar_scan(self, handle, max_points, force_latest)</code></div>
+<div class='docstring'>Get the most recent LiDAR scan data.</div>
+<div class='signature'><code>start_lidar2dmap_preview(self, handle, options)</code></div>
+<div class='docstring'>Start LIDAR 2D grid map preview generation.</div>
+<div class='signature'><code>stop_lidar2dmap_preview(self, handle)</code></div>
+<div class='docstring'>Stop LIDAR 2D grid map preview generation.</div>
+<div class='signature'><code>get_lidar2dmap_preview_handle(self, handle)</code></div>
+<div class='docstring'>Get the handle of the preview 2D grid map.</div>
+<div class='signature'><code>is_lidar2dmap_preview_updating(self, handle)</code></div>
+<div class='docstring'>Check if LIDAR 2D grid map preview is updating.</div>
+<div class='signature'><code>require_lidar2dmap_redraw(self, handle)</code></div>
+<div class='docstring'>Require redraw of the 2D map preview.</div>
+<div class='signature'><code>get_lidar2dmap_dirty_rect(self, handle)</code></div>
+<div class='docstring'>Get and reset the dirty rectangle of the 2D map preview.</div>
+<div class='signature'><code>set_lidar2dmap_auto_floor_detection(self, handle, enable)</code></div>
+<div class='docstring'>Enable/disable auto floor detection for 2D map.</div>
+<div class='signature'><code>is_lidar2dmap_auto_floor_detection(self, handle)</code></div>
+<div class='docstring'>Check if auto floor detection is enabled.</div>
+<div class='signature'><code>get_gridmap_dimension(self, gridmap_handle, get_max_capacity)</code></div>
+<div class='docstring'>Get the dimension of a 2D grid map.</div>
+<div class='signature'><code>read_gridmap_cell_data(self, gridmap_handle, fetch_rect, resolution, l2p_mapping)</code></div>
+<div class='docstring'>Read cell data from a 2D grid map.<br><br>Args:<br>    gridmap_handle: Handle to the grid map<br>    fetch_rect: Rectangle area to fetch (in meters)<br>    resolution: Map resolution in meters per cell (default: 0.05m = 5cm)<br>    l2p_mapping: If True, perform log-odd to linear (0-255) mapping for visualization.<br>                If False, return raw data for navigation (default: True)<br><br>Returns:<br>    tuple: (cell_data_list, fetch_info)</div>
+<div class='signature'><code>get_floor_detection_histogram(self, handle)</code></div>
+<div class='docstring'>Get floor detection histogram data.</div>
+<div class='signature'><code>get_all_floor_detection_info(self, handle)</code></div>
+<div class='docstring'>Get all floor detection descriptions and current floor ID.</div>
+<div class='signature'><code>get_current_floor_detection_desc(self, handle)</code></div>
+<div class='docstring'>Get current floor detection description.</div>
+<div class='signature'><code>generate_lidar_2d_fullmap(self, handle, build_options, wait_for_data_sync, timeout_ms)</code></div>
+<div class='docstring'>Generate full 2D LiDAR map on-demand.<br><br>Args:<br>    handle: Session handle<br>    build_options: GridMapGenerationOptions for the map generation<br>    wait_for_data_sync: Whether to wait for map data sync (default: True)<br>    timeout_ms: Timeout in milliseconds (default: 60000)<br>    <br>Returns:<br>    Handle to the generated 2D grid map</div>
+<div class='signature'><code>set_enhanced_imaging_subscription(self, handle, enhanced_image_type, enable)</code></div>
+<div class='docstring'>Set enhanced imaging subscription for specific image type.</div>
+<div class='signature'><code>is_enhanced_imaging_subscribed(self, handle, enhanced_image_type)</code></div>
+<div class='docstring'>Check if enhanced imaging is subscribed for specific image type.</div>
+<div class='signature'><code>require_semantic_segmentation_alternative_model(self, handle, use_alternative_model, timeout_ms)</code></div>
+<div class='docstring'>Require semantic segmentation to use alternative model.</div>
+<div class='signature'><code>get_camera_calibration(self, handle)</code></div>
+<div class='docstring'>Get camera calibration parameters.</div>
+<div class='signature'><code>get_transform_calibration(self, handle)</code></div>
+<div class='docstring'>Get transform calibration parameters.</div>
+<div class='signature'><code>peek_depth_camera_frame(self, handle, frame_type)</code></div>
+<div class='docstring'>Get depth camera frame data using correct C API (two-step process like C++).</div>
+<div class='signature'><code>peek_depth_camera_related_rectified_image(self, handle, timestamp)</code></div>
+<div class='docstring'>Get depth camera related rectified image using correct C API.</div>
+<div class='signature'><code>get_semantic_segmentation_config(self, handle)</code></div>
+<div class='docstring'>Get semantic segmentation configuration.</div>
+<div class='signature'><code>get_semantic_segmentation_labels(self, handle)</code></div>
+<div class='docstring'>Get semantic segmentation label information.</div>
+<div class='signature'><code>get_semantic_segmentation_label_set_name(self, handle)</code></div>
+<div class='docstring'>Get semantic segmentation label set name.</div>
+<div class='signature'><code>peek_semantic_segmentation_frame(self, handle, timestamp_ns, allow_nearest)</code></div>
+<div class='docstring'>Get semantic segmentation frame data using two-step buffer allocation.</div>
+<div class='signature'><code>wait_semantic_segmentation_next_frame(self, handle, timeout_ms)</code></div>
+<div class='docstring'>Wait for the next semantic segmentation frame to be available.</div>
+<div class='signature'><code>is_semantic_segmentation_using_alternative_model(self, handle)</code></div>
+<div class='docstring'>Check if semantic segmentation is using alternative model.</div>
+<div class='signature'><code>set_semantic_segmentation_model(self, handle, model_type)</code></div>
+<div class='docstring'>Set semantic segmentation model type.</div>
+<div class='signature'><code>calc_depth_aligned_segmentation_map(self, handle, segmentation_data, seg_width, seg_height)</code></div>
+<div class='docstring'>Calculate depth camera aligned segmentation map (matching C++ implementation).</div>
+<div class='signature'><code>require_map_reset(self, handle, timeout_ms)</code></div>
+<div class='docstring'>Require the device to reset its map.</div>
+<div class='signature'><code>require_pure_localization_mode(self, handle, timeout_ms)</code></div>
+<div class='docstring'>Require the device to enter pure localization mode (no mapping).</div>
+<div class='signature'><code>is_device_connection_alive(self, handle)</code></div>
+<div class='docstring'>Check if the device connection is alive and healthy.</div>
+<div class='signature'><code>is_raw_data_subscribed(self, handle)</code></div>
+<div class='docstring'>Check if raw data subscription is active.</div>
+<div class='signature'><code>get_last_device_status(self, handle)</code></div>
+<div class='docstring'>Get the last device status information.</div>
+<div class='signature'><code>get_relocalization_status(self, handle)</code></div>
+<div class='docstring'>Get relocalization status information.</div>
+<div class='signature'><code>get_mapping_flags(self, handle)</code></div>
+<div class='docstring'>Get current mapping flags.</div>
+<div class='signature'><code>convert_quaternion_to_euler(self, qx, qy, qz, qw)</code></div>
+<div class='docstring'>Convert quaternion to Euler angles.</div>
+<div class='signature'><code>depthcam_is_ready(self, handle)</code></div>
+<div class='docstring'>Check if depth camera is ready.</div>
+<div class='signature'><code>depthcam_get_config_info(self, handle)</code></div>
+<div class='docstring'>Get depth camera configuration.</div>
+<div class='signature'><code>depthcam_wait_next_frame(self, handle, timeout_ms)</code></div>
+<div class='docstring'>Wait for next depth camera frame.</div>
+<div class='signature'><code>semantic_segmentation_is_ready(self, handle)</code></div>
+<div class='docstring'>Check if semantic segmentation is ready.</div>
+<div class='signature'><code>gridmap_release(self, gridmap_handle)</code></div>
+<div class='docstring'>Release gridmap handle to prevent memory leaks.</div>
+<div class='signature'><code>gridmap_get_resolution(self, gridmap_handle)</code></div>
+<div class='docstring'>Get gridmap resolution.</div>
+<div class='signature'><code>get_supported_grid_resolution_range(self, handle)</code></div>
+<div class='docstring'>Get supported grid resolution range.</div>
+<div class='signature'><code>get_supported_max_grid_cell_count(self, handle)</code></div>
+<div class='docstring'>Get maximum supported grid cell count.</div>
+<div class='signature'><code>get_imu_info(self, handle)</code></div>
+<div class='docstring'>Get IMU information.</div>
+<div class='signature'><code>get_all_map_info(self, handle, max_count)</code></div>
+<div class='docstring'>Get information about all maps.</div>
+<div class='signature'><code>peek_history_pose(self, handle, timestamp_ns, allow_interpolation, max_time_diff_ns)</code></div>
+<div class='docstring'>Peek historical pose at specific timestamp.</div>
+<div class='signature'><code>peek_imu_data(self, handle, max_count)</code></div>
+<div class='docstring'>Peek recent IMU data.</div>
+<div class='signature'><code>set_low_rate_mode(self, handle, enable)</code></div>
+<div class='docstring'>Enable/disable low rate mode - CORRECTED: no return value.</div>
+<div class='signature'><code>set_loop_closure(self, handle, enable, timeout_ms)</code></div>
+<div class='docstring'>Enable/disable loop closure - CORRECTED: added missing timeout_ms parameter.</div>
+<div class='signature'><code>force_map_global_optimization(self, handle, timeout_ms)</code></div>
+<div class='docstring'>Force global map optimization.</div>
+<div class='signature'><code>send_custom_command(self, handle, command_id, data, timeout_ms)</code></div>
+<div class='docstring'>Send custom command - CORRECTED: proper parameter order and types.</div>
+<h2>Functions</h2>
+<div class='signature'><code>load_aurora_sdk_library()</code></div>
+<div class='docstring'>Load the Aurora SDK dynamic library based on platform.</div>
+<div class='signature'><code>get_c_bindings()</code></div>
+<div class='docstring'>Get global C bindings instance.</div>
+<div class='signature'><code>map_point_callback(user_data, map_point_ptr)</code></div>
+<div class='signature'><code>keyframe_callback(user_data, keyframe_ptr, looped_ids, connected_ids)</code></div>
+<div class='signature'><code>map_desc_callback(user_data, map_desc_ptr)</code></div>
+        <a href="#" class="back-to-top">↑</a>
+    </div>
+</body>
+</html>

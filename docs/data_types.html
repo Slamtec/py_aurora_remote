@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>data_types - Aurora Python SDK</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px; }
+        h3 { color: #2980b9; }
+        h4 { color: #7f8c8d; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Consolas', monospace; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        .nav { background: #34495e; color: white; padding: 10px 0; margin: -40px -40px 40px -40px; border-radius: 8px 8px 0 0; }
+        .nav ul { list-style: none; padding: 0 20px; margin: 0; }
+        .nav li { display: inline-block; margin-right: 20px; }
+        .nav a { color: #3498db; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+        .signature { background: #e8f4fd; padding: 10px; border-left: 4px solid #3498db; margin: 10px 0; }
+        .docstring { margin: 15px 0; }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #3498db; color: white; padding: 10px; border-radius: 50%; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+            </ul>
+        </nav>
+        <h1>data_types</h1>
+<div class='docstring'>Data types and structures for Aurora SDK Python bindings.</div>
+<h2>Classes</h2>
+<h3>Vector3</h3>
+<div class='docstring'>3D vector structure (slamtec_aurora_sdk_position3d_t).</div>
+<h4>Methods</h4>
+<div class='signature'><code>to_tuple(self)</code></div>
+<div class='signature'><code>to_numpy(self)</code></div>
+<h3>Quaternion</h3>
+<div class='docstring'>Quaternion structure (slamtec_aurora_sdk_quaternion_t).</div>
+<h4>Methods</h4>
+<div class='signature'><code>to_tuple(self)</code></div>
+<div class='signature'><code>to_numpy(self)</code></div>
+<h3>EulerAngle</h3>
+<div class='docstring'>Euler angle structure (slamtec_aurora_sdk_euler_angle_t).</div>
+<h4>Methods</h4>
+<div class='signature'><code>to_tuple(self)</code></div>
+<div class='signature'><code>to_numpy(self)</code></div>
+<h3>Pose</h3>
+<div class='docstring'>Pose structure with translation and rotation (slamtec_aurora_sdk_pose_t).</div>
+<h3>PoseSE3</h3>
+<div class='docstring'>Pose structure in SE3 format (slamtec_aurora_sdk_pose_se3_t).</div>
+<h3>ConnectionInfo</h3>
+<div class='docstring'>Connection info structure (slamtec_aurora_sdk_connection_info_t).</div>
+<h3>ServerConnectionInfo</h3>
+<div class='docstring'>Server connection info structure (slamtec_aurora_sdk_server_connection_info_t).</div>
+<h3>DeviceBasicInfo</h3>
+<div class='docstring'>Device basic info structure (slamtec_aurora_sdk_device_basic_info_t).</div>
+<h3>ImageDesc</h3>
+<div class='docstring'>Image description structure (slamtec_aurora_sdk_image_desc_t).</div>
+<h3>StereoImagePairDesc</h3>
+<div class='docstring'>Stereo image pair description (slamtec_aurora_sdk_stereo_image_pair_desc_t).</div>
+<h3>StereoImagePairBuffer</h3>
+<div class='docstring'>Stereo image pair buffer (slamtec_aurora_sdk_stereo_image_pair_buffer_t).</div>
+<h3>Keypoint</h3>
+<div class='docstring'>Keypoint structure (slamtec_aurora_sdk_keypoint_t).</div>
+<h3>TrackingDataBuffer</h3>
+<div class='docstring'>Tracking data buffer (slamtec_aurora_sdk_tracking_data_buffer_t).</div>
+<h3>TrackingInfo</h3>
+<div class='docstring'>Tracking info structure (slamtec_aurora_sdk_tracking_info_t).</div>
+<h3>LidarScanPoint</h3>
+<div class='docstring'>Single LiDAR scan point.</div>
+<h3>LidarScanData</h3>
+<div class='docstring'>LiDAR scan data header.</div>
+<h3>VersionInfo</h3>
+<div class='docstring'>SDK version info structure.</div>
+<h3>MapStorageSessionStatus</h3>
+<div class='docstring'>Map storage session status structure (slamtec_aurora_sdk_mapstorage_session_status_t).</div>
+<h4>Methods</h4>
+<div class='signature'><code>is_finished(self)</code></div>
+<div class='docstring'>Check if session finished successfully.</div>
+<div class='signature'><code>is_working(self)</code></div>
+<div class='docstring'>Check if session is currently working.</div>
+<div class='signature'><code>is_idle(self)</code></div>
+<div class='docstring'>Check if session is idle.</div>
+<div class='signature'><code>is_failed(self)</code></div>
+<div class='docstring'>Check if session failed.</div>
+<div class='signature'><code>is_aborted(self)</code></div>
+<div class='docstring'>Check if session was aborted.</div>
+<div class='signature'><code>is_rejected(self)</code></div>
+<div class='docstring'>Check if session was rejected.</div>
+<div class='signature'><code>is_timeout(self)</code></div>
+<div class='docstring'>Check if session timed out.</div>
+<div class='signature'><code>get_status_string(self)</code></div>
+<div class='docstring'>Get human-readable status string.</div>
+<h3>IMUData</h3>
+<div class='docstring'>IMU data structure (slamtec_aurora_sdk_imu_data_t).</div>
+<h4>Methods</h4>
+<div class='signature'><code>get_timestamp_seconds(self)</code></div>
+<div class='docstring'>Get timestamp in seconds (floating point).</div>
+<div class='signature'><code>get_acceleration(self)</code></div>
+<div class='docstring'>Get acceleration as a tuple (x, y, z) in g units.</div>
+<div class='signature'><code>get_gyroscope(self)</code></div>
+<div class='docstring'>Get gyroscope data as a tuple (x, y, z) in degrees per second.</div>
+<div class='signature'><code>to_dict(self)</code></div>
+<div class='docstring'>Convert IMU data to dictionary.</div>
+<div class='signature'><code>to_numpy(self)</code></div>
+<div class='docstring'>Convert IMU data to numpy arrays (if available).</div>
+<h3>DeviceBasicInfoWrapper</h3>
+<div class='docstring'>Python wrapper for device basic information matching C++ RemoteDeviceBasicInfo.<br><br>This class wraps slamtec_aurora_sdk_device_basic_info_t and provides<br>capability checking methods matching the C++ SDK interface.</div>
+<h4>Methods</h4>
+<div class='signature'><code>from_c_struct(cls, c_struct, timestamp_ns)</code></div>
+<div class='docstring'>Create DeviceBasicInfo from C structure.</div>
+<div class='signature'><code>isSupportDepthCamera(self)</code></div>
+<div class='docstring'>Check if depth camera is supported.<br><br>Returns:<br>    bool: True if depth camera is supported, False otherwise</div>
+<div class='signature'><code>isSupportSemanticSegmentation(self)</code></div>
+<div class='docstring'>Check if semantic segmentation is supported.<br><br>Returns:<br>    bool: True if semantic segmentation is supported, False otherwise</div>
+<div class='signature'><code>isSupportCameraPreviewStream(self)</code></div>
+<div class='docstring'>Check if camera preview stream is supported.<br><br>Returns:<br>    bool: True if camera preview stream is supported, False otherwise</div>
+<div class='signature'><code>isSupportVSLAM(self)</code></div>
+<div class='docstring'>Check if VSLAM is supported.<br><br>Returns:<br>    bool: True if VSLAM is supported, False otherwise</div>
+<div class='signature'><code>isSupportCoMap(self)</code></div>
+<div class='docstring'>Check if CoMap (2D LIDAR mapping) is supported.<br><br>Returns:<br>    bool: True if CoMap is supported, False otherwise</div>
+<div class='signature'><code>isSupportLiDAR(self)</code></div>
+<div class='docstring'>Check if LiDAR is supported.<br><br>Returns:<br>    bool: True if LiDAR is supported, False otherwise</div>
+<div class='signature'><code>isSupportIMU(self)</code></div>
+<div class='docstring'>Check if IMU is supported.<br><br>Returns:<br>    bool: True if IMU is supported, False otherwise</div>
+<div class='signature'><code>isSupportStereoCamera(self)</code></div>
+<div class='docstring'>Check if stereo camera is supported.<br><br>Returns:<br>    bool: True if stereo camera is supported, False otherwise</div>
+<div class='signature'><code>isSupportEnhancedImaging(self)</code></div>
+<div class='docstring'>Check if enhanced imaging is supported.<br><br>Returns:<br>    bool: True if enhanced imaging is supported, False otherwise</div>
+<h3>DeviceInfo</h3>
+<div class='docstring'>Legacy device info wrapper for backward compatibility.</div>
+<h4>Methods</h4>
+<div class='signature'><code>from_device_basic_info(cls, device_basic_info)</code></div>
+<div class='docstring'>Create legacy DeviceInfo from DeviceBasicInfo.</div>
+<div class='signature'><code>from_c_struct(cls, c_struct, timestamp_ns)</code></div>
+<div class='docstring'>Create DeviceInfo from C structure (DeviceBasicInfo).</div>
+<h3>DeviceStatus</h3>
+<div class='docstring'>Device status information structure.</div>
+<h3>RelocalizationStatus</h3>
+<div class='docstring'>Relocalization status information structure.</div>
+<h3>ImageFrame</h3>
+<div class='docstring'>Python wrapper for image frame data.</div>
+<h4>Methods</h4>
+<div class='signature'><code>from_c_desc(cls, desc, data)</code></div>
+<div class='signature'><code>to_opencv_image(self)</code></div>
+<div class='docstring'>Convert image data to OpenCV-compatible numpy array.<br><br>Returns:<br>    numpy.ndarray: BGR image array ready for OpenCV, or None if no data<br>    <br>Note:<br>    Requires opencv-python and numpy to be installed.</div>
+<div class='signature'><code>has_image_data(self)</code></div>
+<div class='docstring'>Check if this frame contains actual image data.</div>
+<h3>TrackingFrame</h3>
+<div class='docstring'>Python wrapper for tracking frame data.</div>
+<h4>Methods</h4>
+<div class='signature'><code>from_c_struct(cls, tracking_info, left_keypoints, right_keypoints, left_image_data, right_image_data)</code></div>
+<div class='docstring'>Create TrackingFrame from C structures.</div>
+<div class='signature'><code>draw_keypoints_on_image(self, opencv_image, image_side, color, radius)</code></div>
+<div class='docstring'>Draw keypoints on a provided OpenCV image.<br><br>Args:<br>    opencv_image (numpy.ndarray): OpenCV image to draw keypoints on<br>    image_side (str): 'left' or 'right' to specify which keypoints to use<br>    color (tuple): BGR color for keypoints (default: green)<br>    radius (int): Radius of keypoint circles<br>    <br>Returns:<br>    numpy.ndarray: Image with keypoints drawn (modifies input image)<br>    <br>Note:<br>    Requires opencv-python to be installed.</div>
+<div class='signature'><code>draw_keypoints(self, image_side, color, radius)</code></div>
+<div class='docstring'>Draw keypoints on the tracking frame's own image and return the result.<br><br>Args:<br>    image_side (str): 'left' or 'right' to specify which image to use<br>    color (tuple): BGR color for keypoints (default: green)<br>    radius (int): Radius of keypoint circles<br>    <br>Returns:<br>    numpy.ndarray: Image with keypoints drawn, or None if no image/keypoints<br>    <br>Note:<br>    Requires opencv-python and numpy to be installed.<br>    This method only works if the tracking frame has image data.</div>
+<h3>ScanData</h3>
+<div class='docstring'>Python wrapper for LiDAR scan data.</div>
+<h4>Methods</h4>
+<div class='signature'><code>from_c_data(cls, header, points)</code></div>
+<h3>LidarScanData</h3>
+<div class='docstring'>Python wrapper for 2D LiDAR scan data.</div>
+<h4>Methods</h4>
+<div class='signature'><code>from_c_data(cls, scan_info, scan_points)</code></div>
+<div class='docstring'>Create LidarScanData from C structures.</div>
+<div class='signature'><code>to_cartesian(self)</code></div>
+<div class='docstring'>Convert polar coordinates to cartesian (x, y) points.</div>
+<div class='signature'><code>get_scan_count(self)</code></div>
+<div class='docstring'>Get the number of scan points.</div>
+<div class='signature'><code>get_valid_points(self)</code></div>
+<div class='docstring'>Get only valid scan points (quality > 0).</div>
+<h3>GridMap2D</h3>
+<div class='docstring'>Python wrapper for 2D grid map data.</div>
+<h4>Methods</h4>
+<div class='signature'><code>get_cell_value(self, x, y)</code></div>
+<div class='docstring'>Get the value of a cell at grid coordinates (x, y).</div>
+<div class='signature'><code>world_to_grid(self, world_x, world_y)</code></div>
+<div class='docstring'>Convert world coordinates to grid coordinates.</div>
+<div class='signature'><code>grid_to_world(self, grid_x, grid_y)</code></div>
+<div class='docstring'>Convert grid coordinates to world coordinates.</div>
+<div class='signature'><code>to_numpy(self)</code></div>
+<div class='docstring'>Convert grid data to numpy array (requires numpy).</div>
+<h3>GridMapGenerationOptions</h3>
+<div class='docstring'>2D gridmap generation options structure (slamtec_aurora_sdk_2d_gridmap_generation_options_t).</div>
+<h3>GlobalMapDesc</h3>
+<div class='docstring'>Global map description structure (slamtec_aurora_sdk_global_map_desc_t).</div>
+<h3>MapPointDesc</h3>
+<div class='docstring'>Map point description structure (slamtec_aurora_sdk_map_point_desc_t).</div>
+<h3>KeyframeDesc</h3>
+<div class='docstring'>Keyframe description structure (slamtec_aurora_sdk_keyframe_desc_t).</div>
+<h3>MapDataVisitor</h3>
+<div class='docstring'>Map data visitor structure (slamtec_aurora_sdk_map_data_visitor_t).</div>
+<h3>GridMap2DDimension</h3>
+<div class='docstring'>2D gridmap dimension structure (slamtec_aurora_sdk_2dmap_dimension_t).</div>
+<h3>Rect</h3>
+<div class='docstring'>Rectangle structure (slamtec_aurora_sdk_rect_t).</div>
+<h3>GridMapGenerationOptions</h3>
+<div class='docstring'>2D gridmap generation options (slamtec_aurora_sdk_2d_gridmap_generation_options_t).</div>
+<h3>GridMap2DFetchInfo</h3>
+<div class='docstring'>2D gridmap fetch info (slamtec_aurora_sdk_2d_gridmap_fetch_info_t).</div>
+<h3>FloorDetectionDesc</h3>
+<div class='docstring'>Floor detection description (slamtec_aurora_sdk_floor_detection_desc_t).</div>
+<h3>FloorDetectionHistogramInfo</h3>
+<div class='docstring'>Floor detection histogram info (slamtec_aurora_sdk_floor_detection_histogram_info_t).</div>
+<h3>LidarScanPoint</h3>
+<div class='docstring'>LiDAR scan point structure (slamtec_aurora_sdk_lidar_scan_point_t).</div>
+<h3>LidarSinglelayerScanDataInfo</h3>
+<div class='docstring'>LiDAR single layer scan data info (slamtec_aurora_sdk_lidar_singlelayer_scandata_info_t).</div>
+<h3>GridMap2DDimension</h3>
+<div class='docstring'>2D grid map dimension structure (slamtec_aurora_sdk_2dmap_dimension_t).</div>
+<h3>GridMap2DGenerationOptions</h3>
+<div class='docstring'>2D grid map generation options (slamtec_aurora_sdk_2d_gridmap_generation_options_t).</div>
+<h3>SingleCameraCalibration</h3>
+<div class='docstring'>Single camera calibration structure (slamtec_aurora_sdk_single_camera_calibration_t).</div>
+<h3>ExtCameraTransform</h3>
+<div class='docstring'>External camera transform structure (slamtec_aurora_sdk_ext_camera_transform_t).</div>
+<h3>CameraCalibrationInfo</h3>
+<div class='docstring'>Camera calibration info structure (slamtec_aurora_sdk_camera_calibration_t).</div>
+<h3>TransformCalibrationInfo</h3>
+<div class='docstring'>Transform calibration info structure (slamtec_aurora_sdk_transform_calibration_t).</div>
+<h3>SemanticSegmentationConfig</h3>
+<div class='docstring'>Semantic segmentation configuration structure.</div>
+<h3>SemanticSegmentationLabelName</h3>
+<div class='docstring'>Semantic segmentation label name structure.</div>
+<h3>SemanticSegmentationLabelInfo</h3>
+<div class='docstring'>Semantic segmentation label information structure.</div>
+<h3>EnhancedImagingFrameDesc</h3>
+<div class='docstring'>Enhanced imaging frame description structure.</div>
+<h3>EnhancedImagingFrameDesc</h3>
+<div class='docstring'>Enhanced imaging frame descriptor (slamtec_aurora_sdk_enhanced_imaging_frame_desc_t).</div>
+<h3>EnhancedImagingFrameBuffer</h3>
+<div class='docstring'>Enhanced imaging frame buffer (slamtec_aurora_sdk_enhanced_imaging_frame_buffer_t).</div>
+<h3>DepthCameraFrameInfo</h3>
+<div class='docstring'>Depth camera frame information structure (DEPRECATED - use EnhancedImagingFrameDesc).</div>
+<h3>DepthCameraFrame</h3>
+<div class='docstring'>Python wrapper for depth camera frame data.</div>
+<h4>Methods</h4>
+<div class='signature'><code>from_c_struct(cls, frame_desc, frame_data)</code></div>
+<div class='docstring'>Create DepthCameraFrame from C structures.</div>
+<div class='signature'><code>to_numpy_depth_map(self)</code></div>
+<div class='docstring'>Convert depth data to numpy array.</div>
+<div class='signature'><code>to_colorized_depth_map(self, colormap)</code></div>
+<div class='docstring'>Convert depth map to colorized visualization.<br><br>Args:<br>    colormap: OpenCV colormap (default: cv2.COLORMAP_JET)<br>    <br>Returns:<br>    numpy.ndarray: Colorized depth map as BGR image</div>
+<h3>IMUInfo</h3>
+<div class='docstring'>IMU information structure (slamtec_aurora_sdk_imu_info_t).</div>
+<h3>MapDesc</h3>
+<div class='docstring'>Map description structure (slamtec_aurora_sdk_map_desc_t).</div>
+        <a href="#" class="back-to-top">↑</a>
+    </div>
+</body>
+</html>

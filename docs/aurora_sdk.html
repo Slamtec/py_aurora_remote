@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aurora_sdk - Aurora Python SDK</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px; }
+        h3 { color: #2980b9; }
+        h4 { color: #7f8c8d; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Consolas', monospace; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        .nav { background: #34495e; color: white; padding: 10px 0; margin: -40px -40px 40px -40px; border-radius: 8px 8px 0 0; }
+        .nav ul { list-style: none; padding: 0 20px; margin: 0; }
+        .nav li { display: inline-block; margin-right: 20px; }
+        .nav a { color: #3498db; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+        .signature { background: #e8f4fd; padding: 10px; border-left: 4px solid #3498db; margin: 10px 0; }
+        .docstring { margin: 15px 0; }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #3498db; color: white; padding: 10px; border-radius: 50%; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+            </ul>
+        </nav>
+        <h1>aurora_sdk</h1>
+<div class='docstring'>Aurora SDK v2 - Component-based architecture.<br><br>This is the new component-based implementation following C++ SDK patterns.</div>
+<h2>Classes</h2>
+<h3>AuroraSDK</h3>
+<div class='docstring'>Aurora SDK main class with component-based architecture.<br><br>This class provides access to Aurora device functionality through separate<br>components following the C++ SDK design pattern:<br>- Controller: Device connection and control<br>- DataProvider: Data retrieval (pose, images, sensors)<br>- MapManager: VSLAM (3D visual mapping) operations<br>- LIDAR2DMapBuilder: CoMap (2D LIDAR mapping) operations<br>- EnhancedImaging: Enhanced imaging features (depth camera, semantic segmentation)<br><br>Example usage:<br>    sdk = AuroraSDK()<br>    sdk.controller.connect(connection_string="192.168.1.212")<br>    <br>    # Get camera preview and tracking data<br>    left_img, right_img = sdk.data_provider.get_camera_preview()<br>    tracking_frame = sdk.data_provider.get_tracking_frame()<br>    <br>    # VSLAM operations<br>    sdk.map_manager.save_vslam_map("my_map.vslam")<br>    <br>    # 2D LIDAR mapping (CoMap)<br>    sdk.lidar_2d_map_builder.start_lidar_2d_map_preview()</div>
+<h4>Methods</h4>
+<div class='signature'><code>create_session(self)</code></div>
+<div class='docstring'>Convenience helper: Create SDK session.<br><br>NOTE: Session is created automatically during SDK initialization.<br>This method is deprecated and should not be called manually.<br><br>Raises:<br>    AuroraSDKError: If session is already created</div>
+<div class='signature'><code>connect(self, device_info, connection_string)</code></div>
+<div class='docstring'>Convenience helper: Connect to an Aurora device.<br><br>Args:<br>    device_info: Device info from discovery (preferred)<br>    connection_string: Direct connection string (fallback)<br>    <br>Raises:<br>    ConnectionError: If connection fails<br>    AuroraSDKError: If session not created or invalid parameters</div>
+<div class='signature'><code>disconnect(self)</code></div>
+<div class='docstring'>Convenience helper: Disconnect from current device.</div>
+<div class='signature'><code>is_connected(self)</code></div>
+<div class='docstring'>Convenience helper: Check if connected to a device.<br><br>Returns:<br>    bool: True if connected, False otherwise</div>
+<div class='signature'><code>discover_devices(self, timeout)</code></div>
+<div class='docstring'>Convenience helper: Discover Aurora devices on the network.<br><br>Args:<br>    timeout: Discovery timeout in seconds<br>    <br>Returns:<br>    List of discovered device information dictionaries</div>
+<div class='signature'><code>get_version_info(self)</code></div>
+<div class='docstring'>Convenience helper: Get SDK version information.<br><br>Returns:<br>    dict containing version information</div>
+<div class='signature'><code>connect_and_start(self, connection_string, auto_discover)</code></div>
+<div class='docstring'>Convenience method to create session and connect to device.<br><br>Args:<br>    connection_string: Optional specific device to connect to<br>    auto_discover: If True, discover devices if connection_string not provided<br>    <br>Returns:<br>    bool: True if successfully connected<br>    <br>Raises:<br>    AuroraSDKError: If connection fails</div>
+<div class='signature'><code>get_device_status(self)</code></div>
+<div class='docstring'>Get comprehensive device status information.<br><br>Returns:<br>    dict: Device status including connection state, device info, etc.</div>
+<div class='signature'><code>quick_start_preview(self, connection_string)</code></div>
+<div class='docstring'>Quick start method for camera preview applications.<br><br>Args:<br>    connection_string: Optional specific device to connect to<br>    <br>Returns:<br>    bool: True if successfully started</div>
+<div class='signature'><code>release(self)</code></div>
+<div class='docstring'>Convenience helper: Release SDK session and cleanup resources.<br><br>This method provides a simple way to cleanup the SDK session,<br>disconnecting from the device if connected and releasing the session.</div>
+<div class='signature'><code>get_device_info(self)</code></div>
+<div class='docstring'>Convenience helper: Get device information.<br><br>Returns:<br>    Device information object</div>
+<div class='signature'><code>get_current_pose(self, use_se3)</code></div>
+<div class='docstring'>Convenience helper: Get current device pose.<br><br>Args:<br>    use_se3: If True, return pose in SE3 format (position + quaternion)<br>            If False, return pose in Euler format (position + roll/pitch/yaw)<br>            <br>Returns:<br>    tuple: (position, rotation, timestamp) where:<br>        - position: (x, y, z) coordinates<br>        - rotation: (qx, qy, qz, qw) quaternion if use_se3=True, <br>                   (roll, pitch, yaw) Euler angles if use_se3=False<br>        - timestamp: timestamp in nanoseconds</div>
+<div class='signature'><code>get_tracking_frame(self)</code></div>
+<div class='docstring'>Convenience helper: Get tracking frame with images and keypoints.<br><br>Returns:<br>    TrackingFrame object with left/right images and keypoints</div>
+<div class='signature'><code>get_camera_preview(self)</code></div>
+<div class='docstring'>Convenience helper: Get camera preview images.<br><br>Returns:<br>    tuple: (left_image, right_image) as ImageFrame objects</div>
+<div class='signature'><code>get_map_info(self)</code></div>
+<div class='docstring'>Convenience helper: Get map information.<br><br>Returns:<br>    dict: Map information including status, count, etc.</div>
+<div class='signature'><code>get_recent_lidar_scan(self, max_points)</code></div>
+<div class='docstring'>Convenience helper: Get recent LiDAR scan data.<br><br>Args:<br>    max_points: Maximum number of scan points to retrieve<br><br>Returns:<br>    LidarScanData object with scan points and metadata</div>
+<div class='signature'><code>start_lidar_2d_map_preview(self, resolution)</code></div>
+<div class='docstring'>Convenience helper: Start LIDAR 2D map preview generation.<br><br>Args:<br>    resolution: Map resolution in meters per pixel (default: 0.05m = 5cm)</div>
+<div class='signature'><code>stop_lidar_2d_map_preview(self)</code></div>
+<div class='docstring'>Convenience helper: Stop LIDAR 2D map preview generation.</div>
+<div class='signature'><code>enable_map_data_syncing(self, enable)</code></div>
+<div class='docstring'>Convenience helper: Enable/disable map data syncing.<br><br>Args:<br>    enable: True to enable, False to disable</div>
+<div class='signature'><code>get_map_data(self)</code></div>
+<div class='docstring'>Convenience helper: Get visual map data (map points and keyframes).<br><br>Returns:<br>    dict: Dictionary containing 'map_points' and 'keyframes' lists</div>
+<div class='signature'><code>require_mapping_mode(self, timeout_ms)</code></div>
+<div class='docstring'>Convenience helper: Require device to enter mapping mode.<br><br>Args:<br>    timeout_ms: Timeout in milliseconds</div>
+<div class='signature'><code>resync_map_data(self, invalidate_cache)</code></div>
+<div class='docstring'>Convenience helper: Force resync of map data.<br><br>Args:<br>    invalidate_cache: Whether to invalidate cache</div>
+<div class='signature'><code>convert_quaternion_to_euler(self, qx, qy, qz, qw)</code></div>
+<div class='docstring'>Convert quaternion to Euler angles.<br><br>Args:<br>    qx, qy, qz, qw: Quaternion components<br>    <br>Returns:<br>    tuple: (roll, pitch, yaw) in radians<br>    <br>Raises:<br>    AuroraSDKError: If conversion fails</div>
+        <a href="#" class="back-to-top">↑</a>
+    </div>
+</body>
+</html>

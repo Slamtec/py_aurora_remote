@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference - Aurora Python SDK</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px; }
+        h3 { color: #2980b9; }
+        h4 { color: #7f8c8d; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Consolas', monospace; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        .nav { background: #34495e; color: white; padding: 10px 0; margin: -40px -40px 40px -40px; border-radius: 8px 8px 0 0; }
+        .nav ul { list-style: none; padding: 0 20px; margin: 0; }
+        .nav li { display: inline-block; margin-right: 20px; }
+        .nav a { color: #3498db; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+        .signature { background: #e8f4fd; padding: 10px; border-left: 4px solid #3498db; margin: 10px 0; }
+        .docstring { margin: 15px 0; }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #3498db; color: white; padding: 10px; border-radius: 50%; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+            </ul>
+        </nav>
+        <h1>SLAMTEC Aurora Python SDK API Reference</h1>
+<p>This is the automatically generated API reference for the SLAMTEC Aurora Python SDK.</p>
+<h2>Components</h2>
+<ul>
+<li><strong><a href="aurora_sdk.html">aurora_sdk</a></strong> - Aurora SDK v2 - Component-based architecture.</li>
+<li><strong><a href="controller.html">controller</a></strong> - Aurora SDK Controller component.</li>
+<li><strong><a href="c_bindings.html">c_bindings</a></strong> - Low-level C bindings for Aurora SDK using ctypes.</li>
+<li><strong><a href="data_provider.html">data_provider</a></strong> - Aurora SDK DataProvider component.</li>
+<li><strong><a href="data_types.html">data_types</a></strong> - Data types and structures for Aurora SDK Python bindings.</li>
+<li><strong><a href="enhanced_imaging.html">enhanced_imaging</a></strong> - Aurora SDK Enhanced Imaging component (SDK 2.</li>
+<li><strong><a href="exceptions.html">exceptions</a></strong> - Exception classes for Aurora SDK Python bindings.</li>
+<li><strong><a href="floor_detector.html">floor_detector</a></strong> - Floor Detector module for Aurora SDK.</li>
+<li><strong><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></strong> - Aurora SDK LIDAR2DMapBuilder component.</li>
+<li><strong><a href="map_manager.html">map_manager</a></strong> - Aurora SDK MapManager component.</li>
+<li><strong><a href="utils.html">utils</a></strong> - Aurora SDK Utility Functions
+
+This module contains helper functions and utilities for common operations
+with the Aurora SDK, such as map synchronization checking, data processing,
+status monitoring, and semantic segmentation utilities.</li>
+</ul>
+<h2>Quick Start</h2>
+<pre><code>from slamtec_aurora_sdk import AuroraSDK
+
+# Create SDK instance
+sdk = AuroraSDK()
+
+# Connect to device
+sdk.connect(connection_string="192.168.1.212")
+
+# Get data
+pose = sdk.data_provider.get_current_pose()
+left_img, right_img = sdk.data_provider.get_camera_preview()
+
+# Cleanup
+sdk.disconnect()
+sdk.release()</code></pre>
+        <a href="#" class="back-to-top">↑</a>
+    </div>
+</body>
+</html>

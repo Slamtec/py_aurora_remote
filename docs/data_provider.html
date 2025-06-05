@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>data_provider - Aurora Python SDK</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px; }
+        h3 { color: #2980b9; }
+        h4 { color: #7f8c8d; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Consolas', monospace; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        .nav { background: #34495e; color: white; padding: 10px 0; margin: -40px -40px 40px -40px; border-radius: 8px 8px 0 0; }
+        .nav ul { list-style: none; padding: 0 20px; margin: 0; }
+        .nav li { display: inline-block; margin-right: 20px; }
+        .nav a { color: #3498db; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+        .signature { background: #e8f4fd; padding: 10px; border-left: 4px solid #3498db; margin: 10px 0; }
+        .docstring { margin: 15px 0; }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #3498db; color: white; padding: 10px; border-radius: 50%; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+            </ul>
+        </nav>
+        <h1>data_provider</h1>
+<div class='docstring'>Aurora SDK DataProvider component.<br><br>Handles data retrieval operations including pose, images, tracking data, and sensor data.</div>
+<h2>Classes</h2>
+<h3>DataProvider</h3>
+<div class='docstring'>DataProvider component for Aurora SDK.<br><br>Responsible for:<br>- Pose data retrieval (current pose, pose history)<br>- Camera image data (preview, tracking frames)<br>- LiDAR scan data<br>- IMU sensor data<br>- Tracking and mapping data</div>
+<h4>Methods</h4>
+<div class='signature'><code>get_current_pose(self, use_se3)</code></div>
+<div class='docstring'>Get current device pose.<br><br>Args:<br>    use_se3: If True, return SE3 format (position + quaternion),<br>            if False, return Euler format (position + euler angles)<br>            <br>Returns:<br>    Tuple of (position, rotation, timestamp_ns)<br>    - position: (x, y, z) tuple<br>    - rotation: (qx, qy, qz, qw) if use_se3, (roll, pitch, yaw) otherwise<br>    - timestamp_ns: timestamp in nanoseconds<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to get pose</div>
+<div class='signature'><code>get_camera_preview(self)</code></div>
+<div class='docstring'>Get camera preview frames.<br><br>Returns:<br>    Tuple of (left_frame, right_frame) ImageFrame objects<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    DataNotReadyError: If camera data is not ready<br>    AuroraSDKError: If failed to get camera preview</div>
+<div class='signature'><code>get_tracking_frame(self)</code></div>
+<div class='docstring'>Get tracking frame data with keypoints and images.<br><br>Returns:<br>    TrackingFrame object containing images, keypoints, pose, and tracking status<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    DataNotReadyError: If tracking data is not ready<br>    AuroraSDKError: If failed to get tracking data</div>
+<div class='signature'><code>get_recent_lidar_scan(self, max_points)</code></div>
+<div class='docstring'>Get recent LiDAR scan data.<br><br>Args:<br>    max_points: Maximum number of scan points to retrieve<br>    <br>Returns:<br>    LidarScanData object containing scan points and metadata, or None if not available<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    DataNotReadyError: If LiDAR data is not ready<br>    AuroraSDKError: If failed to get scan data</div>
+<div class='signature'><code>get_imu_data(self)</code></div>
+<div class='docstring'>Get IMU sensor data.<br><br>Returns:<br>    List of IMUData objects containing accelerometer and gyroscope data<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    DataNotReadyError: If IMU data is not ready<br>    AuroraSDKError: If failed to get IMU data</div>
+<div class='signature'><code>peek_imu_data(self, max_count)</code></div>
+<div class='docstring'>Peek at cached IMU data from the device.<br><br>This method retrieves IMU data that has been cached by the SDK.<br>It's non-blocking and returns immediately with available data.<br>The C++ SDK returns immediately with the actual count of samples retrieved,<br>regardless of whether the max_count is reached.<br><br>Args:<br>    max_count (int): Maximum number of IMU samples to retrieve (default: 100)<br>    <br>Returns:<br>    List of IMUData objects containing accelerometer and gyroscope data<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to get IMU data</div>
+<div class='signature'><code>get_map_data(self)</code></div>
+<div class='docstring'>Get visual map data including map points and keyframes.<br><br>Returns:<br>    dict: Dictionary containing 'map_points' and 'keyframes' lists<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    DataNotReadyError: If map data is not ready<br>    AuroraSDKError: If failed to get map data</div>
+<div class='signature'><code>peek_recent_lidar_scan_raw(self)</code></div>
+<div class='docstring'>Get the most recent LiDAR scan data in raw format.<br><br>Returns:<br>    tuple: (scan_info, scan_points) or None if not available</div>
+<div class='signature'><code>get_global_mapping_info(self)</code></div>
+<div class='docstring'>Get global mapping information from the device.<br><br>This exposes the complete slamtec_aurora_sdk_global_map_desc_t structure<br>with all available fields for map status monitoring and processing.<br><br>Returns:<br>    dict: Complete global mapping information with all fields:<br>        - lastMPCountToFetch: Last map point count to fetch<br>        - lastKFCountToFetch: Last keyframe count to fetch  <br>        - lastMapCountToFetch: Last map count to fetch<br>        - lastMPRetrieved: Last map point retrieved<br>        - lastKFRetrieved: Last keyframe retrieved<br>        - totalMPCount: Total map point count<br>        - total_kf_count: Total keyframe count<br>        - totalMapCount: Total map count<br>        - totalMPCountFetched: Total map points fetched<br>        - total_kf_count_fetched: Total keyframes fetched<br>        - totalMapCountFetched: Total maps fetched<br>        - currentActiveMPCount: Current active map point count<br>        - currentActiveKFCount: Current active keyframe count<br>        - active_map_id: Active map ID<br>        - mappingFlags: Mapping flags<br>        - slidingWindowStartKFId: Sliding window start keyframe ID</div>
+<div class='signature'><code>get_camera_calibration(self)</code></div>
+<div class='docstring'>Get camera calibration parameters from the device.<br><br>Returns:<br>    CameraCalibrationInfo: Camera calibration data including intrinsic and extrinsic parameters<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve calibration data</div>
+<div class='signature'><code>get_transform_calibration(self)</code></div>
+<div class='docstring'>Get transform calibration parameters from the device.<br><br>Returns:<br>    TransformCalibrationInfo: Transform calibration data including camera-to-LiDAR transforms<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve transform calibration data</div>
+<div class='signature'><code>get_last_device_basic_info(self)</code></div>
+<div class='docstring'>Get the last device basic information.<br><br>Returns:<br>    DeviceBasicInfoWrapper: Device basic information wrapper with capability checking methods<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve device basic info</div>
+<div class='signature'><code>get_device_info(self)</code></div>
+<div class='docstring'>Get device information (legacy compatibility method).<br><br>Returns:<br>    DeviceInfo: Legacy device info for backward compatibility<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve device info</div>
+<div class='signature'><code>get_last_device_status(self)</code></div>
+<div class='docstring'>Get the last device status information.<br><br>Returns:<br>    Tuple of (DeviceStatus, timestamp_ns): Device status and timestamp<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve device status</div>
+<div class='signature'><code>get_relocalization_status(self)</code></div>
+<div class='docstring'>Get relocalization status information.<br><br>Returns:<br>    RelocalizationStatus: Current relocalization status<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve relocalization status</div>
+<div class='signature'><code>get_mapping_flags(self)</code></div>
+<div class='docstring'>Get current mapping flags.<br><br>Returns:<br>    int: Current mapping flags as bitmask<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve mapping flags</div>
+<div class='signature'><code>get_imu_info(self)</code></div>
+<div class='docstring'>Get IMU information.<br><br>Returns:<br>    IMUInfo: IMU configuration and capabilities<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve IMU info</div>
+<div class='signature'><code>get_all_map_info(self, max_count)</code></div>
+<div class='docstring'>Get information about all maps.<br><br>Args:<br>    max_count (int): Maximum number of maps to retrieve (default: 32)<br>    <br>Returns:<br>    list: List of MapDesc objects containing map information<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve map info</div>
+<div class='signature'><code>peek_history_pose(self, timestamp_ns, allow_interpolation, max_time_diff_ns)</code></div>
+<div class='docstring'>Peek historical pose at specific timestamp.<br><br>Args:<br>    timestamp_ns (int): Timestamp in nanoseconds (0 for latest)<br>    allow_interpolation (bool): Allow pose interpolation (default: True)<br>    max_time_diff_ns (int): Maximum time difference in nanoseconds (default: 1 second)<br>    <br>Returns:<br>    PoseSE3: Historical pose data<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve historical pose</div>
+        <a href="#" class="back-to-top">↑</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>controller - Aurora Python SDK</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px; }
+        h3 { color: #2980b9; }
+        h4 { color: #7f8c8d; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Consolas', monospace; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        .nav { background: #34495e; color: white; padding: 10px 0; margin: -40px -40px 40px -40px; border-radius: 8px 8px 0 0; }
+        .nav ul { list-style: none; padding: 0 20px; margin: 0; }
+        .nav li { display: inline-block; margin-right: 20px; }
+        .nav a { color: #3498db; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+        .signature { background: #e8f4fd; padding: 10px; border-left: 4px solid #3498db; margin: 10px 0; }
+        .docstring { margin: 15px 0; }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #3498db; color: white; padding: 10px; border-radius: 50%; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+            </ul>
+        </nav>
+        <h1>controller</h1>
+<div class='docstring'>Aurora SDK Controller component.<br><br>Handles device connection, session management, and control operations.</div>
+<h2>Classes</h2>
+<h3>Controller</h3>
+<div class='docstring'>Controller component for Aurora SDK.<br><br>Responsible for:<br>- Device discovery and connection management<br>- Session lifecycle (create, release)<br>- Device control operations (reset, reboot, etc.)<br>- Configuration management</div>
+<h4>Methods</h4>
+<div class='signature'><code>get_version_info(self)</code></div>
+<div class='docstring'>Get SDK version information.<br><br>Returns:<br>    dict containing version information</div>
+<div class='signature'><code>create_session(self)</code></div>
+<div class='docstring'>Create SDK session.<br><br>Raises:<br>    AuroraSDKError: If session creation fails</div>
+<div class='signature'><code>release_session(self)</code></div>
+<div class='docstring'>Release SDK session.</div>
+<div class='signature'><code>discover_devices(self, timeout)</code></div>
+<div class='docstring'>Discover Aurora devices on the network.<br><br>Args:<br>    timeout: Discovery timeout in seconds<br>    <br>Returns:<br>    List of discovered device information dictionaries<br>    <br>Raises:<br>    AuroraSDKError: If discovery fails</div>
+<div class='signature'><code>connect(self, device_info, connection_string)</code></div>
+<div class='docstring'>Connect to an Aurora device.<br><br>Args:<br>    device_info: Device info from discovery (preferred)<br>    connection_string: Direct connection string (fallback)<br>    <br>Raises:<br>    ConnectionError: If connection fails<br>    AuroraSDKError: If session not created or invalid parameters</div>
+<div class='signature'><code>disconnect(self)</code></div>
+<div class='docstring'>Disconnect from current device.</div>
+<div class='signature'><code>is_connected(self)</code></div>
+<div class='docstring'>Check if connected to a device.<br><br>Returns:<br>    bool: True if connected, False otherwise</div>
+<div class='signature'><code>get_device_info(self)</code></div>
+<div class='docstring'>Get connected device information.<br><br>Returns:<br>    DeviceInfo object containing device details<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to get device info</div>
+<div class='signature'><code>enable_raw_data_subscription(self, enable)</code></div>
+<div class='docstring'>Enable/disable raw data subscription for better image quality.<br><br>Args:<br>    enable: True to enable, False to disable<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If operation fails</div>
+<div class='signature'><code>reset_device(self)</code></div>
+<div class='docstring'>Reset the connected device.<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If reset fails</div>
+<div class='signature'><code>enable_map_data_syncing(self, enable)</code></div>
+<div class='docstring'>Enable/disable map data syncing.<br><br>Args:<br>    enable: True to enable, False to disable<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If operation fails</div>
+<div class='signature'><code>require_mapping_mode(self, timeout_ms)</code></div>
+<div class='docstring'>Require device to enter mapping mode.<br><br>Args:<br>    timeout_ms: Timeout in milliseconds<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If operation fails</div>
+<div class='signature'><code>resync_map_data(self, invalidate_cache)</code></div>
+<div class='docstring'>Force resync of map data.<br><br>Args:<br>    invalidate_cache: Whether to invalidate cache<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If operation fails</div>
+<div class='signature'><code>set_enhanced_imaging_subscription(self, enhanced_image_type, enable)</code></div>
+<div class='docstring'>Set enhanced imaging subscription for specific image type.<br><br>Args:<br>    enhanced_image_type (int): Type of enhanced image (0: depth, 1: semantic segmentation)<br>    enable (bool): True to enable, False to disable<br>    <br>Returns:<br>    bool: True if successful, False otherwise<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If operation fails</div>
+<div class='signature'><code>is_enhanced_imaging_subscribed(self, enhanced_image_type)</code></div>
+<div class='docstring'>Check if enhanced imaging is subscribed for specific image type.<br><br>Args:<br>    enhanced_image_type (int): Type of enhanced image (0: depth, 1: semantic segmentation)<br>    <br>Returns:<br>    bool: True if subscribed, False otherwise<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If operation fails</div>
+<div class='signature'><code>require_semantic_segmentation_alternative_model(self, use_alternative_model, timeout_ms)</code></div>
+<div class='docstring'>Require semantic segmentation to use alternative model.<br><br>Args:<br>    use_alternative_model (bool): True to use alternative model, False for default<br>    timeout_ms (int): Timeout in milliseconds<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If operation fails</div>
+<div class='signature'><code>require_relocalization(self, timeout_ms)</code></div>
+<div class='docstring'>Require the device to perform relocalization.<br><br>This method tells the Aurora device to perform relocalization to determine<br>its position within a previously built map. The device will use its current<br>sensor readings to match against the existing map.<br><br>Args:<br>    timeout_ms (int): Timeout in milliseconds (default: 5000)<br>    <br>Returns:<br>    bool: True if relocalization was successful, False otherwise<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If relocalization operation fails</div>
+<div class='signature'><code>cancel_relocalization(self)</code></div>
+<div class='docstring'>Cancel an ongoing relocalization operation.<br><br>Returns:<br>    bool: True if cancellation was successful, False otherwise<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If cancellation operation fails</div>
+<div class='signature'><code>require_map_reset(self, timeout_ms)</code></div>
+<div class='docstring'>Require the device to reset its map.<br><br>This will clear the current SLAM map and start mapping from scratch.<br><br>Args:<br>    timeout_ms (int): Timeout in milliseconds (default: 10000)<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If map reset operation fails</div>
+<div class='signature'><code>require_pure_localization_mode(self, timeout_ms)</code></div>
+<div class='docstring'>Require the device to enter pure localization mode.<br><br>In this mode, the device will not add new features to the map but will<br>only use existing map features for localization.<br><br>Args:<br>    timeout_ms (int): Timeout in milliseconds (default: 10000)<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If mode switch operation fails</div>
+<div class='signature'><code>is_device_connection_alive(self)</code></div>
+<div class='docstring'>Check if the device connection is alive and healthy.<br><br>Returns:<br>    bool: True if connection is alive, False otherwise<br>    <br>Raises:<br>    ConnectionError: If not connected to a device</div>
+<div class='signature'><code>is_raw_data_subscribed(self)</code></div>
+<div class='docstring'>Check if raw data subscription is active.<br><br>Returns:<br>    bool: True if raw data is subscribed, False otherwise<br>    <br>Raises:<br>    ConnectionError: If not connected to a device</div>
+<div class='signature'><code>set_low_rate_mode(self, enable)</code></div>
+<div class='docstring'>Enable/disable low rate mode for bandwidth management.<br><br>Args:<br>    enable (bool): True to enable low rate mode, False to disable<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If operation fails</div>
+<div class='signature'><code>set_loop_closure(self, enable, timeout_ms)</code></div>
+<div class='docstring'>Enable/disable loop closure detection.<br><br>Args:<br>    enable (bool): True to enable loop closure, False to disable<br>    timeout_ms (int): Timeout in milliseconds (default: 5000)<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If operation fails</div>
+<div class='signature'><code>force_map_global_optimization(self, timeout_ms)</code></div>
+<div class='docstring'>Force global map optimization.<br><br>Args:<br>    timeout_ms (int): Timeout in milliseconds (default: 30000)<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If optimization fails</div>
+<div class='signature'><code>send_custom_command(self, command_id, data, timeout_ms)</code></div>
+<div class='docstring'>Send custom command to device.<br><br>Args:<br>    command_id (int): Command ID (uint64)<br>    data (bytes or str, optional): Command data<br>    timeout_ms (int): Timeout in milliseconds (default: 5000)<br>    <br>Returns:<br>    bytes: Response data from device<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If command fails</div>
+        <a href="#" class="back-to-top">↑</a>
+    </div>
+</body>
+</html>

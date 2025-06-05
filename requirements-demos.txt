@@ -1,0 +1,23 @@
+# SLAMTEC Aurora SDK Python Bindings - Demo Requirements
+# Additional dependencies for running demonstration examples
+
+# Core requirements (from requirements.txt)
+numpy>=1.19.0
+
+# Computer Vision and Image Processing
+opencv-python>=4.5.0         # Required for camera preview, segmentation, and image demos
+
+# 3D Visualization (Python-specific demos)
+open3d>=0.15.0               # Required for dense_point_cloud.py demo
+
+# 2D Plotting and Visualization
+matplotlib>=3.3.0            # Required for vector_map_render.py and plotting demos
+
+# Image Processing (alternative/additional)
+Pillow>=8.0.0               # Alternative for basic image operations
+
+# Optional: For development and testing
+# pytest>=6.0.0
+# pytest-cov>=2.10.0
+# flake8>=3.8.0
+# black>=21.0.0

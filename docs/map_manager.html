@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>map_manager - Aurora Python SDK</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px; }
+        h3 { color: #2980b9; }
+        h4 { color: #7f8c8d; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Consolas', monospace; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        .nav { background: #34495e; color: white; padding: 10px 0; margin: -40px -40px 40px -40px; border-radius: 8px 8px 0 0; }
+        .nav ul { list-style: none; padding: 0 20px; margin: 0; }
+        .nav li { display: inline-block; margin-right: 20px; }
+        .nav a { color: #3498db; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+        .signature { background: #e8f4fd; padding: 10px; border-left: 4px solid #3498db; margin: 10px 0; }
+        .docstring { margin: 15px 0; }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #3498db; color: white; padding: 10px; border-radius: 50%; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+            </ul>
+        </nav>
+        <h1>map_manager</h1>
+<div class='docstring'>Aurora SDK MapManager component.<br><br>Handles VSLAM map storage operations (save/load) using async sessions.</div>
+<h2>Classes</h2>
+<h3>MapManager</h3>
+<div class='docstring'>MapManager component for Aurora SDK.<br><br>Handles VSLAM map storage operations with async sessions:<br>- Download maps from Aurora device to local files<br>- Upload maps from local files to Aurora device  <br>- Monitor progress of map storage operations<br>- Handle session status and error conditions<br><br>The map storage operations are asynchronous - they run in the background<br>while you can query progress and wait for completion.</div>
+<h4>Methods</h4>
+<div class='signature'><code>start_download_session(self, map_file_path, callback, user_data)</code></div>
+<div class='docstring'>Start downloading a map from the Aurora device to local file.<br><br>This operation runs asynchronously. Use is_session_active() and <br>query_session_status() to monitor progress, or wait_for_completion()<br>to block until finished.<br><br>Args:<br>    map_file_path (str): Local file path where map will be saved<br>    callback (callable, optional): Callback function called when complete.<br>                                 Signature: callback(user_data, is_ok)<br>    user_data: User data passed to callback<br>    <br>Returns:<br>    bool: True if session started successfully, False otherwise<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to start download session</div>
+<div class='signature'><code>start_upload_session(self, map_file_path, callback, user_data)</code></div>
+<div class='docstring'>Start uploading a map from local file to the Aurora device.<br><br>This operation runs asynchronously. Use is_session_active() and <br>query_session_status() to monitor progress, or wait_for_completion()<br>to block until finished.<br><br>Args:<br>    map_file_path (str): Local file path of map to upload<br>    callback (callable, optional): Callback function called when complete.<br>                                 Signature: callback(user_data, is_ok)<br>    user_data: User data passed to callback<br>    <br>Returns:<br>    bool: True if session started successfully, False otherwise<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to start upload session</div>
+<div class='signature'><code>abort_session(self)</code></div>
+<div class='docstring'>Abort the current map storage session.<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If C bindings not available</div>
+<div class='signature'><code>is_session_active(self)</code></div>
+<div class='docstring'>Check if a map storage session is currently active.<br><br>Returns:<br>    bool: True if session is active, False otherwise<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If C bindings not available</div>
+<div class='signature'><code>query_session_status(self)</code></div>
+<div class='docstring'>Query the progress and status of the current map storage session.<br><br>Returns:<br>    MapStorageSessionStatus: Status object with progress and flags<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to query status</div>
+<div class='signature'><code>wait_for_completion(self, timeout_seconds, progress_callback)</code></div>
+<div class='docstring'>Wait for the current map storage session to complete.<br><br>This method blocks until the session finishes, is aborted, or times out.<br><br>Args:<br>    timeout_seconds (float, optional): Maximum time to wait in seconds.<br>                                     None means wait indefinitely.<br>    progress_callback (callable, optional): Callback called with progress updates.<br>                                           Signature: callback(status)<br>    <br>Returns:<br>    bool: True if session completed successfully, False if failed/aborted<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If session monitoring failed<br>    TimeoutError: If timeout_seconds exceeded</div>
+<div class='signature'><code>download_map(self, map_file_path, timeout_seconds, progress_callback)</code></div>
+<div class='docstring'>Download a map from Aurora device to local file (blocking).<br><br>This is a convenience method that starts a download session and waits<br>for completion.<br><br>Args:<br>    map_file_path (str): Local file path where map will be saved<br>    timeout_seconds (float, optional): Maximum time to wait<br>    progress_callback (callable, optional): Progress callback function<br>    <br>Returns:<br>    bool: True if download successful, False otherwise<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If download failed<br>    TimeoutError: If timeout exceeded</div>
+<div class='signature'><code>upload_map(self, map_file_path, timeout_seconds, progress_callback)</code></div>
+<div class='docstring'>Upload a map from local file to Aurora device (blocking).<br><br>This is a convenience method that starts an upload session and waits<br>for completion.<br><br>Args:<br>    map_file_path (str): Local file path of map to upload<br>    timeout_seconds (float, optional): Maximum time to wait<br>    progress_callback (callable, optional): Progress callback function<br>    <br>Returns:<br>    bool: True if upload successful, False otherwise<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If upload failed<br>    TimeoutError: If timeout exceeded</div>
+<h2>Functions</h2>
+<div class='signature'><code>internal_callback(user_data_ptr, is_ok)</code></div>
+<div class='signature'><code>internal_callback(user_data_ptr, is_ok)</code></div>
+        <a href="#" class="back-to-top">↑</a>
+    </div>
+</body>
+</html>

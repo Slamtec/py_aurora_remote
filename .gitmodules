@@ -1,0 +1,3 @@
+[submodule "cpp_sdk"]
+	path = cpp_sdk
+	url = https://github.com/Slamtec/aurora_remote_sdk_demo.git

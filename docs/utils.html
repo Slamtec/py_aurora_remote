@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>utils - Aurora Python SDK</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px; }
+        h3 { color: #2980b9; }
+        h4 { color: #7f8c8d; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Consolas', monospace; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        .nav { background: #34495e; color: white; padding: 10px 0; margin: -40px -40px 40px -40px; border-radius: 8px 8px 0 0; }
+        .nav ul { list-style: none; padding: 0 20px; margin: 0; }
+        .nav li { display: inline-block; margin-right: 20px; }
+        .nav a { color: #3498db; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+        .signature { background: #e8f4fd; padding: 10px; border-left: 4px solid #3498db; margin: 10px 0; }
+        .docstring { margin: 15px 0; }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #3498db; color: white; padding: 10px; border-radius: 50%; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+            </ul>
+        </nav>
+        <h1>utils</h1>
+<div class='docstring'>Aurora SDK Utility Functions<br><br>This module contains helper functions and utilities for common operations<br>with the Aurora SDK, such as map synchronization checking, data processing,<br>status monitoring, and semantic segmentation utilities.</div>
+<h2>Functions</h2>
+<div class='signature'><code>get_map_sync_status(global_mapping_info)</code></div>
+<div class='docstring'>Calculate map data synchronization status from global mapping info.<br><br>Args:<br>    global_mapping_info: Dictionary returned from DataProvider.get_global_mapping_info()<br>    <br>Returns:<br>    dict: Map sync status with sync ratio and derived information<br>        - sync_ratio: float (0.0 to 1.0) - ratio of fetched/total keyframes  <br>        - total_kf_count: int - total keyframes in the map<br>        - total_kf_count_fetched: int - keyframes successfully fetched<br>        - is_synced: bool - True if sync ratio >= 95%<br>        - is_sufficient: bool - True if has enough data for map generation<br>        - raw_info: dict - original global mapping info</div>
+<div class='signature'><code>wait_for_map_data(data_provider, min_keyframes, min_sync_ratio, max_wait_time, progress_callback)</code></div>
+<div class='docstring'>Wait for sufficient map data to be available for processing.<br><br>Args:<br>    data_provider: DataProvider instance<br>    min_keyframes: Minimum number of keyframes required (default: 10)<br>    min_sync_ratio: Minimum sync ratio required (default: 0.8 = 80%)<br>    max_wait_time: Maximum time to wait in seconds (default: 30.0)<br>    progress_callback: Optional callback function(elapsed_time, sync_status)<br>    <br>Returns:<br>    dict: Final sync status when sufficient data is available or timeout reached<br>    <br>Raises:<br>    AuroraSDKError: If no map data is available after timeout</div>
+<div class='signature'><code>format_map_sync_status(sync_status, verbose)</code></div>
+<div class='docstring'>Format map synchronization status for display.<br><br>Args:<br>    sync_status: Dictionary from get_map_sync_status()<br>    verbose: If True, include detailed information<br>    <br>Returns:<br>    str: Formatted status string</div>
+<div class='signature'><code>validate_map_generation_options(options)</code></div>
+<div class='docstring'>Validate map generation options for common issues.<br><br>Args:<br>    options: GridMapGenerationOptions instance<br>    <br>Returns:<br>    list: List of validation warnings/errors (empty if all good)</div>
+<div class='signature'><code>to_numpy_segmentation_map(image_frame)</code></div>
+<div class='docstring'>Convert ImageFrame containing segmentation data to numpy array.<br><br>Args:<br>    image_frame (ImageFrame): ImageFrame containing segmentation data<br>    <br>Returns:<br>    numpy.ndarray: 2D array of class IDs, or None if conversion fails<br>    <br>Raises:<br>    ImportError: If NumPy is not available<br>    ValueError: If image_frame is invalid</div>
+<div class='signature'><code>to_colorized_segmentation_map(image_frame, colors, max_classes)</code></div>
+<div class='docstring'>Convert ImageFrame containing segmentation data to colorized visualization.<br><br>Args:<br>    image_frame (ImageFrame): ImageFrame containing segmentation data  <br>    colors: List of (B, G, R) color tuples for each class. If None, random colors are generated.<br>    max_classes: Maximum number of classes to generate colors for (default: 256)<br>    <br>Returns:<br>    numpy.ndarray: Colorized segmentation map as BGR image, or None if conversion fails<br>    <br>Raises:<br>    ImportError: If OpenCV and NumPy are not available</div>
+<div class='signature'><code>generate_class_colors(class_count)</code></div>
+<div class='docstring'>Generate colors exactly like C++ generateClassColors function.<br><br>Args:<br>    class_count (int): Number of classes to generate colors for<br>    <br>Returns:<br>    list: List of (B, G, R) color tuples</div>
+<div class='signature'><code>manual_colorize_segmentation(seg_map, colors)</code></div>
+<div class='docstring'>Manual colorization (matching C++ colorizeSegmentationMap exactly).<br><br>Args:<br>    seg_map (numpy.ndarray): 2D segmentation map with class IDs<br>    colors: List of (B, G, R) color tuples<br>    <br>Returns:<br>    numpy.ndarray: Colorized segmentation map as BGR image, or None if failed</div>
+<div class='signature'><code>get_colorized_segmentation(image_frame, colors)</code></div>
+<div class='docstring'>Get colorized segmentation with C API fallback.<br><br>Args:<br>    image_frame (ImageFrame): ImageFrame containing segmentation data<br>    colors: List of (B, G, R) color tuples<br>    <br>Returns:<br>    numpy.ndarray: Colorized segmentation map, or None if failed</div>
+<div class='signature'><code>get_class_at_position(image_frame, x, y)</code></div>
+<div class='docstring'>Get class ID at given pixel position in segmentation frame.<br><br>Args:<br>    image_frame (ImageFrame): ImageFrame containing segmentation data<br>    x (int): X coordinate<br>    y (int): Y coordinate<br>    <br>Returns:<br>    int: Class ID at position, or None if invalid position or no data</div>
+        <a href="#" class="back-to-top">↑</a>
+    </div>
+</body>
+</html>

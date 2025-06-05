@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>enhanced_imaging - Aurora Python SDK</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px; }
+        h3 { color: #2980b9; }
+        h4 { color: #7f8c8d; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Consolas', monospace; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        .nav { background: #34495e; color: white; padding: 10px 0; margin: -40px -40px 40px -40px; border-radius: 8px 8px 0 0; }
+        .nav ul { list-style: none; padding: 0 20px; margin: 0; }
+        .nav li { display: inline-block; margin-right: 20px; }
+        .nav a { color: #3498db; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+        .signature { background: #e8f4fd; padding: 10px; border-left: 4px solid #3498db; margin: 10px 0; }
+        .docstring { margin: 15px 0; }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #3498db; color: white; padding: 10px; border-radius: 50%; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+            </ul>
+        </nav>
+        <h1>enhanced_imaging</h1>
+<div class='docstring'>Aurora SDK Enhanced Imaging component (SDK 2.0).<br><br>Handles Enhanced Imaging operations including depth camera frames, semantic segmentation,<br>camera calibration, and transform calibration.</div>
+<h2>Classes</h2>
+<h3>EnhancedImaging</h3>
+<div class='docstring'>Enhanced Imaging component for Aurora SDK 2.0.<br><br>Responsible for:<br>- Depth camera frame retrieval and processing<br>- Semantic segmentation frame retrieval and processing<br>- Camera calibration data access<br>- Transform calibration data access<br>- Model switching for semantic segmentation<br>- Depth-aligned segmentation map calculation</div>
+<h4>Methods</h4>
+<div class='signature'><code>is_depth_camera_ready(self)</code></div>
+<div class='docstring'>Check if depth camera is ready for frame capture.<br><br>Returns:<br>    bool: True if depth camera is ready, False otherwise</div>
+<div class='signature'><code>wait_depth_camera_next_frame(self, timeout_ms)</code></div>
+<div class='docstring'>Wait for the next depth camera frame.<br><br>Args:<br>    timeout_ms (int): Timeout in milliseconds<br>    <br>Returns:<br>    bool: True if frame is available, False if timeout</div>
+<div class='signature'><code>peek_depth_camera_frame(self, frame_type, timestamp_ns, allow_nearest_frame)</code></div>
+<div class='docstring'>Get the latest depth camera frame from the device.<br><br>Args:<br>    frame_type (int): Type of depth frame (0: depth map, 1: point3d)<br>    timestamp_ns (int): Specific timestamp to retrieve (0 for latest)<br>    allow_nearest_frame (bool): Allow nearest frame if exact timestamp not available<br>    <br>Returns:<br>    DepthCameraFrame: Depth camera frame data with depth map and metadata<br>    None: If no frame is available<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve depth frame</div>
+<div class='signature'><code>peek_depth_camera_related_rectified_image(self, timestamp_ns)</code></div>
+<div class='docstring'>Get the related rectified camera image for a depth frame.<br><br>Args:<br>    timestamp_ns (int): Timestamp of the depth frame to get related image for<br>    <br>Returns:<br>    ImageFrame: Camera image frame data with rectified image<br>    None: If no frame is available<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve image</div>
+<div class='signature'><code>is_semantic_segmentation_ready(self)</code></div>
+<div class='docstring'>Check if semantic segmentation is ready for frame capture.<br><br>Returns:<br>    bool: True if semantic segmentation is ready, False otherwise</div>
+<div class='signature'><code>wait_semantic_segmentation_next_frame(self, timeout_ms)</code></div>
+<div class='docstring'>Wait for the next semantic segmentation frame.<br><br>Args:<br>    timeout_ms (int): Timeout in milliseconds<br>    <br>Returns:<br>    bool: True if frame is available, False if timeout</div>
+<div class='signature'><code>get_semantic_segmentation_config(self)</code></div>
+<div class='docstring'>Get semantic segmentation configuration information.<br><br>Returns:<br>    SemanticSegmentationConfig: Configuration including model type, class count, etc.<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve configuration</div>
+<div class='signature'><code>get_semantic_segmentation_labels(self)</code></div>
+<div class='docstring'>Get semantic segmentation label information.<br><br>Returns:<br>    SemanticSegmentationLabelInfo: Label set name and label names<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve label information</div>
+<div class='signature'><code>get_semantic_segmentation_label_set_name(self)</code></div>
+<div class='docstring'>Get the current semantic segmentation label set name.<br><br>Returns:<br>    str: Label set name (e.g., "indoor_80_classes", "outdoor_18_classes")</div>
+<div class='signature'><code>peek_semantic_segmentation_frame(self, timestamp_ns, allow_nearest_frame)</code></div>
+<div class='docstring'>Get the latest semantic segmentation frame from the device.<br><br>Args:<br>    timestamp_ns (int): Specific timestamp to retrieve (0 for latest)<br>    allow_nearest_frame (bool): Allow nearest frame if exact timestamp not available<br>    <br>Returns:<br>    ImageFrame: Semantic segmentation frame as unified ImageFrame with class IDs and metadata<br>    None: If no frame is available<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve segmentation frame</div>
+<div class='signature'><code>calc_depth_camera_aligned_segmentation_map(self, segmentation_frame)</code></div>
+<div class='docstring'>Calculate depth camera aligned segmentation map.<br><br>This function maps the segmentation map to the same coordinate system as the depth map,<br>allowing for proper overlay and analysis.<br><br>Args:<br>    segmentation_frame (ImageFrame): Segmentation frame to align (unified ImageFrame format)<br>    <br>Returns:<br>    tuple: (aligned_data, aligned_width, aligned_height)<br>        - aligned_data (bytes): Aligned segmentation data<br>        - aligned_width (int): Width of aligned map<br>        - aligned_height (int): Height of aligned map<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to calculate aligned map</div>
+<div class='signature'><code>is_depth_camera_supported(self)</code></div>
+<div class='docstring'>Check if depth camera is supported by the current device.<br><br>This is a convenience method that delegates to DeviceBasicInfo.isSupportDepthCamera().<br><br>Returns:<br>    bool: True if depth camera is supported, False otherwise</div>
+<div class='signature'><code>is_semantic_segmentation_supported(self)</code></div>
+<div class='docstring'>Check if semantic segmentation is supported by the current device.<br><br>This is a convenience method that delegates to DeviceBasicInfo.isSupportSemanticSegmentation().<br><br>Returns:<br>    bool: True if semantic segmentation is supported, False otherwise</div>
+<div class='signature'><code>is_semantic_segmentation_alternative_model(self)</code></div>
+<div class='docstring'>Check if semantic segmentation is currently using the alternative model.<br><br>Returns:<br>    bool: True if using alternative model, False if using default model<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to check model status</div>
+<div class='signature'><code>get_depth_camera_config(self)</code></div>
+<div class='docstring'>Get depth camera configuration information.<br><br>Returns:<br>    DepthCameraFrameInfo: Configuration information<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve configuration</div>
+        <a href="#" class="back-to-top">↑</a>
+    </div>
+</body>
+</html>
