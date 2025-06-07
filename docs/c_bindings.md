@@ -66,17 +66,17 @@ Enable/disable raw data subscription.
 
 **get_current_pose_se3**(self, handle)
 
-Get current pose in SE3 format.
+Get current pose in SE3 format with timestamp.
 
 **get_current_pose**(self, handle)
 
-Get current pose in Euler angle format.
+Get current pose in Euler angle format with timestamp.
 
 **get_device_basic_info**(self, handle)
 
 Get device basic information.
 
-**peek_camera_preview_image**(self, handle, timestamp_ns)
+**peek_camera_preview_image**(self, handle, timestamp_ns, allow_nearest_frame)
 
 Get camera preview image with actual pixel data.
 
@@ -112,9 +112,22 @@ Get current LIDAR 2D map preview.
 
 Get global mapping information.
 
-**access_map_data**(self, handle)
+**access_map_data**(self, handle, map_ids, fetch_kf, fetch_mp, fetch_mapinfo, kf_fetch_flags, mp_fetch_flags)
 
 Access visual map data (map points and keyframes).
+
+Args:
+    handle: Session handle
+    map_ids: Optional list/tuple of map IDs to fetch. If None, fetches only the active map.
+            If empty list, fetches all maps.
+    fetch_kf: Whether to fetch keyframes (default: True)
+    fetch_mp: Whether to fetch map points (default: True)
+    fetch_mapinfo: Whether to fetch map info (default: False)
+    kf_fetch_flags: Keyframe fetch flags (default: None, uses FETCH_ALL)
+    mp_fetch_flags: Map point fetch flags (default: None, uses FETCH_ALL)
+
+Returns:
+    Dict containing 'map_points', 'keyframes', and 'loop_closures' lists with full metadata
 
 **peek_recent_lidar_scan**(self, handle, max_points, force_latest)
 

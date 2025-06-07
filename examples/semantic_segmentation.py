@@ -132,40 +132,18 @@ def create_camera_overlay(camera_image, colorized_seg_map):
 def get_camera_preview_for_overlay(sdk, timestamp_ns):
     """Get camera preview image for overlay with timestamp correlation (matching C++ demo exactly)."""
     try:
-        # Try timestamp-correlated camera preview first (like C++ demo)
-        # C++: sdk->dataProvider.peekCameraPreviewImage(cameraImagePair, segFrame.desc.timestamp_ns, true)
-        try:
-            desc, left_data, right_data = sdk.controller._c_bindings.peek_camera_preview_image(sdk.controller._session_handle, timestamp_ns)
-            
-            if left_data and desc.left_image_desc.width > 0 and desc.left_image_desc.height > 0:
-                # Convert timestamp-correlated camera image
-                import numpy as np
-                width = desc.left_image_desc.width
-                height = desc.left_image_desc.height
-                
-                # Determine format and convert to numpy
-                if desc.left_image_desc.format == 0:  # Grayscale
-                    camera_image = np.frombuffer(left_data, dtype=np.uint8).reshape((height, width))
+        # Use the updated get_camera_preview method with timestamp support
+        left_img, right_img = sdk.data_provider.get_camera_preview(timestamp_ns, allow_nearest_frame=False)
+        
+        if left_img and left_img.has_image_data():
+            camera_image = left_img.to_opencv_image()
+            # Convert grayscale to BGR if needed (like C++ demo)
+            if camera_image is not None:
+                if len(camera_image.shape) == 2:
                     camera_image = cv2.cvtColor(camera_image, cv2.COLOR_GRAY2BGR)
-                elif desc.left_image_desc.format == 1:  # RGB
-                    camera_image = np.frombuffer(left_data, dtype=np.uint8).reshape((height, width, 3))
-                    camera_image = cv2.cvtColor(camera_image, cv2.COLOR_RGB2BGR)
-                else:  # Other formats, assume BGR
-                    camera_image = np.frombuffer(left_data, dtype=np.uint8).reshape((height, width, 3))
-                
-                return camera_image
-        except:
-            # Fallback to latest camera preview if timestamp correlation fails
-            left_img, right_img = sdk.data_provider.get_camera_preview()
-            if left_img and left_img.has_image_data():
-                camera_image = left_img.to_opencv_image()
-                # Convert grayscale to BGR if needed (like C++ demo)
-                if camera_image is not None:
-                    if len(camera_image.shape) == 2:
-                        camera_image = cv2.cvtColor(camera_image, cv2.COLOR_GRAY2BGR)
-                    elif len(camera_image.shape) == 3 and camera_image.shape[2] == 1:
-                        camera_image = cv2.cvtColor(camera_image, cv2.COLOR_GRAY2BGR)
-                return camera_image
+                elif len(camera_image.shape) == 3 and camera_image.shape[2] == 1:
+                    camera_image = cv2.cvtColor(camera_image, cv2.COLOR_GRAY2BGR)
+            return camera_image
     except Exception as e:
         # Silent fallback - this is expected behavior when camera data isn't available
         pass

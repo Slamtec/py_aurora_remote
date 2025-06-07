@@ -1,33 +1,12 @@
-# SLAMTEC Aurora SDK Python Bindings Requirements
-# Core dependencies required for the SDK to function
+# SLAMTEC Aurora SDK Python Bindings - Core Requirements
+# Minimal dependencies required for the SDK to function
+# Install with: pip install -r requirements.txt
 
-# NumPy for numerical operations and data handling
+# Core numerical operations
 numpy>=1.19.0
 
-# Optional dependencies (commented out by default)
-# Uncomment the following lines if you need visualization capabilities
-
-# OpenCV for image processing and visualization examples
-# opencv-python>=4.5.0
-
-# Matplotlib for plotting and vector graphics visualization
-# matplotlib>=3.3.0  # Required for lidar_scan_plot_vector.py and vector_map_render.py examples
-
-# GUI Backend Dependencies (platform-specific)
-# For macOS: Built-in macosx backend should work by default
-# For Linux/Windows with Qt backend (recommended):
-# PyQt5>=5.15.0
-
-# For Linux/Windows with Tkinter backend (alternative):
-# On Ubuntu/Debian: sudo apt-get install python3-tk
-# On Windows: Usually included with Python
-# On macOS: brew install python-tk
-
-# Pillow for image handling (alternative to OpenCV for basic image operations)
-# Pillow>=8.0.0
-
-# Development dependencies (for SDK development/testing)
-# pytest>=6.0.0
-# pytest-cov>=2.10.0
-# flake8>=3.8.0
-# black>=21.0.0
+# Note: For running demos and examples, install:
+#   pip install -r requirements-demo.txt
+#
+# For development and package building, install:
+#   pip install -r requirements-dev.txt

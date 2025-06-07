@@ -511,17 +511,15 @@ Toolbar:
         
         # Add map points
         if self.map_points:
-            all_x.extend([p[0] for p in self.map_points])
-            all_y.extend([p[1] for p in self.map_points])
-            if len(self.map_points[0]) > 2:
-                all_z.extend([p[2] for p in self.map_points])
+            all_x.extend([p['position'][0] for p in self.map_points])
+            all_y.extend([p['position'][1] for p in self.map_points])
+            all_z.extend([p['position'][2] for p in self.map_points])
         
         # Add keyframes
         if self.keyframes:
-            all_x.extend([k[0] for k in self.keyframes])
-            all_y.extend([k[1] for k in self.keyframes])
-            if len(self.keyframes[0]) > 2:
-                all_z.extend([k[2] for k in self.keyframes])
+            all_x.extend([k['position'][0] for k in self.keyframes])
+            all_y.extend([k['position'][1] for k in self.keyframes])
+            all_z.extend([k['position'][2] for k in self.keyframes])
         
         # Add pose history
         if self.pose_history:
@@ -561,27 +559,27 @@ Toolbar:
             if self.map_points:
                 if self.enable_3d:
                     self.scatter_points._offsets3d = (
-                        [p[0] for p in self.map_points],
-                        [p[1] for p in self.map_points],
-                        [p[2] for p in self.map_points] if len(self.map_points[0]) > 2 else [0] * len(self.map_points)
+                        [p['position'][0] for p in self.map_points],
+                        [p['position'][1] for p in self.map_points],
+                        [p['position'][2] for p in self.map_points]
                     )
                 else:
                     if len(self.map_points) > 0:
-                        points = np.array([[p[0], p[1]] for p in self.map_points])
+                        points = np.array([[p['position'][0], p['position'][1]] for p in self.map_points])
                         self.scatter_points.set_offsets(points)
             
             # Update keyframe trajectory
             if self.keyframes and len(self.keyframes) > 1:
                 if self.enable_3d:
                     self.trajectory_line.set_data_3d(
-                        [k[0] for k in self.keyframes],
-                        [k[1] for k in self.keyframes],
-                        [k[2] for k in self.keyframes] if len(self.keyframes[0]) > 2 else [0] * len(self.keyframes)
+                        [k['position'][0] for k in self.keyframes],
+                        [k['position'][1] for k in self.keyframes],
+                        [k['position'][2] for k in self.keyframes]
                     )
                 else:
                     self.trajectory_line.set_data(
-                        [k[0] for k in self.keyframes],
-                        [k[1] for k in self.keyframes]
+                        [k['position'][0] for k in self.keyframes],
+                        [k['position'][1] for k in self.keyframes]
                     )
             
             # Update pose history
@@ -1032,7 +1030,7 @@ Toolbar:
                 
                 # Update data every 2 seconds
                 if current_time - last_update_time >= 2.0:
-                    try:
+                    #try:
                         # Get fresh map data
                         map_data = sdk.get_map_data()
                         if map_data:
@@ -1059,16 +1057,16 @@ Toolbar:
                         
                         # Plot map points
                         if map_points:
-                            x_coords = [p[0] for p in map_points]
-                            y_coords = [p[1] for p in map_points]
+                            x_coords = [p['position'][0] for p in map_points]
+                            y_coords = [p['position'][1] for p in map_points]
                             ax.scatter(x_coords, y_coords, s=2, c='green', alpha=0.6, 
                                      label='Map Points ({})'.format(len(map_points)))
                         
                         # Plot keyframe trajectory
                         loop_count = 0
                         if keyframes and len(keyframes) > 1:
-                            x_coords = [k[0] for k in keyframes]
-                            y_coords = [k[1] for k in keyframes]
+                            x_coords = [k['position'][0] for k in keyframes]
+                            y_coords = [k['position'][1] for k in keyframes]
                             ax.plot(x_coords, y_coords, 'r-', linewidth=2, 
                                    label='Keyframe Trajectory ({})'.format(len(keyframes)))
                             ax.scatter(x_coords, y_coords, c='red', s=20, zorder=5)
@@ -1080,12 +1078,12 @@ Toolbar:
                                 # Create a mapping from keyframe ID to keyframe position
                                 kf_id_to_pos = {}
                                 for i, kf in enumerate(keyframes):
-                                    # Keyframe tuple format: (x, y, z, qx, qy, qz, qw, id)
-                                    if len(kf) >= 8:  # Ensure we have the ID
-                                        kf_id_to_pos[kf[7]] = (kf[0], kf[1])  # Map ID to (x, y)
+                                    # Keyframe dict format with id, position, etc.
+                                    kf_id_to_pos[kf['id']] = (kf['position'][0], kf['position'][1])  # Map ID to (x, y)
                                 
                                 # Draw loop closure connections using real loop closure data
                                 actual_connections_drawn = 0
+                                missing_keyframes = []
                                 for from_kf_id, to_kf_id in loop_closures:
                                     if from_kf_id in kf_id_to_pos and to_kf_id in kf_id_to_pos:
                                         pos1 = kf_id_to_pos[from_kf_id]
@@ -1101,6 +1099,17 @@ Toolbar:
                                                  c=loop_closure_color, s=50, marker='o', 
                                                  edgecolors='black', linewidth=1, zorder=7)
                                         actual_connections_drawn += 1
+                                    else:
+                                        # Track missing keyframes for debugging
+                                        if from_kf_id not in kf_id_to_pos:
+                                            missing_keyframes.append(from_kf_id)
+                                        if to_kf_id not in kf_id_to_pos:
+                                            missing_keyframes.append(to_kf_id)
+                                
+                                # Debug info for missing keyframes
+                                if missing_keyframes and len(missing_keyframes) < 10:  # Don't spam too much
+                                    print(f"Warning: Loop closures reference missing keyframes: {set(missing_keyframes)}")
+                                    print(f"Available keyframe IDs: {sorted(list(kf_id_to_pos.keys())[:10])}...")  # Show first 10
                                 
                                 # Add loop closures to legend if any found
                                 if actual_connections_drawn > 0:
@@ -1124,11 +1133,11 @@ Toolbar:
                             all_x = []
                             all_y = []
                             if map_points:
-                                all_x.extend([p[0] for p in map_points])
-                                all_y.extend([p[1] for p in map_points])
+                                all_x.extend([p['position'][0] for p in map_points])
+                                all_y.extend([p['position'][1] for p in map_points])
                             if keyframes:
-                                all_x.extend([k[0] for k in keyframes])
-                                all_y.extend([k[1] for k in keyframes])
+                                all_x.extend([k['position'][0] for k in keyframes])
+                                all_y.extend([k['position'][1] for k in keyframes])
                             
                             if all_x and all_y:
                                 margin = max(2.0, (max(all_x) - min(all_x)) * 0.1)
@@ -1149,7 +1158,9 @@ Toolbar:
                         # Show actual loop closures from SDK data
                         actual_loop_count = len(loop_closures) if loop_closures else 0
                         if actual_loop_count > 0:
-                            stats_info += "\nLoop Closures: {}".format(actual_loop_count)
+                            # Show both total and successfully drawn connections
+                            drawn_count = actual_connections_drawn if 'actual_connections_drawn' in locals() else 0
+                            stats_info += "\nLoop Closures: {} (drawn: {})".format(actual_loop_count, drawn_count)
                         if current_pose:
                             stats_info += "\nCurrent Pose: ({:.2f}, {:.2f}, {:.2f})".format(current_pose[0], current_pose[1], current_pose[2])
                         stats_info += "\nAuto-scale: {}".format(auto_scale_status)
@@ -1168,8 +1179,8 @@ Toolbar:
                         last_update_time = current_time
                         print("Updated: {} points, {} keyframes".format(len(map_points), len(keyframes)))
                         
-                    except Exception as e:
-                        print("Update error: {}".format(e))
+                    #except Exception as e:
+                    #    print("Update error: {}".format(e))
                 
                 # Check if window is still open
                 if not plt.fignum_exists(fig.number):

@@ -28,23 +28,23 @@ def setup_sdk_import():
     Import the Aurora SDK, trying installed package first, then falling back to source.
     
     Returns:
-        tuple: (AuroraSDK, DepthCameraFrame, AuroraSDKError)
+        tuple: (AuroraSDK, AuroraSDKError)
     """
     try:
         # Try to import from installed package first
-        from slamtec_aurora_sdk import AuroraSDK, DepthCameraFrame
+        from slamtec_aurora_sdk import AuroraSDK
         from slamtec_aurora_sdk.exceptions import AuroraSDKError
-        return AuroraSDK, DepthCameraFrame, AuroraSDKError
+        return AuroraSDK, AuroraSDKError
     except ImportError:
         # Fall back to source code in parent directory
         print("Warning: Aurora SDK package not found, using source code from parent directory")
         sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'python_bindings'))
-        from slamtec_aurora_sdk import AuroraSDK, DepthCameraFrame
+        from slamtec_aurora_sdk import AuroraSDK
         from slamtec_aurora_sdk.exceptions import AuroraSDKError
-        return AuroraSDK, DepthCameraFrame, AuroraSDKError
+        return AuroraSDK, AuroraSDKError
 
 # Setup SDK import
-AuroraSDK, DepthCameraFrame, AuroraSDKError = setup_sdk_import()
+AuroraSDK, AuroraSDKError = setup_sdk_import()
 
 try:
     import cv2

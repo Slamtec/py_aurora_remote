@@ -49,12 +49,14 @@ Returns:
 Get the latest depth camera frame from the device.
 
 Args:
-    frame_type (int): Type of depth frame (0: depth map, 1: point3d)
+    frame_type (int): Type of depth frame 
+        - DEPTHCAM_FRAME_TYPE_DEPTH_MAP (0): depth map
+        - DEPTHCAM_FRAME_TYPE_POINT3D (1): point3d
     timestamp_ns (int): Specific timestamp to retrieve (0 for latest)
     allow_nearest_frame (bool): Allow nearest frame if exact timestamp not available
     
 Returns:
-    DepthCameraFrame: Depth camera frame data with depth map and metadata
+    ImageFrame: Image frame with depth data (depth map or point3d)
     None: If no frame is available
     
 Raises:
@@ -192,7 +194,7 @@ Raises:
 Get depth camera configuration information.
 
 Returns:
-    DepthCameraFrameInfo: Configuration information
+    DepthcamConfigInfo: Configuration information
     
 Raises:
     ConnectionError: If not connected to a device

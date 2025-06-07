@@ -55,7 +55,6 @@ __all__ = [
     'ScanData',
     
     # Enhanced Imaging data types (SDK 2.0)
-    'DepthCameraFrame',
     'SemanticSegmentationFrame',
     'CameraCalibrationInfo',
     'TransformCalibrationInfo',
@@ -63,6 +62,10 @@ __all__ = [
     # Enhanced Image Type Constants
     'ENHANCED_IMAGE_TYPE_DEPTH',
     'ENHANCED_IMAGE_TYPE_SEMANTIC_SEGMENTATION',
+    
+    # Depth Camera Frame Type Constants
+    'DEPTHCAM_FRAME_TYPE_DEPTH_MAP',
+    'DEPTHCAM_FRAME_TYPE_POINT3D',
     
     # Device capability checking (SDK 2.0)
     'DeviceBasicInfo'

@@ -83,9 +83,13 @@ class DataProvider:
         except Exception as e:
             raise AuroraSDKError(f"Failed to get current pose: {e}")
     
-    def get_camera_preview(self):
+    def get_camera_preview(self, timestamp_ns=0, allow_nearest_frame=True):
         """
         Get camera preview frames.
+        
+        Args:
+            timestamp_ns (int): Timestamp in nanoseconds (0 for latest frame)
+            allow_nearest_frame (bool): Allow nearest frame if exact timestamp not available
         
         Returns:
             Tuple of (left_frame, right_frame) ImageFrame objects
@@ -98,7 +102,8 @@ class DataProvider:
         self._ensure_connected()
         
         try:
-            desc, left_data, right_data = self._c_bindings.peek_camera_preview_image(self._controller.session_handle)
+            desc, left_data, right_data = self._c_bindings.peek_camera_preview_image(
+                self._controller.session_handle, timestamp_ns, allow_nearest_frame)
             
             # Create ImageFrame objects
             left_frame = ImageFrame.from_c_desc(desc.left_image_desc, data=left_data)
@@ -277,12 +282,28 @@ class DataProvider:
             else:
                 raise AuroraSDKError(f"Failed to get IMU data: {e}")
     
-    def get_map_data(self):
+    def get_map_data(self, map_ids=None, fetch_kf=True, fetch_mp=True, fetch_mapinfo=False,
+                     kf_fetch_flags=None, mp_fetch_flags=None):
         """
         Get visual map data including map points and keyframes.
         
+        Args:
+            map_ids: Optional list/tuple of map IDs to fetch.
+                    - None (default): fetches only the active map
+                    - Empty list []: fetches all maps
+                    - List of IDs: fetches specific maps
+            fetch_kf: Whether to fetch keyframes (default: True)
+            fetch_mp: Whether to fetch map points (default: True)
+            fetch_mapinfo: Whether to fetch map info (default: False)
+            kf_fetch_flags: Keyframe fetch flags (default: None, uses FETCH_ALL)
+            mp_fetch_flags: Map point fetch flags (default: None, uses FETCH_ALL)
+        
         Returns:
-            dict: Dictionary containing 'map_points' and 'keyframes' lists
+            dict: Dictionary containing 'map_points', 'keyframes', 'loop_closures', and 'map_info'.
+                  Each map point contains: {'position': (x,y,z), 'id': int, 'map_id': int, 'timestamp': float}
+                  Each keyframe contains: {'position': (x,y,z), 'rotation': (qx,qy,qz,qw), 'id': int, 'map_id': int, 'timestamp': float, 'fixed': bool}
+                  Loop closures are tuples: [(from_keyframe_id, to_keyframe_id), ...]
+                  Map info is a dict keyed by map_id containing: {'id': int, 'point_count': int, 'keyframe_count': int, 'connection_count': int}
             
         Raises:
             ConnectionError: If not connected to a device
@@ -292,24 +313,31 @@ class DataProvider:
         self._ensure_connected()
         self._ensure_c_bindings()
         
+        # Import default flags
+        from .data_types import SLAMTEC_AURORA_SDK_KF_FETCH_FLAG_ALL, SLAMTEC_AURORA_SDK_MP_FETCH_FLAG_ALL
+        
+        # Use default flags if not specified
+        if kf_fetch_flags is None:
+            kf_fetch_flags = SLAMTEC_AURORA_SDK_KF_FETCH_FLAG_ALL
+        if mp_fetch_flags is None:
+            mp_fetch_flags = SLAMTEC_AURORA_SDK_MP_FETCH_FLAG_ALL
+        
         try:
-            # Rate limit map data access to prevent excessive calls
-            import time
-            if not hasattr(self, '_last_map_access_time'):
-                self._last_map_access_time = 0
-            
-            current_time = time.time()
-            if current_time - self._last_map_access_time < 2.0:  # Minimum 2 seconds between calls
-                return {'map_points': [], 'keyframes': []}
-                
-            self._last_map_access_time = current_time
-            return self._c_bindings.access_map_data(self._controller.session_handle)
+            return self._c_bindings.access_map_data(
+                self._controller.session_handle, 
+                map_ids=map_ids,
+                fetch_kf=fetch_kf,
+                fetch_mp=fetch_mp,
+                fetch_mapinfo=fetch_mapinfo,
+                kf_fetch_flags=kf_fetch_flags,
+                mp_fetch_flags=mp_fetch_flags
+            )
             
         except Exception as e:
             if "NOT_READY" in str(e) or "timeout" in str(e).lower():
                 raise DataNotReadyError("Map data not ready")
             # Return empty data on any error to prevent crashes
-            return {'map_points': [], 'keyframes': []}
+            return {'map_points': [], 'keyframes': [], 'loop_closures': [], 'map_info': {}}
     
     def peek_recent_lidar_scan_raw(self):
         """

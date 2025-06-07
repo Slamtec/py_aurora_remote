@@ -24,16 +24,20 @@ def setup_sdk_import():
     """
     try:
         # Try to import from installed package first
-        from slamtec_aurora_sdk import AuroraSDK, ENHANCED_IMAGE_TYPE_SEMANTIC_SEGMENTATION, ENHANCED_IMAGE_TYPE_DEPTH
-        from slamtec_aurora_sdk.data_types import DEPTHCAM_FRAME_TYPE_POINT3D, DEPTHCAM_FRAME_TYPE_DEPTH_MAP
+        from slamtec_aurora_sdk import (
+            AuroraSDK, ENHANCED_IMAGE_TYPE_SEMANTIC_SEGMENTATION, ENHANCED_IMAGE_TYPE_DEPTH,
+            DEPTHCAM_FRAME_TYPE_POINT3D, DEPTHCAM_FRAME_TYPE_DEPTH_MAP
+        )
         from slamtec_aurora_sdk.exceptions import AuroraSDKError
         return AuroraSDK, ENHANCED_IMAGE_TYPE_SEMANTIC_SEGMENTATION, ENHANCED_IMAGE_TYPE_DEPTH, DEPTHCAM_FRAME_TYPE_POINT3D, DEPTHCAM_FRAME_TYPE_DEPTH_MAP, AuroraSDKError
     except ImportError:
         # Fall back to source code in parent directory
         print("Warning: Aurora SDK package not found, using source code from parent directory")
         sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'python_bindings'))
-        from slamtec_aurora_sdk import AuroraSDK, ENHANCED_IMAGE_TYPE_SEMANTIC_SEGMENTATION, ENHANCED_IMAGE_TYPE_DEPTH
-        from slamtec_aurora_sdk.data_types import DEPTHCAM_FRAME_TYPE_POINT3D, DEPTHCAM_FRAME_TYPE_DEPTH_MAP
+        from slamtec_aurora_sdk import (
+            AuroraSDK, ENHANCED_IMAGE_TYPE_SEMANTIC_SEGMENTATION, ENHANCED_IMAGE_TYPE_DEPTH,
+            DEPTHCAM_FRAME_TYPE_POINT3D, DEPTHCAM_FRAME_TYPE_DEPTH_MAP
+        )
         from slamtec_aurora_sdk.exceptions import AuroraSDKError
         return AuroraSDK, ENHANCED_IMAGE_TYPE_SEMANTIC_SEGMENTATION, ENHANCED_IMAGE_TYPE_DEPTH, DEPTHCAM_FRAME_TYPE_POINT3D, DEPTHCAM_FRAME_TYPE_DEPTH_MAP, AuroraSDKError
 
@@ -72,49 +76,31 @@ def parse_point_cloud_data(frame, camera_image=None, max_points=100000):
     Parse 3D point cloud data from depth camera frame.
     
     Args:
-        frame: Depth camera frame
+        frame: ImageFrame with point3d data
         camera_image: Optional camera image for colorization
         max_points: Maximum number of points to process
         
     Returns:
         tuple: (points_xyz, colors_rgb, timestamp) or (None, None, None) if failed
     """
-    if frame is None or frame.depth_data is None:
+    if frame is None or not frame.is_point3d_frame():
         if debug_mode:
-            print("No frame or depth data")
+            print("No frame or not point3d data")
         return None, None, None
     
     # Get frame dimensions
     width = frame.width
     height = frame.height
-    data = frame.depth_data
     
     if debug_mode:
-        print(f"Frame: {width}x{height}, data size: {len(data)} bytes")
-
+        print(f"Frame: {width}x{height}, data size: {len(frame.data)} bytes")
     
-    expected_size_packed = width * height * 3 * 4  # 3 floats per point
+    # Use the new to_point3d_array method
+    points_xyz = frame.to_point3d_array()
     
-    points_xyz = None
-    
-    # Try different parsing strategies
-    if len(data) == expected_size_packed:
-        # Standard XYZ float format
+    if points_xyz is None:
         if debug_mode:
-            print("Parsing as packed XYZ floats")
-        try:
-            points_raw = np.frombuffer(data, dtype=np.float32)
-            points_xyz = points_raw.reshape(-1, 3)
-        except Exception as e:
-            print(f"Failed to parse as XYZ: {e}")
-    
-    else:
-        if debug_mode:
-            print(f"Unknown data format: {len(data)} bytes")
-            # Try to understand the format
-            if len(data) >= 40:
-                print(f"First 10 floats: {np.frombuffer(data[:40], dtype=np.float32)}")
-                print(f"First 10 bytes (hex): {data[:10].hex()}")
+            print("Failed to extract point3d data")
         return None, None, None
     
     if points_xyz is None:
@@ -419,7 +405,7 @@ def point_cloud_acquisition_thread(sdk, max_points, update_rate_hz):
             # Get depth frame
             frame = sdk.enhanced_imaging.peek_depth_camera_frame(DEPTHCAM_FRAME_TYPE_POINT3D)
             
-            if frame and frame.depth_data:
+            if frame and frame.data:
                 # Try to get the related camera image
                 camera_image = None
                 if hasattr(frame, 'timestamp_ns') and frame.timestamp_ns > 0:

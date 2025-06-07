@@ -1,0 +1,29 @@
+# Demo and Notebook Requirements for Aurora SDK Python Bindings
+# For running examples and Jupyter notebooks
+# Install with: pip install -r requirements-demo.txt
+
+# Core dependency
+numpy>=1.19.0
+
+# Computer Vision and Image Processing
+opencv-python>=4.5.0         # Required for camera preview, segmentation, and image demos
+Pillow>=8.0.0               # Alternative/additional image operations
+
+# 3D Visualization
+open3d>=0.15.0              # Required for dense_point_cloud.py demo
+
+# 2D Plotting and Visualization
+matplotlib>=3.3.0           # Required for vector_map_render.py and plotting demos
+
+# Jupyter Notebook Support
+jupyter>=1.0.0              # For interactive tutorials
+ipywidgets>=7.0.0           # For interactive widgets in notebooks
+notebook>=6.0.0             # Classic Jupyter Notebook
+
+# Optional GUI backends for cross-platform support
+# Uncomment based on your platform:
+# PyQt5>=5.15.0             # Recommended for Linux/Windows
+# pyqt5-tools>=5.15.0       # Additional Qt tools
+
+# Platform-specific requirements
+pywin32>=227; sys_platform == "win32"  # Windows COM support

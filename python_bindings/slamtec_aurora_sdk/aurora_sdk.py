@@ -419,14 +419,33 @@ class AuroraSDK:
         """
         return self.controller.enable_map_data_syncing(enable)
     
-    def get_map_data(self):
+    def get_map_data(self, map_ids=None, fetch_kf=True, fetch_mp=True, fetch_mapinfo=False,
+                     kf_fetch_flags=None, mp_fetch_flags=None):
         """
         Convenience helper: Get visual map data (map points and keyframes).
         
+        Args:
+            map_ids: Optional list/tuple of map IDs to fetch.
+                    - None (default): fetches only the active map
+                    - Empty list []: fetches all maps
+                    - List of IDs: fetches specific maps
+            fetch_kf: Whether to fetch keyframes (default: True)
+            fetch_mp: Whether to fetch map points (default: True)
+            fetch_mapinfo: Whether to fetch map info (default: False)
+            kf_fetch_flags: Keyframe fetch flags (default: None, uses FETCH_ALL)
+            mp_fetch_flags: Map point fetch flags (default: None, uses FETCH_ALL)
+        
         Returns:
-            dict: Dictionary containing 'map_points' and 'keyframes' lists
+            dict: Dictionary containing 'map_points', 'keyframes', 'loop_closures', and 'map_info'
         """
-        return self.data_provider.get_map_data()
+        return self.data_provider.get_map_data(
+            map_ids=map_ids,
+            fetch_kf=fetch_kf,
+            fetch_mp=fetch_mp,
+            fetch_mapinfo=fetch_mapinfo,
+            kf_fetch_flags=kf_fetch_flags,
+            mp_fetch_flags=mp_fetch_flags
+        )
     
     def require_mapping_mode(self, timeout_ms=10000):
         """

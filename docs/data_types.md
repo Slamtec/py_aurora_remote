@@ -394,9 +394,20 @@ Relocalization status information structure.
 
 Python wrapper for image frame data.
 
+This class handles various image formats including regular images (grayscale, RGB, RGBA)
+and depth data (float32 depth maps).
+
 #### Methods
 
 **from_c_desc**(cls, desc, data)
+
+**from_depth_camera_struct**(cls, frame_desc, frame_data)
+
+Create ImageFrame from depth camera C structures.
+
+**from_point3d_struct**(cls, frame_desc, frame_data)
+
+Create ImageFrame from point3d C structures.
 
 **to_opencv_image**(self)
 
@@ -412,9 +423,49 @@ Note:
 
 Check if this frame contains actual image data.
 
+**is_depth_frame**(self)
+
+Check if this frame contains depth data.
+
+**is_point3d_frame**(self)
+
+Check if this frame contains point3d data.
+
+**to_numpy_depth_map**(self)
+
+Convert depth data to numpy array.
+
+Returns:
+    numpy.ndarray: 2D array of float32 depth values, or None if not depth data
+
+**to_colorized_depth_map**(self, colormap)
+
+Convert depth map to colorized visualization.
+
+Args:
+    colormap: OpenCV colormap (default: cv2.COLORMAP_JET)
+    
+Returns:
+    numpy.ndarray: Colorized depth map as BGR image
+
+**to_point3d_array**(self)
+
+Convert point3d data to numpy array of 3D points.
+
+Returns:
+    numpy.ndarray: Nx3 array of (x, y, z) points, or None if not point3d data
+
+**to_point_cloud_data**(self)
+
+Convert point3d data to point cloud format.
+
+Returns:
+    tuple: (points_xyz, valid_mask) where points_xyz is shaped (height, width, 3)
+           and valid_mask indicates which points are valid (non-zero)
+
 #### Special Methods
 
-**__init__**(self, width, height, pixel_format, timestamp_ns, data)
+**__init__**(self, width, height, pixel_format, timestamp_ns, data, depth_scale, min_depth, max_depth)
 
 ### TrackingFrame
 
@@ -550,6 +601,12 @@ Map point description structure (slamtec_aurora_sdk_map_point_desc_t).
 
 Keyframe description structure (slamtec_aurora_sdk_keyframe_desc_t).
 
+### MapDesc
+
+**Inherits from:** ctypes.Structure
+
+Map description structure (slamtec_aurora_sdk_map_desc_t).
+
 ### MapDataVisitor
 
 **Inherits from:** ctypes.Structure
@@ -662,12 +719,6 @@ Semantic segmentation label information structure.
 
 **Inherits from:** ctypes.Structure
 
-Enhanced imaging frame description structure.
-
-### EnhancedImagingFrameDesc
-
-**Inherits from:** ctypes.Structure
-
 Enhanced imaging frame descriptor (slamtec_aurora_sdk_enhanced_imaging_frame_desc_t).
 
 ### EnhancedImagingFrameBuffer
@@ -676,51 +727,17 @@ Enhanced imaging frame descriptor (slamtec_aurora_sdk_enhanced_imaging_frame_des
 
 Enhanced imaging frame buffer (slamtec_aurora_sdk_enhanced_imaging_frame_buffer_t).
 
-### DepthCameraFrameInfo
+### DepthcamConfigInfo
 
 **Inherits from:** ctypes.Structure
 
-Depth camera frame information structure (DEPRECATED - use EnhancedImagingFrameDesc).
-
-### DepthCameraFrame
-
-Python wrapper for depth camera frame data.
-
-#### Methods
-
-**from_c_struct**(cls, frame_desc, frame_data)
-
-Create DepthCameraFrame from C structures.
-
-**to_numpy_depth_map**(self)
-
-Convert depth data to numpy array.
-
-**to_colorized_depth_map**(self, colormap)
-
-Convert depth map to colorized visualization.
-
-Args:
-    colormap: OpenCV colormap (default: cv2.COLORMAP_JET)
-    
-Returns:
-    numpy.ndarray: Colorized depth map as BGR image
-
-#### Special Methods
-
-**__init__**(self, width, height, timestamp_ns, depth_scale, min_depth, max_depth, depth_data)
+Depth camera configuration info (slamtec_aurora_sdk_depthcam_config_info_t).
 
 ### IMUInfo
 
 **Inherits from:** ctypes.Structure
 
 IMU information structure (slamtec_aurora_sdk_imu_info_t).
-
-### MapDesc
-
-**Inherits from:** ctypes.Structure
-
-Map description structure (slamtec_aurora_sdk_map_desc_t).
 
 ## Constants
 
@@ -752,8 +769,16 @@ Map description structure (slamtec_aurora_sdk_map_desc_t).
 - **SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_WORKING** = `1`
 - **SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_IDLE** = `0`
 - **SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_FAILED** = `<complex_value>`
+- **SLAMTEC_AURORA_SDK_KEYFRAME_FLAG_NONE** = `0`
+- **SLAMTEC_AURORA_SDK_KEYFRAME_FLAG_BAD** = `<complex_value>`
+- **SLAMTEC_AURORA_SDK_KEYFRAME_FLAG_FIXED** = `<complex_value>`
+- **SLAMTEC_AURORA_SDK_MAP_FETCH_FLAG_ALL** = `4294967295`
+- **SLAMTEC_AURORA_SDK_KF_FETCH_FLAG_ALL** = `4294967295`
+- **SLAMTEC_AURORA_SDK_MP_FETCH_FLAG_ALL** = `4294967295`
 - **SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_ABORTED** = `<complex_value>`
 - **SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_REJECTED** = `<complex_value>`
 - **SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_TIMEOUT** = `<complex_value>`
 - **NUMPY_AVAILABLE** = `True`
+- **FORMAT_DEPTH_FLOAT32** = `100`
+- **FORMAT_POINT3D_FLOAT32** = `101`
 - **NUMPY_AVAILABLE** = `False`

@@ -61,7 +61,7 @@
 <div class='signature'><code>get_device_info(self)</code></div>
 <div class='docstring'>Convenience helper: Get device information.<br><br>Returns:<br>    Device information object</div>
 <div class='signature'><code>get_current_pose(self, use_se3)</code></div>
-<div class='docstring'>Convenience helper: Get current device pose.<br><br>Args:<br>    use_se3: If True, return pose in SE3 format (position + quaternion)<br>            If False, return pose in Euler format (position + roll/pitch/yaw)<br>            <br>Returns:<br>    tuple: (position, rotation, timestamp) where:<br>        - position: (x, y, z) coordinates<br>        - rotation: (qx, qy, qz, qw) quaternion if use_se3=True, <br>                   (roll, pitch, yaw) Euler angles if use_se3=False<br>        - timestamp: timestamp in nanoseconds</div>
+<div class='docstring'>Convenience helper: Get current device pose with timestamp.<br><br>Args:<br>    use_se3: If True, return pose in SE3 format (position + quaternion)<br>            If False, return pose in Euler format (position + roll/pitch/yaw)<br>            <br>Returns:<br>    tuple: (position, rotation, timestamp_ns) where:<br>        - position: (x, y, z) coordinates in meters<br>        - rotation: (qx, qy, qz, qw) quaternion if use_se3=True, <br>                   (roll, pitch, yaw) Euler angles if use_se3=False<br>        - timestamp_ns: timestamp in nanoseconds</div>
 <div class='signature'><code>get_tracking_frame(self)</code></div>
 <div class='docstring'>Convenience helper: Get tracking frame with images and keypoints.<br><br>Returns:<br>    TrackingFrame object with left/right images and keypoints</div>
 <div class='signature'><code>get_camera_preview(self)</code></div>
@@ -76,8 +76,8 @@
 <div class='docstring'>Convenience helper: Stop LIDAR 2D map preview generation.</div>
 <div class='signature'><code>enable_map_data_syncing(self, enable)</code></div>
 <div class='docstring'>Convenience helper: Enable/disable map data syncing.<br><br>Args:<br>    enable: True to enable, False to disable</div>
-<div class='signature'><code>get_map_data(self)</code></div>
-<div class='docstring'>Convenience helper: Get visual map data (map points and keyframes).<br><br>Returns:<br>    dict: Dictionary containing 'map_points' and 'keyframes' lists</div>
+<div class='signature'><code>get_map_data(self, map_ids, fetch_kf, fetch_mp, fetch_mapinfo, kf_fetch_flags, mp_fetch_flags)</code></div>
+<div class='docstring'>Convenience helper: Get visual map data (map points and keyframes).<br><br>Args:<br>    map_ids: Optional list/tuple of map IDs to fetch.<br>            - None (default): fetches only the active map<br>            - Empty list []: fetches all maps<br>            - List of IDs: fetches specific maps<br>    fetch_kf: Whether to fetch keyframes (default: True)<br>    fetch_mp: Whether to fetch map points (default: True)<br>    fetch_mapinfo: Whether to fetch map info (default: False)<br>    kf_fetch_flags: Keyframe fetch flags (default: None, uses FETCH_ALL)<br>    mp_fetch_flags: Map point fetch flags (default: None, uses FETCH_ALL)<br><br>Returns:<br>    dict: Dictionary containing 'map_points', 'keyframes', 'loop_closures', and 'map_info'</div>
 <div class='signature'><code>require_mapping_mode(self, timeout_ms)</code></div>
 <div class='docstring'>Convenience helper: Require device to enter mapping mode.<br><br>Args:<br>    timeout_ms: Timeout in milliseconds</div>
 <div class='signature'><code>resync_map_data(self, invalidate_cache)</code></div>

@@ -277,6 +277,16 @@ SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_FINISHED = 2
 SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_WORKING = 1
 SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_IDLE = 0
 SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_FAILED = -1
+
+# Keyframe Flags
+SLAMTEC_AURORA_SDK_KEYFRAME_FLAG_NONE = 0
+SLAMTEC_AURORA_SDK_KEYFRAME_FLAG_BAD = (1 << 0)  # 0x1
+SLAMTEC_AURORA_SDK_KEYFRAME_FLAG_FIXED = (1 << 1)  # 0x2
+
+# Map Data Fetch Flags
+SLAMTEC_AURORA_SDK_MAP_FETCH_FLAG_ALL = 0xFFFFFFFF  # Fetch all available data
+SLAMTEC_AURORA_SDK_KF_FETCH_FLAG_ALL = 0xFFFFFFFF   # Fetch all keyframe data
+SLAMTEC_AURORA_SDK_MP_FETCH_FLAG_ALL = 0xFFFFFFFF   # Fetch all map point data
 SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_ABORTED = -2
 SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_REJECTED = -3
 SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_TIMEOUT = -4
@@ -652,15 +662,28 @@ class RelocalizationStatus(ctypes.Structure):
 
 
 class ImageFrame:
-    """Python wrapper for image frame data."""
+    """Python wrapper for image frame data.
+    
+    This class handles various image formats including regular images (grayscale, RGB, RGBA)
+    and depth data (float32 depth maps).
+    """
+    
+    # Additional format constants for depth data
+    FORMAT_DEPTH_FLOAT32 = 100  # Float32 depth data
+    FORMAT_POINT3D_FLOAT32 = 101  # Float32 point3d data (x,y,z triplets)
     
     def __init__(self, width, height, pixel_format,
-                 timestamp_ns, data = None):
+                 timestamp_ns, data = None, depth_scale=1.0, 
+                 min_depth=0.0, max_depth=10.0):
         self.width = width
         self.height = height
         self.pixel_format = pixel_format
         self.timestamp_ns = timestamp_ns
         self.data = data
+        # Additional fields for depth data
+        self.depth_scale = depth_scale
+        self.min_depth = min_depth
+        self.max_depth = max_depth
     
     @classmethod
     def from_c_desc(cls, desc, data = None):
@@ -670,6 +693,31 @@ class ImageFrame:
             pixel_format=desc.format,  # Use the format field from C structure
             timestamp_ns=0,  # Timestamp is in the parent stereo pair structure
             data=data
+        )
+    
+    @classmethod
+    def from_depth_camera_struct(cls, frame_desc, frame_data):
+        """Create ImageFrame from depth camera C structures."""
+        return cls(
+            width=frame_desc.image_desc.width,
+            height=frame_desc.image_desc.height,
+            pixel_format=cls.FORMAT_DEPTH_FLOAT32,  # Mark as depth data
+            timestamp_ns=frame_desc.timestamp_ns,
+            data=frame_data,
+            depth_scale=1.0,  # Default scale
+            min_depth=0.0,    # Will be calculated from data
+            max_depth=10.0    # Will be calculated from data
+        )
+    
+    @classmethod
+    def from_point3d_struct(cls, frame_desc, frame_data):
+        """Create ImageFrame from point3d C structures."""
+        return cls(
+            width=frame_desc.image_desc.width,
+            height=frame_desc.image_desc.height,
+            pixel_format=cls.FORMAT_POINT3D_FLOAT32,  # Mark as point3d data
+            timestamp_ns=frame_desc.timestamp_ns,
+            data=frame_data
         )
     
     def to_opencv_image(self):
@@ -719,6 +767,120 @@ class ImageFrame:
     def has_image_data(self):
         """Check if this frame contains actual image data."""
         return self.data is not None and len(self.data) > 0
+    
+    def is_depth_frame(self):
+        """Check if this frame contains depth data."""
+        return self.pixel_format == self.FORMAT_DEPTH_FLOAT32
+    
+    def is_point3d_frame(self):
+        """Check if this frame contains point3d data."""
+        return self.pixel_format == self.FORMAT_POINT3D_FLOAT32
+    
+    def to_numpy_depth_map(self):
+        """Convert depth data to numpy array.
+        
+        Returns:
+            numpy.ndarray: 2D array of float32 depth values, or None if not depth data
+        """
+        if not NUMPY_AVAILABLE:
+            raise ImportError("NumPy is required for depth map conversion")
+        
+        if not self.is_depth_frame() or not self.data:
+            return None
+            
+        import numpy as np
+        # Convert bytes to float32 array
+        depth_array = np.frombuffer(self.data, dtype=np.float32)
+        if len(depth_array) >= self.width * self.height:
+            return depth_array[:self.width * self.height].reshape((self.height, self.width))
+        return None
+    
+    def to_colorized_depth_map(self, colormap=None):
+        """
+        Convert depth map to colorized visualization.
+        
+        Args:
+            colormap: OpenCV colormap (default: cv2.COLORMAP_JET)
+            
+        Returns:
+            numpy.ndarray: Colorized depth map as BGR image
+        """
+        try:
+            import numpy as np
+            import cv2
+        except ImportError as e:
+            raise ImportError("OpenCV and NumPy are required for depth colorization: {}".format(e))
+        
+        depth_map = self.to_numpy_depth_map()
+        if depth_map is None:
+            return None
+        
+        if colormap is None:
+            colormap = cv2.COLORMAP_JET
+        
+        # Normalize depth values to 0-255 range
+        normalized_depth = np.zeros_like(depth_map, dtype=np.uint8)
+        valid_mask = (depth_map > 0) & (depth_map < float('inf'))
+        
+        if np.any(valid_mask):
+            valid_depths = depth_map[valid_mask]
+            min_depth = np.min(valid_depths)
+            max_depth = np.max(valid_depths)
+            
+            if max_depth > min_depth:
+                # Normalize valid depths to 0-255
+                normalized_valid = ((valid_depths - min_depth) / (max_depth - min_depth) * 255).astype(np.uint8)
+                normalized_depth[valid_mask] = normalized_valid
+        
+        # Apply colormap
+        return cv2.applyColorMap(normalized_depth, colormap)
+    
+    def to_point3d_array(self):
+        """Convert point3d data to numpy array of 3D points.
+        
+        Returns:
+            numpy.ndarray: Nx3 array of (x, y, z) points, or None if not point3d data
+        """
+        if not NUMPY_AVAILABLE:
+            raise ImportError("NumPy is required for point3d conversion")
+        
+        if not self.is_point3d_frame() or not self.data:
+            return None
+            
+        import numpy as np
+        # Convert bytes to float32 array
+        float_array = np.frombuffer(self.data, dtype=np.float32)
+        
+        # Calculate expected number of points
+        expected_floats = self.width * self.height * 3
+        if len(float_array) >= expected_floats:
+            # Reshape to Nx3 array of points
+            points = float_array[:expected_floats].reshape((self.width * self.height, 3))
+            return points
+        return None
+    
+    def to_point_cloud_data(self):
+        """Convert point3d data to point cloud format.
+        
+        Returns:
+            tuple: (points_xyz, valid_mask) where points_xyz is shaped (height, width, 3)
+                   and valid_mask indicates which points are valid (non-zero)
+        """
+        if not self.is_point3d_frame():
+            return None, None
+            
+        points_flat = self.to_point3d_array()
+        if points_flat is None:
+            return None, None
+            
+        import numpy as np
+        # Reshape to height x width x 3
+        points_xyz = points_flat.reshape((self.height, self.width, 3))
+        
+        # Create mask for valid points (non-zero points)
+        valid_mask = np.any(points_xyz != 0, axis=2)
+        
+        return points_xyz, valid_mask
 
 
 class TrackingFrame:
@@ -1050,10 +1212,24 @@ class KeyframeDesc(ctypes.Structure):
     ]
 
 
+class MapDesc(ctypes.Structure):
+    """Map description structure (slamtec_aurora_sdk_map_desc_t)."""
+    _fields_ = [
+        ("map_id", ctypes.c_uint32),               # Map ID
+        ("map_flags", ctypes.c_uint32),            # Map flags
+        ("keyframe_count", ctypes.c_uint64),       # Number of keyframes in the map
+        ("map_point_count", ctypes.c_uint64),      # Number of map points in the map
+        ("keyframe_id_start", ctypes.c_uint64),    # First keyframe ID
+        ("keyframe_id_end", ctypes.c_uint64),      # Last keyframe ID
+        ("map_point_id_start", ctypes.c_uint64),   # First map point ID
+        ("map_point_id_end", ctypes.c_uint64)      # Last map point ID
+    ]
+
+
 # Callback function types for map data visitor
 MapPointCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.POINTER(MapPointDesc))
 KeyframeCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.POINTER(KeyframeDesc), ctypes.POINTER(ctypes.c_uint64), ctypes.POINTER(ctypes.c_uint64))
-MapDescCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p)
+MapDescCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.POINTER(MapDesc))
 
 # Callback function type for map storage session result
 MapStorageSessionResultCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_int)
@@ -1176,12 +1352,6 @@ class GridMap2DGenerationOptions(ctypes.Structure):
     ]
 
 
-# Note: GridMap2DFetchInfo is already defined above with correct fields
-
-
-# Note: Rect is already defined above with correct c_float fields
-
-
 # Callback function types for LiDAR scan
 LidarScanCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, 
                                      ctypes.POINTER(LidarSinglelayerScanDataInfo), 
@@ -1254,19 +1424,6 @@ class SemanticSegmentationLabelInfo(ctypes.Structure):
     ]
 
 
-class EnhancedImagingFrameDesc(ctypes.Structure):
-    """Enhanced imaging frame description structure."""
-    _fields_ = [
-        ("timestamp_ns", ctypes.c_uint64),               # timestamp in nanoseconds
-        ("frame_type", ctypes.c_int),                    # 0: depth, 1: semantic segmentation
-        ("width", ctypes.c_int),                         # frame width
-        ("height", ctypes.c_int),                        # frame height
-        ("data_format", ctypes.c_int),                   # data format (float32 for depth, uint8 for segmentation)
-        ("data_size", ctypes.c_size_t),                  # data size in bytes
-        ("metadata_size", ctypes.c_size_t)               # metadata size in bytes
-    ]
-
-
 # Enhanced Imaging Frame Structures (matching C API exactly)
 class EnhancedImagingFrameDesc(ctypes.Structure):
     """Enhanced imaging frame descriptor (slamtec_aurora_sdk_enhanced_imaging_frame_desc_t)."""
@@ -1284,104 +1441,20 @@ class EnhancedImagingFrameBuffer(ctypes.Structure):
     ]
 
 
-# Deprecated - keeping for compatibility but not used
-class DepthCameraFrameInfo(ctypes.Structure):
-    """Depth camera frame information structure (DEPRECATED - use EnhancedImagingFrameDesc)."""
+# DepthCameraFrame is deprecated - use ImageFrame instead
+# The ImageFrame class now supports depth data with is_depth_frame() and to_numpy_depth_map() methods
+
+# Depth Camera Configuration
+class DepthcamConfigInfo(ctypes.Structure):
+    """Depth camera configuration info (slamtec_aurora_sdk_depthcam_config_info_t)."""
     _fields_ = [
-        ("timestamp_ns", ctypes.c_uint64),               # timestamp in nanoseconds
-        ("width", ctypes.c_int),                         # depth map width
-        ("height", ctypes.c_int),                        # depth map height
-        ("depth_scale", ctypes.c_float),                 # depth scale factor
-        ("min_depth", ctypes.c_float),                   # minimum depth value
-        ("max_depth", ctypes.c_float),                   # maximum depth value
-        ("depth_data_size", ctypes.c_size_t)             # depth data size in bytes
+        ("fps", ctypes.c_float),
+        ("frame_skip", ctypes.c_int),
+        ("image_width", ctypes.c_int),
+        ("image_height", ctypes.c_int),
+        ("binded_cam_id", ctypes.c_int)
     ]
 
-
-# Python wrapper classes for Enhanced Imaging
-class DepthCameraFrame:
-    """Python wrapper for depth camera frame data."""
-    
-    def __init__(self, width=0, height=0, timestamp_ns=0, depth_scale=1.0, 
-                 min_depth=0.0, max_depth=10.0, depth_data=None):
-        self.width = width
-        self.height = height
-        self.timestamp_ns = timestamp_ns
-        self.depth_scale = depth_scale
-        self.min_depth = min_depth
-        self.max_depth = max_depth
-        self.depth_data = depth_data  # Float32 depth values
-    
-    @classmethod
-    def from_c_struct(cls, frame_desc, frame_data):
-        """Create DepthCameraFrame from C structures."""
-        return cls(
-            width=frame_desc.image_desc.width,
-            height=frame_desc.image_desc.height,
-            timestamp_ns=frame_desc.timestamp_ns,
-            depth_scale=1.0,  # Default scale
-            min_depth=0.0,    # Will be calculated from data
-            max_depth=10.0,   # Will be calculated from data
-            depth_data=frame_data
-        )
-    
-    def to_numpy_depth_map(self):
-        """Convert depth data to numpy array."""
-        if not NUMPY_AVAILABLE:
-            raise ImportError("NumPy is required for depth map conversion")
-        
-        if not self.depth_data:
-            return None
-            
-        import numpy as np
-        # Convert bytes to float32 array
-        depth_array = np.frombuffer(self.depth_data, dtype=np.float32)
-        if len(depth_array) >= self.width * self.height:
-            return depth_array[:self.width * self.height].reshape((self.height, self.width))
-        return None
-    
-    def to_colorized_depth_map(self, colormap=None):
-        """
-        Convert depth map to colorized visualization.
-        
-        Args:
-            colormap: OpenCV colormap (default: cv2.COLORMAP_JET)
-            
-        Returns:
-            numpy.ndarray: Colorized depth map as BGR image
-        """
-        try:
-            import numpy as np
-            import cv2
-        except ImportError as e:
-            raise ImportError("OpenCV and NumPy are required for depth colorization: {}".format(e))
-        
-        depth_map = self.to_numpy_depth_map()
-        if depth_map is None:
-            return None
-        
-        if colormap is None:
-            colormap = cv2.COLORMAP_JET
-        
-        # Normalize depth values to 0-255 range
-        normalized_depth = np.zeros_like(depth_map, dtype=np.uint8)
-        valid_mask = (depth_map > 0) & (depth_map < float('inf'))
-        
-        if np.any(valid_mask):
-            valid_depths = depth_map[valid_mask]
-            min_depth = np.min(valid_depths)
-            max_depth = np.max(valid_depths)
-            
-            if max_depth > min_depth:
-                # Normalize valid depths to 0-255
-                normalized_valid = ((valid_depths - min_depth) / (max_depth - min_depth) * 255).astype(np.uint8)
-                normalized_depth[valid_mask] = normalized_valid
-        
-        # Apply colormap
-        return cv2.applyColorMap(normalized_depth, colormap)
-
-
-# CRITICAL MISSING DATA TYPES that supervisor overlooked
 class IMUInfo(ctypes.Structure):
     """IMU information structure (slamtec_aurora_sdk_imu_info_t)."""
     _fields_ = [
@@ -1393,17 +1466,5 @@ class IMUInfo(ctypes.Structure):
     ]
 
 
-class MapDesc(ctypes.Structure):
-    """Map description structure (slamtec_aurora_sdk_map_desc_t)."""
-    _fields_ = [
-        ("map_id", ctypes.c_uint32),               # Map ID
-        ("map_flags", ctypes.c_uint32),            # Map flags
-        ("keyframe_count", ctypes.c_uint64),       # Number of keyframes in the map
-        ("map_point_count", ctypes.c_uint64),      # Number of map points in the map
-        ("keyframe_id_start", ctypes.c_uint64),    # First keyframe ID
-        ("keyframe_id_end", ctypes.c_uint64),      # Last keyframe ID
-        ("map_point_id_start", ctypes.c_uint64),   # First map point ID
-        ("map_point_id_end", ctypes.c_uint64)      # Last map point ID
-    ]
 
 

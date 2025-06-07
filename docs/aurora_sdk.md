@@ -219,18 +219,18 @@ Returns:
 
 **get_current_pose**(self, use_se3)
 
-Convenience helper: Get current device pose.
+Convenience helper: Get current device pose with timestamp.
 
 Args:
     use_se3: If True, return pose in SE3 format (position + quaternion)
             If False, return pose in Euler format (position + roll/pitch/yaw)
             
 Returns:
-    tuple: (position, rotation, timestamp) where:
-        - position: (x, y, z) coordinates
+    tuple: (position, rotation, timestamp_ns) where:
+        - position: (x, y, z) coordinates in meters
         - rotation: (qx, qy, qz, qw) quaternion if use_se3=True, 
                    (roll, pitch, yaw) Euler angles if use_se3=False
-        - timestamp: timestamp in nanoseconds
+        - timestamp_ns: timestamp in nanoseconds
 
 **get_tracking_frame**(self)
 
@@ -281,12 +281,23 @@ Convenience helper: Enable/disable map data syncing.
 Args:
     enable: True to enable, False to disable
 
-**get_map_data**(self)
+**get_map_data**(self, map_ids, fetch_kf, fetch_mp, fetch_mapinfo, kf_fetch_flags, mp_fetch_flags)
 
 Convenience helper: Get visual map data (map points and keyframes).
 
+Args:
+    map_ids: Optional list/tuple of map IDs to fetch.
+            - None (default): fetches only the active map
+            - Empty list []: fetches all maps
+            - List of IDs: fetches specific maps
+    fetch_kf: Whether to fetch keyframes (default: True)
+    fetch_mp: Whether to fetch map points (default: True)
+    fetch_mapinfo: Whether to fetch map info (default: False)
+    kf_fetch_flags: Keyframe fetch flags (default: None, uses FETCH_ALL)
+    mp_fetch_flags: Map point fetch flags (default: None, uses FETCH_ALL)
+
 Returns:
-    dict: Dictionary containing 'map_points' and 'keyframes' lists
+    dict: Dictionary containing 'map_points', 'keyframes', 'loop_closures', and 'map_info'
 
 **require_mapping_mode**(self, timeout_ms)
 

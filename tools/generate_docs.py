@@ -6,7 +6,7 @@ This script automatically generates API reference documentation by parsing
 Python source files and extracting docstrings, class definitions, and method signatures.
 
 Usage:
-    python tools/generate_docs.py [--format html|markdown] [--output DIR]
+    python tools/generate_docs.py [--format html|markdown|both] [--output DIR] [--clean] [--verbose]
 
 Features:
 - Extracts docstrings, classes, methods, and function signatures
@@ -15,6 +15,9 @@ Features:
 - Automatic table of contents
 - Code syntax highlighting
 - Type hints extraction
+- Backup and restore functionality
+- Git integration for change tracking
+- Documentation verification
 """
 
 import os
@@ -22,9 +25,137 @@ import sys
 import ast
 import inspect
 import argparse
+import shutil
+import subprocess
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Union
+from datetime import datetime
 import importlib.util
+
+
+def run_command(cmd, cwd=None, verbose=False):
+    """Run a shell command and return the result."""
+    if verbose:
+        print(f"Running: {cmd}")
+    
+    try:
+        result = subprocess.run(
+            cmd, shell=True, cwd=cwd, 
+            capture_output=True, text=True, check=True
+        )
+        if verbose and result.stdout:
+            print(result.stdout)
+        return result
+    except subprocess.CalledProcessError as e:
+        print(f"Command failed: {cmd}")
+        print(f"Error: {e.stderr}")
+        return None
+
+
+def backup_docs(docs_dir, verbose=False):
+    """Create a backup of existing documentation."""
+    if not docs_dir.exists():
+        if verbose:
+            print("No existing documentation to backup")
+        return None
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_dir = docs_dir.parent / f"docs_backup_{timestamp}"
+    
+    try:
+        shutil.copytree(docs_dir, backup_dir)
+        if verbose:
+            print(f"Created backup: {backup_dir}")
+        return backup_dir
+    except Exception as e:
+        print(f"Failed to create backup: {e}")
+        return None
+
+
+def clean_docs(docs_dir, verbose=False):
+    """Clean existing documentation directory."""
+    if docs_dir.exists():
+        shutil.rmtree(docs_dir)
+        if verbose:
+            print(f"Cleaned documentation directory: {docs_dir}")
+
+
+def verify_docs(docs_dir, format_type, verbose=False):
+    """Verify that documentation was generated correctly."""
+    if not docs_dir.exists():
+        print("Error: Documentation directory not found")
+        return False
+    
+    # Check for index file
+    if format_type == "markdown":
+        index_file = docs_dir / "index.md"
+    elif format_type == "html":
+        index_file = docs_dir / "index.html"
+    else:
+        # Check both for 'both' format
+        index_md = docs_dir / "index.md"
+        index_html = docs_dir / "index.html"
+        if not (index_md.exists() and index_html.exists()):
+            print("Error: Missing index files")
+            return False
+        if verbose:
+            print("Found both HTML and Markdown index files")
+        return True
+    
+    if not index_file.exists():
+        print(f"Error: Index file not found: {index_file}")
+        return False
+    
+    # Count documentation files
+    if format_type == "markdown":
+        doc_files = list(docs_dir.glob("*.md"))
+    elif format_type == "html":
+        doc_files = list(docs_dir.glob("*.html"))
+    else:
+        doc_files = list(docs_dir.glob("*.md")) + list(docs_dir.glob("*.html"))
+    
+    if len(doc_files) < 5:  # Should have at least index + a few module docs
+        print(f"Warning: Only {len(doc_files)} documentation files found")
+        return False
+    
+    if verbose:
+        print(f"Verification passed: Found {len(doc_files)} documentation files")
+    
+    return True
+
+
+def check_git_status(project_root, verbose=False):
+    """Check if there are changes in the documentation."""
+    result = run_command("git status --porcelain docs/", cwd=project_root, verbose=False)
+    
+    if result and result.stdout.strip():
+        if verbose:
+            print("Documentation changes detected:")
+            print(result.stdout)
+        return True
+    else:
+        if verbose:
+            print("No documentation changes detected")
+        return False
+
+
+def get_sdk_version(project_root):
+    """Get SDK version from the source code."""
+    init_file = project_root / "python_bindings" / "slamtec_aurora_sdk" / "__init__.py"
+    
+    try:
+        with open(init_file, 'r') as f:
+            content = f.read()
+        
+        # Extract version from __version__ = "x.x.x"
+        for line in content.split('\n'):
+            if line.strip().startswith('__version__'):
+                version = line.split('=')[1].strip().strip('"\'')
+                return version
+    except Exception:
+        pass
+    
+    return "unknown"
 
 
 class DocGenerator:
@@ -230,23 +361,14 @@ class DocGenerator:
             "",
         ]
         
-        # Sort modules by importance
-        important_modules = ['aurora_sdk', 'controller', 'data_provider', 'map_manager', 
-                           'lidar_2d_map_builder', 'enhanced_imaging', 'floor_detector', 
-                           'data_types', 'exceptions']
+        # Sort modules by priority, then alphabetically within same priority
+        sorted_modules = sorted(self.modules.items(), 
+                              key=lambda x: (self.get_module_priority(x[0]), x[0]))
         
-        # Add important modules first
-        for module_name in important_modules:
-            if module_name in self.modules:
-                module_info = self.modules[module_name]
-                description = self.extract_short_description(module_info['docstring'])
-                content.append(f"- **[{module_name}]({module_name}.md)** - {description}")
-        
-        # Add remaining modules
-        for module_name, module_info in self.modules.items():
-            if module_name not in important_modules:
-                description = self.extract_short_description(module_info['docstring'])
-                content.append(f"- **[{module_name}]({module_name}.md)** - {description}")
+        # Add all modules in priority order
+        for module_name, module_info in sorted_modules:
+            description = self.extract_short_description(module_info['docstring'])
+            content.append(f"- **[{module_name}]({module_name}.md)** - {description}")
         
         content.extend([
             "",
@@ -274,13 +396,24 @@ class DocGenerator:
             "",
             "The Aurora Python SDK follows a component-based architecture:",
             "",
-            "- **AuroraSDK**: Main SDK class providing component access",
-            "- **Controller**: Device connection and control",
-            "- **DataProvider**: Data acquisition (pose, images, sensors)",
-            "- **MapManager**: VSLAM (3D visual mapping) operations",
-            "- **LIDAR2DMapBuilder**: 2D LIDAR mapping operations",
-            "- **EnhancedImaging**: Advanced imaging features",
-            "- **FloorDetector**: Multi-floor detection",
+        ])
+        
+        # Dynamically build architecture description from actual modules
+        architecture_components = []
+        for module_name, module_info in sorted_modules:
+            # Skip utility/internal modules from architecture overview
+            if module_name in ['c_bindings', 'data_types', 'exceptions', 'utils']:
+                continue
+            
+            # Get first line of docstring as component description
+            description = self.extract_short_description(module_info['docstring'])
+            if description and description != "No description available":
+                # Convert module_name to readable format using smart capitalization
+                display_name = self.format_module_display_name(module_name)
+                architecture_components.append(f"- **{display_name}**: {description}")
+        
+        content.extend(architecture_components)
+        content.extend([
             "",
             f"*Documentation generated automatically from source code*",
         ])
@@ -450,6 +583,62 @@ class DocGenerator:
         
         return "No description available"
     
+    def format_module_display_name(self, module_name: str) -> str:
+        """Format module name for display in documentation."""
+        # Special cases for known acronyms and formatting
+        special_cases = {
+            'aurora_sdk': 'AuroraSDK',
+            'lidar_2d_map_builder': 'LIDAR2DMapBuilder',
+            'imu': 'IMU',
+            'api': 'API',
+            'sdk': 'SDK',
+            'lidar': 'LIDAR',
+            'vslam': 'VSLAM',
+            'ai': 'AI',
+            'cv': 'CV',
+            'ml': 'ML'
+        }
+        
+        if module_name in special_cases:
+            return special_cases[module_name]
+        
+        # Split by underscores and capitalize each part
+        parts = module_name.split('_')
+        formatted_parts = []
+        
+        for part in parts:
+            # Check if part is a known acronym
+            if part.lower() in special_cases:
+                formatted_parts.append(special_cases[part.lower()])
+            else:
+                # Regular capitalization
+                formatted_parts.append(part.capitalize())
+        
+        return ''.join(formatted_parts)
+    
+    def get_module_priority(self, module_name: str) -> int:
+        """Determine module priority for sorting (lower number = higher priority)."""
+        # Main SDK entry point
+        if module_name == 'aurora_sdk':
+            return 0
+        # Core components
+        elif module_name in ['controller', 'data_provider']:
+            return 1
+        # Feature components (any module ending with common patterns)
+        elif any(module_name.endswith(suffix) for suffix in ['_manager', '_builder', '_detector']):
+            return 2
+        elif module_name in ['enhanced_imaging', 'floor_detector']:
+            return 2
+        # Data and utility modules
+        elif module_name in ['data_types', 'exceptions', 'utils']:
+            return 4
+        # Low-level modules
+        elif module_name in ['c_bindings']:
+            return 5
+        # Everything else (future components)
+        else:
+            return 3
+    
     def generate_html_docs(self) -> None:
         """Generate HTML documentation."""
         print("Generating HTML documentation...")
@@ -531,9 +720,14 @@ class DocGenerator:
             "<ul>",
         ]
         
-        for module_name, module_info in self.modules.items():
+        # Sort modules by priority, then alphabetically within same priority
+        sorted_modules = sorted(self.modules.items(), 
+                              key=lambda x: (self.get_module_priority(x[0]), x[0]))
+        
+        for module_name, module_info in sorted_modules:
             description = self.extract_short_description(module_info['docstring'])
-            content.append(f'<li><strong><a href="{module_name}.html">{module_name}</a></strong> - {description}</li>')
+            display_name = self.format_module_display_name(module_name)
+            content.append(f'<li><strong><a href="{module_name}.html">{display_name}</a></strong> - {description}</li>')
         
         content.extend([
             "</ul>",
@@ -619,12 +813,20 @@ class DocGenerator:
 def main():
     """Main function."""
     parser = argparse.ArgumentParser(description="Generate Aurora Python SDK API documentation")
-    parser.add_argument("--format", choices=["html", "markdown"], default="markdown",
+    parser.add_argument("--format", choices=["html", "markdown", "both"], default="markdown",
                        help="Output format (default: markdown)")
     parser.add_argument("--output", type=str, default="docs",
                        help="Output directory (default: docs)")
     parser.add_argument("--sdk-path", type=str,
                        help="Path to SDK source code (default: auto-detect)")
+    parser.add_argument("--clean", action="store_true",
+                       help="Clean existing documentation before regenerating")
+    parser.add_argument("--no-backup", action="store_true",
+                       help="Skip creating backup of existing documentation")
+    parser.add_argument("--verbose", "-v", action="store_true",
+                       help="Enable verbose output")
+    parser.add_argument("--check-only", action="store_true",
+                       help="Only check if documentation needs updating")
     
     args = parser.parse_args()
     
@@ -644,23 +846,124 @@ def main():
     output_dir = project_root / args.output
     
     print("SLAMTEC Aurora Python SDK Documentation Generator")
-    print("=" * 50)
+    print("=" * 55)
+    
+    # Get SDK version
+    sdk_version = get_sdk_version(project_root)
+    print(f"SDK Version: {sdk_version}")
+    print(f"Project Root: {project_root}")
     print(f"SDK Path: {sdk_path}")
     print(f"Output Directory: {output_dir}")
     print(f"Format: {args.format}")
     print()
     
-    # Generate documentation
-    generator = DocGenerator(sdk_path, output_dir, args.format)
+    # Check if documentation needs updating (git-based)
+    if args.check_only:
+        has_changes = check_git_status(project_root, args.verbose)
+        if has_changes:
+            print("Documentation may need updating (git changes detected)")
+            return 1
+        else:
+            print("Documentation appears up to date")
+            return 0
+    
+    # Create backup if requested
+    backup_dir = None
+    if not args.no_backup:
+        backup_dir = backup_docs(output_dir, args.verbose)
+    
     try:
-        generator.generate()
-        print()
-        print("Documentation generation completed successfully!")
-        print(f"Open {output_dir / ('index.' + args.format)} to view the documentation.")
-        return 0
+        # Clean documentation if requested
+        if args.clean:
+            clean_docs(output_dir, args.verbose)
+        
+        # Generate documentation
+        formats_to_generate = []
+        if args.format == "both":
+            formats_to_generate = ["markdown", "html"]
+        else:
+            formats_to_generate = [args.format]
+        
+        success = True
+        for fmt in formats_to_generate:
+            print(f"Generating {fmt.upper()} documentation...")
+            
+            # Generate documentation
+            generator = DocGenerator(sdk_path, output_dir, fmt)
+            try:
+                generator.generate()
+                
+                # Verify generated documentation
+                if not verify_docs(output_dir, fmt, args.verbose):
+                    print(f"Documentation verification failed for {fmt}")
+                    success = False
+            except Exception as e:
+                print(f"Failed to generate {fmt} documentation: {e}")
+                success = False
+        
+        if success:
+            print()
+            print("✅ Documentation generation completed successfully!")
+            
+            # Show summary
+            if output_dir.exists():
+                md_files = len(list(output_dir.glob("*.md")))
+                html_files = len(list(output_dir.glob("*.html")))
+                print(f"   📄 Markdown files: {md_files}")
+                print(f"   🌐 HTML files: {html_files}")
+            
+            # Check for git changes
+            if check_git_status(project_root, False):
+                print("   📝 Git changes detected in documentation")
+                print("   Run 'git add docs/ && git commit' to commit changes")
+            
+            # Show access information
+            if "markdown" in formats_to_generate:
+                print(f"   📖 View Markdown: {output_dir / 'index.md'}")
+            if "html" in formats_to_generate:
+                print(f"   🌐 View HTML: {output_dir / 'index.html'}")
+            
+            return 0
+        else:
+            print("❌ Documentation generation failed")
+            
+            # Restore backup if available
+            if backup_dir and backup_dir.exists():
+                print(f"Restoring backup from {backup_dir}")
+                if output_dir.exists():
+                    shutil.rmtree(output_dir)
+                shutil.move(backup_dir, output_dir)
+            
+            return 1
+            
     except Exception as e:
-        print(f"Error generating documentation: {e}")
+        print(f"❌ Error during documentation generation: {e}")
+        
+        # Restore backup if available
+        if backup_dir and backup_dir.exists():
+            print(f"Restoring backup from {backup_dir}")
+            try:
+                if output_dir.exists():
+                    shutil.rmtree(output_dir)
+                shutil.move(backup_dir, output_dir)
+            except Exception as restore_error:
+                print(f"Failed to restore backup: {restore_error}")
+        
         return 1
+    
+    finally:
+        # Clean up old backups (keep only the most recent 3)
+        if not args.no_backup:
+            backups = sorted(project_root.glob("docs_backup_*"))
+            if len(backups) > 3:
+                for old_backup in backups[:-3]:
+                    try:
+                        shutil.rmtree(old_backup)
+                        if args.verbose:
+                            print(f"Removed old backup: {old_backup}")
+                    except Exception as e:
+                        if args.verbose:
+                            print(f"Failed to remove old backup {old_backup}: {e}")
 
 
 if __name__ == "__main__":

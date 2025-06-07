@@ -43,7 +43,7 @@
 <div class='signature'><code>wait_depth_camera_next_frame(self, timeout_ms)</code></div>
 <div class='docstring'>Wait for the next depth camera frame.<br><br>Args:<br>    timeout_ms (int): Timeout in milliseconds<br>    <br>Returns:<br>    bool: True if frame is available, False if timeout</div>
 <div class='signature'><code>peek_depth_camera_frame(self, frame_type, timestamp_ns, allow_nearest_frame)</code></div>
-<div class='docstring'>Get the latest depth camera frame from the device.<br><br>Args:<br>    frame_type (int): Type of depth frame (0: depth map, 1: point3d)<br>    timestamp_ns (int): Specific timestamp to retrieve (0 for latest)<br>    allow_nearest_frame (bool): Allow nearest frame if exact timestamp not available<br>    <br>Returns:<br>    DepthCameraFrame: Depth camera frame data with depth map and metadata<br>    None: If no frame is available<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve depth frame</div>
+<div class='docstring'>Get the latest depth camera frame from the device.<br><br>Args:<br>    frame_type (int): Type of depth frame (0: depth map, 1: point3d)<br>    timestamp_ns (int): Specific timestamp to retrieve (0 for latest)<br>    allow_nearest_frame (bool): Allow nearest frame if exact timestamp not available<br>    <br>Returns:<br>    ImageFrame: Image frame with depth data (depth map or point3d)<br>    None: If no frame is available<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve depth frame</div>
 <div class='signature'><code>peek_depth_camera_related_rectified_image(self, timestamp_ns)</code></div>
 <div class='docstring'>Get the related rectified camera image for a depth frame.<br><br>Args:<br>    timestamp_ns (int): Timestamp of the depth frame to get related image for<br>    <br>Returns:<br>    ImageFrame: Camera image frame data with rectified image<br>    None: If no frame is available<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve image</div>
 <div class='signature'><code>is_semantic_segmentation_ready(self)</code></div>
@@ -67,7 +67,7 @@
 <div class='signature'><code>is_semantic_segmentation_alternative_model(self)</code></div>
 <div class='docstring'>Check if semantic segmentation is currently using the alternative model.<br><br>Returns:<br>    bool: True if using alternative model, False if using default model<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to check model status</div>
 <div class='signature'><code>get_depth_camera_config(self)</code></div>
-<div class='docstring'>Get depth camera configuration information.<br><br>Returns:<br>    DepthCameraFrameInfo: Configuration information<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve configuration</div>
+<div class='docstring'>Get depth camera configuration information.<br><br>Returns:<br>    DepthcamConfigInfo: Configuration information<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to retrieve configuration</div>
         <a href="#" class="back-to-top">↑</a>
     </div>
 </body>

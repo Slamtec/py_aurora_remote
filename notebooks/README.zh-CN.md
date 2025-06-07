@@ -28,19 +28,19 @@
   - 地图数据管理
 
 ### 高级功能
-- **[04_enhanced_imaging.ipynb](04_enhanced_imaging.ipynb)** - AI 驱动的成像
-  - 深度相机操作
-  - 语义分割
-  - 从深度生成点云
+- **[04_enhanced_imaging.ipynb](04_enhanced_imaging.ipynb)** - 使用统一ImageFrame接口的AI驱动成像
+  - 使用ImageFrame的深度相机操作
+  - 支持时间戳关联的语义分割
+  - 从深度图生成点云
   - 多模态传感器融合
-  - 高级计算机视觉
+  - 具有适当数据处理的高级计算机视觉
 
-- **[05_advanced_enhanced_imaging.ipynb](05_advanced_enhanced_imaging.ipynb)** - 高级成像技术
-  - 密集点云处理
-  - 语义分析和可视化
-  - 3D 重建工作流
-  - 跨模态数据关联
-  - 性能优化
+- **[05_advanced_enhanced_imaging.ipynb](05_advanced_enhanced_imaging.ipynb)** - 具有增强关联的高级成像技术
+  - 从深度图的密集点云处理
+  - 具有适当时间戳关联的语义分析和可视化
+  - 使用统一ImageFrame接口的3D重建工作流
+  - 支持allow_nearest_frame的跨模态数据关联
+  - 具有选择性数据获取的性能优化
 
 - **[06_lidar_2d_mapping.ipynb](06_lidar_2d_mapping.ipynb)** - 2D LiDAR 建图和楼层检测
   - 实时 LiDAR 扫描可视化

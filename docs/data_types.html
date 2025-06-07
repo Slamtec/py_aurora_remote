@@ -145,13 +145,29 @@
 <h3>RelocalizationStatus</h3>
 <div class='docstring'>Relocalization status information structure.</div>
 <h3>ImageFrame</h3>
-<div class='docstring'>Python wrapper for image frame data.</div>
+<div class='docstring'>Python wrapper for image frame data.<br><br>This class handles various image formats including regular images (grayscale, RGB, RGBA)<br>and depth data (float32 depth maps).</div>
 <h4>Methods</h4>
 <div class='signature'><code>from_c_desc(cls, desc, data)</code></div>
+<div class='signature'><code>from_depth_camera_struct(cls, frame_desc, frame_data)</code></div>
+<div class='docstring'>Create ImageFrame from depth camera C structures.</div>
+<div class='signature'><code>from_point3d_struct(cls, frame_desc, frame_data)</code></div>
+<div class='docstring'>Create ImageFrame from point3d C structures.</div>
 <div class='signature'><code>to_opencv_image(self)</code></div>
 <div class='docstring'>Convert image data to OpenCV-compatible numpy array.<br><br>Returns:<br>    numpy.ndarray: BGR image array ready for OpenCV, or None if no data<br>    <br>Note:<br>    Requires opencv-python and numpy to be installed.</div>
 <div class='signature'><code>has_image_data(self)</code></div>
 <div class='docstring'>Check if this frame contains actual image data.</div>
+<div class='signature'><code>is_depth_frame(self)</code></div>
+<div class='docstring'>Check if this frame contains depth data.</div>
+<div class='signature'><code>is_point3d_frame(self)</code></div>
+<div class='docstring'>Check if this frame contains point3d data.</div>
+<div class='signature'><code>to_numpy_depth_map(self)</code></div>
+<div class='docstring'>Convert depth data to numpy array.<br><br>Returns:<br>    numpy.ndarray: 2D array of float32 depth values, or None if not depth data</div>
+<div class='signature'><code>to_colorized_depth_map(self, colormap)</code></div>
+<div class='docstring'>Convert depth map to colorized visualization.<br><br>Args:<br>    colormap: OpenCV colormap (default: cv2.COLORMAP_JET)<br>    <br>Returns:<br>    numpy.ndarray: Colorized depth map as BGR image</div>
+<div class='signature'><code>to_point3d_array(self)</code></div>
+<div class='docstring'>Convert point3d data to numpy array of 3D points.<br><br>Returns:<br>    numpy.ndarray: Nx3 array of (x, y, z) points, or None if not point3d data</div>
+<div class='signature'><code>to_point_cloud_data(self)</code></div>
+<div class='docstring'>Convert point3d data to point cloud format.<br><br>Returns:<br>    tuple: (points_xyz, valid_mask) where points_xyz is shaped (height, width, 3)<br>           and valid_mask indicates which points are valid (non-zero)</div>
 <h3>TrackingFrame</h3>
 <div class='docstring'>Python wrapper for tracking frame data.</div>
 <h4>Methods</h4>
@@ -195,6 +211,8 @@
 <div class='docstring'>Map point description structure (slamtec_aurora_sdk_map_point_desc_t).</div>
 <h3>KeyframeDesc</h3>
 <div class='docstring'>Keyframe description structure (slamtec_aurora_sdk_keyframe_desc_t).</div>
+<h3>MapDesc</h3>
+<div class='docstring'>Map description structure (slamtec_aurora_sdk_map_desc_t).</div>
 <h3>MapDataVisitor</h3>
 <div class='docstring'>Map data visitor structure (slamtec_aurora_sdk_map_data_visitor_t).</div>
 <h3>GridMap2DDimension</h3>
@@ -232,26 +250,13 @@
 <h3>SemanticSegmentationLabelInfo</h3>
 <div class='docstring'>Semantic segmentation label information structure.</div>
 <h3>EnhancedImagingFrameDesc</h3>
-<div class='docstring'>Enhanced imaging frame description structure.</div>
-<h3>EnhancedImagingFrameDesc</h3>
 <div class='docstring'>Enhanced imaging frame descriptor (slamtec_aurora_sdk_enhanced_imaging_frame_desc_t).</div>
 <h3>EnhancedImagingFrameBuffer</h3>
 <div class='docstring'>Enhanced imaging frame buffer (slamtec_aurora_sdk_enhanced_imaging_frame_buffer_t).</div>
-<h3>DepthCameraFrameInfo</h3>
-<div class='docstring'>Depth camera frame information structure (DEPRECATED - use EnhancedImagingFrameDesc).</div>
-<h3>DepthCameraFrame</h3>
-<div class='docstring'>Python wrapper for depth camera frame data.</div>
-<h4>Methods</h4>
-<div class='signature'><code>from_c_struct(cls, frame_desc, frame_data)</code></div>
-<div class='docstring'>Create DepthCameraFrame from C structures.</div>
-<div class='signature'><code>to_numpy_depth_map(self)</code></div>
-<div class='docstring'>Convert depth data to numpy array.</div>
-<div class='signature'><code>to_colorized_depth_map(self, colormap)</code></div>
-<div class='docstring'>Convert depth map to colorized visualization.<br><br>Args:<br>    colormap: OpenCV colormap (default: cv2.COLORMAP_JET)<br>    <br>Returns:<br>    numpy.ndarray: Colorized depth map as BGR image</div>
+<h3>DepthcamConfigInfo</h3>
+<div class='docstring'>Depth camera configuration info (slamtec_aurora_sdk_depthcam_config_info_t).</div>
 <h3>IMUInfo</h3>
 <div class='docstring'>IMU information structure (slamtec_aurora_sdk_imu_info_t).</div>
-<h3>MapDesc</h3>
-<div class='docstring'>Map description structure (slamtec_aurora_sdk_map_desc_t).</div>
         <a href="#" class="back-to-top">↑</a>
     </div>
 </body>

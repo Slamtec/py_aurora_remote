@@ -392,7 +392,7 @@ class CBindings:
         # Enhanced Imaging API operations (SDK 2.0)
         from .data_types import (CameraCalibrationInfo, TransformCalibrationInfo, 
                                 SemanticSegmentationConfig, SemanticSegmentationLabelInfo,
-                                EnhancedImagingFrameDesc, DepthCameraFrameInfo)
+                                EnhancedImagingFrameDesc)
         
         # Camera calibration operations
         self.lib.slamtec_aurora_sdk_dataprovider_get_camera_calibration.argtypes = [
@@ -413,7 +413,7 @@ class CBindings:
         
         self.lib.slamtec_aurora_sdk_dataprovider_depthcam_get_config_info.argtypes = [
             ctypes.c_void_p,  # handle
-            ctypes.POINTER(DepthCameraFrameInfo)  # config_out
+            ctypes.POINTER(DepthcamConfigInfo)  # config_out
         ]
         self.lib.slamtec_aurora_sdk_dataprovider_depthcam_get_config_info.restype = ctypes.c_int
         
@@ -784,7 +784,7 @@ class CBindings:
         return info, timestamp.value
     
     
-    def peek_camera_preview_image(self, handle, timestamp_ns = 0):
+    def peek_camera_preview_image(self, handle, timestamp_ns=0, allow_nearest_frame=True):
         """Get camera preview image with actual pixel data."""
         desc = StereoImagePairDesc()
         
@@ -796,7 +796,7 @@ class CBindings:
         buffer_info.imgdata_right_size = 0
         
         error_code = self.lib.slamtec_aurora_sdk_dataprovider_peek_camera_preview_image(
-            handle, timestamp_ns, ctypes.byref(desc), ctypes.byref(buffer_info), 1
+            handle, timestamp_ns, ctypes.byref(desc), ctypes.byref(buffer_info), 1 if allow_nearest_frame else 0
         )
         if error_code != ERRORCODE_OK:
             raise AuroraSDKError("Failed to get camera preview image, error code: {}".format(error_code))
@@ -820,7 +820,7 @@ class CBindings:
         # Second call to actually get the image data
         if buffer_info.imgdata_left or buffer_info.imgdata_right:
             error_code = self.lib.slamtec_aurora_sdk_dataprovider_peek_camera_preview_image(
-                handle, timestamp_ns, ctypes.byref(desc), ctypes.byref(buffer_info), 1
+                handle, timestamp_ns, ctypes.byref(desc), ctypes.byref(buffer_info), 1 if allow_nearest_frame else 0
             )
             if error_code != ERRORCODE_OK:
                 raise AuroraSDKError("Failed to get camera preview image data, error code: {}".format(error_code))
@@ -1019,98 +1019,157 @@ class CBindings:
             'slidingWindowStartKFId': global_desc.slidingWindowStartKFId
         }
     
-    def access_map_data(self, handle):
-        """Access visual map data (map points and keyframes)."""
+    def access_map_data(self, handle, map_ids=None, fetch_kf=True, fetch_mp=True, fetch_mapinfo=False, 
+                        kf_fetch_flags=None, mp_fetch_flags=None):
+        """
+        Access visual map data (map points and keyframes).
+        
+        Args:
+            handle: Session handle
+            map_ids: Optional list/tuple of map IDs to fetch. If None, fetches only the active map.
+                    If empty list, fetches all maps.
+            fetch_kf: Whether to fetch keyframes (default: True)
+            fetch_mp: Whether to fetch map points (default: True)
+            fetch_mapinfo: Whether to fetch map info (default: False)
+            kf_fetch_flags: Keyframe fetch flags (default: None, uses FETCH_ALL)
+            mp_fetch_flags: Map point fetch flags (default: None, uses FETCH_ALL)
+        
+        Returns:
+            Dict containing 'map_points', 'keyframes', and 'loop_closures' lists with full metadata
+        """
         from .data_types import MapDataVisitor, MapPointCallback, KeyframeCallback, MapDescCallback
         
         # Storage for collected data - use lists that persist outside callback scope
-        collected_data = {'map_points': [], 'keyframes': [], 'loop_closures': []}
+        # Use set for loop closures to automatically handle duplicates
+        collected_data = {'map_points': [], 'keyframes': [], 'loop_closures': set(), 'map_info': {}}
         
         # Callback to collect map points - make more robust
         def map_point_callback(user_data, map_point_ptr):
             try:
-                if map_point_ptr:
+                if map_point_ptr and fetch_mp:
                     mp = map_point_ptr.contents
-                    collected_data['map_points'].append((float(mp.position.x), float(mp.position.y), float(mp.position.z)))
-            except Exception:
+                    # Include all metadata: position, id, map_id, timestamp
+                    map_point_data = {
+                        'position': (float(mp.position.x), float(mp.position.y), float(mp.position.z)),
+                        'id': int(mp.id),
+                        'map_id': int(mp.map_id),
+                        'timestamp': float(mp.timestamp)
+                    }
+                    collected_data['map_points'].append(map_point_data)
+            except Exception as e:
                 pass  # Ignore errors in callback to prevent crashes
         
         # Callback to collect keyframes - make more robust
         def keyframe_callback(user_data, keyframe_ptr, looped_ids, connected_ids):
             try:
-                if keyframe_ptr:
+                if keyframe_ptr and fetch_kf:
                     kf = keyframe_ptr.contents
                     # Use SE3 pose for position and rotation
                     pos = kf.pose_se3.translation
                     rot = kf.pose_se3.quaternion
-                    keyframe_id = kf.id
                     
-                    # Store keyframe with ID
-                    keyframe_tuple = (
-                        float(pos.x), float(pos.y), float(pos.z), 
-                        float(rot.x), float(rot.y), float(rot.z), float(rot.w),
-                        int(keyframe_id)
-                    )
-                    collected_data['keyframes'].append(keyframe_tuple)
+                    # Check if keyframe is fixed
+                    from .data_types import SLAMTEC_AURORA_SDK_KEYFRAME_FLAG_FIXED
+                    is_fixed = bool(kf.flags & SLAMTEC_AURORA_SDK_KEYFRAME_FLAG_FIXED)
+                    
+                    # Store keyframe with all metadata
+                    keyframe_data = {
+                        'position': (float(pos.x), float(pos.y), float(pos.z)),
+                        'rotation': (float(rot.x), float(rot.y), float(rot.z), float(rot.w)),
+                        'id': int(kf.id),
+                        'map_id': int(kf.map_id),
+                        'timestamp': float(kf.timestamp),
+                        'fixed': is_fixed
+                    }
+                    collected_data['keyframes'].append(keyframe_data)
                     
                     # Process loop closure connections
-                    if looped_ids:
-                        # Count how many looped frame IDs are provided
-                        # The array is null-terminated, so count until we hit 0
-                        loop_count = 0
+                    if looped_ids and kf.looped_frame_count > 0:
+                        # Use the actual count from the keyframe structure
                         try:
-                            while looped_ids[loop_count] != 0:
-                                looped_frame_id = looped_ids[loop_count]
-                                # Store loop closure connection: (from_keyframe_id, to_keyframe_id)
-                                loop_closure = (int(keyframe_id), int(looped_frame_id))
-                                collected_data['loop_closures'].append(loop_closure)
-                                loop_count += 1
-                                if loop_count > 100:  # Safety limit to prevent infinite loop
-                                    break
+                            for i in range(kf.looped_frame_count):
+                                looped_frame_id = looped_ids[i]
+                                if looped_frame_id > 0:  # Valid frame ID
+                                    # Store loop closure connection: (from_keyframe_id, to_keyframe_id)
+                                    # Use consistent ordering to avoid duplicates: always put smaller ID first
+                                    kf_id = int(kf.id)
+                                    looped_id = int(looped_frame_id)
+                                    loop_closure = (min(kf_id, looped_id), max(kf_id, looped_id))
+                                    
+                                    # Use set to automatically handle duplicates
+                                    collected_data['loop_closures'].add(loop_closure)
                         except Exception:
                             pass  # Ignore errors in loop processing
                             
             except Exception:
                 pass  # Ignore errors in callback to prevent crashes
         
-        # Dummy callback for map description - make more robust
+        # Callback for map description
         def map_desc_callback(user_data, map_desc_ptr):
             try:
-                pass  # Not needed for visualization
+                if map_desc_ptr and fetch_mapinfo:
+                    # Cast c_void_p to MapDesc pointer
+                    from .data_types import MapDesc
+                    map_desc = ctypes.cast(map_desc_ptr, ctypes.POINTER(MapDesc)).contents
+                    map_info = {
+                        'id': int(map_desc.map_id),
+                        'point_count': int(map_desc.map_point_count),
+                        'keyframe_count': int(map_desc.keyframe_count),
+                        'map_flags': int(map_desc.map_flags),
+                        'keyframe_id_start': int(map_desc.keyframe_id_start),
+                        'keyframe_id_end': int(map_desc.keyframe_id_end),
+                        'map_point_id_start': int(map_desc.map_point_id_start),
+                        'map_point_id_end': int(map_desc.map_point_id_end)
+                    }
+                    collected_data['map_info'][map_info['id']] = map_info
             except Exception:
-                pass
+                pass  # Ignore errors in callback
         
-        # Keep references to prevent garbage collection
-        map_point_cb = MapPointCallback(map_point_callback)
-        keyframe_cb = KeyframeCallback(keyframe_callback)
-        map_desc_cb = MapDescCallback(map_desc_callback)
+        # Keep references to prevent garbage collection - only create needed callbacks
+        map_point_cb = MapPointCallback(map_point_callback) if fetch_mp else None
+        keyframe_cb = KeyframeCallback(keyframe_callback) if fetch_kf else None
+        map_desc_cb = MapDescCallback(map_desc_callback) if fetch_mapinfo else None
         
-        # Create visitor with callbacks
+        # Create visitor with callbacks - set to None for optimization when not needed
         visitor = MapDataVisitor()
         visitor.user_data = None
-        visitor.on_map_point = map_point_cb
-        visitor.on_keyframe = keyframe_cb
-        visitor.on_map_desc = map_desc_cb
+        # Use ctypes.cast(None, type) to create proper NULL pointer for callbacks
+        visitor.on_map_point = map_point_cb or ctypes.cast(None, MapPointCallback)
+        visitor.on_keyframe = keyframe_cb or ctypes.cast(None, KeyframeCallback)
+        visitor.on_map_desc = map_desc_cb or ctypes.cast(None, MapDescCallback)
         
         try:
-            # Get active map ID
-            global_info = self.get_global_mapping_info(handle)
-            active_map_id = global_info['active_map_id']
+            # Determine which maps to fetch
+            if map_ids is None:
+                # Default behavior: fetch only the active map
+                global_info = self.get_global_mapping_info(handle)
+                active_map_id = global_info['active_map_id']
+                map_ids_array = (ctypes.c_uint32 * 1)(active_map_id)
+                map_count = 1
+            elif len(map_ids) == 0:
+                # Empty list: fetch all maps (pass NULL pointer)
+                map_ids_array = None
+                map_count = 0
+            else:
+                # Specific map IDs provided
+                map_ids_array = (ctypes.c_uint32 * len(map_ids))(*map_ids)
+                map_count = len(map_ids)
             
-            # Call access_map_data for the active map
-            map_ids = (ctypes.c_uint32 * 1)(active_map_id)
+            # Call access_map_data with the specified maps
             error_code = self.lib.slamtec_aurora_sdk_dataprovider_access_map_data(
-                handle, ctypes.byref(visitor), map_ids, 1
+                handle, ctypes.byref(visitor), map_ids_array, map_count
             )
             
             if error_code != ERRORCODE_OK:
                 # Don't raise exception, just return empty data
-                return {'map_points': [], 'keyframes': [], 'loop_closures': []}
+                return {'map_points': [], 'keyframes': [], 'loop_closures': [], 'map_info': {}}
                 
         except Exception as e:
             # If there's an error, return empty data but don't fail completely
-            return {'map_points': [], 'keyframes': [], 'loop_closures': []}
+            return {'map_points': [], 'keyframes': [], 'loop_closures': [], 'map_info': {}}
         
+        # Convert loop closures set back to list for consistency
+        collected_data['loop_closures'] = list(collected_data['loop_closures'])
         return collected_data
     
     # LiDAR scan data functions
@@ -1445,9 +1504,13 @@ class CBindings:
         
         return transform_info
     
-    def peek_depth_camera_frame(self, handle, frame_type=0):
+    def peek_depth_camera_frame(self, handle, frame_type=None):
         """Get depth camera frame data using correct C API (two-step process like C++)."""
-        from .data_types import EnhancedImagingFrameDesc, EnhancedImagingFrameBuffer
+        from .data_types import EnhancedImagingFrameDesc, EnhancedImagingFrameBuffer, DEPTHCAM_FRAME_TYPE_DEPTH_MAP
+        
+        # Use default frame type if not specified
+        if frame_type is None:
+            frame_type = DEPTHCAM_FRAME_TYPE_DEPTH_MAP
         
         frame_desc = EnhancedImagingFrameDesc()
         frame_buffer = EnhancedImagingFrameBuffer()
@@ -1746,9 +1809,9 @@ class CBindings:
     
     def depthcam_get_config_info(self, handle):
         """Get depth camera configuration."""
-        from .data_types import DepthCameraFrameInfo
+        from .data_types import DepthcamConfigInfo
         
-        config = DepthCameraFrameInfo()
+        config = DepthcamConfigInfo()
         error_code = self.lib.slamtec_aurora_sdk_dataprovider_depthcam_get_config_info(
             handle, ctypes.byref(config)
         )

@@ -14,16 +14,42 @@
 - **2D网格建图**：基于激光雷达的占用网格建图和实时预览
 
 ### SDK 2.0增强功能
-- **语义分割**：基于多种模型的实时场景理解
-- **深度相机**：支持校正图像关联的密集深度图
+- **语义分割**：基于多种模型的实时场景理解，支持时间戳关联
+- **统一ImageFrame接口**：支持常规图像、深度图和点云的单一接口
+- **深度相机**：支持校正图像关联的密集深度图和适当的数据转换
 - **楼层检测**：自动多楼层检测和管理
-- **增强成像**：先进的计算机视觉处理管道
+- **增强成像**：具有跨模态对齐的先进计算机视觉处理管道
 - **IMU集成**：惯性测量单元数据用于鲁棒跟踪
+- **基于时间戳的数据检索**：传感器模态之间的精确时间关联
 
 ### Python生态系统集成
 - **NumPy/OpenCV**：高效的图像和点云处理
 - **Open3D**：先进的3D可视化和点云操作
 - **科学计算**：与Python数据科学栈无缝集成
+
+## 系统要求
+
+Aurora Python SDK具有最小的核心依赖，演示和开发需要额外的包：
+
+### 核心要求
+- Python 3.7或更高版本
+- NumPy >= 1.19.0
+
+### 要求文件
+- **requirements.txt** - SDK核心功能的最小依赖
+- **requirements-demo.txt** - 运行演示和Jupyter笔记本的额外包
+- **requirements-dev.txt** - 构建包和文档的开发工具
+
+```bash
+# 基本SDK使用
+pip install -r requirements.txt
+
+# 运行演示和笔记本
+pip install -r requirements-demo.txt
+
+# 开发和包构建
+pip install -r requirements-dev.txt
+```
 
 ## 安装
 
@@ -78,8 +104,11 @@ python -c "import slamtec_aurora_sdk; print('Aurora SDK安装成功')"
 git clone --recursive https://github.com/Slamtec/py_aurora_remote.git
 cd py_aurora_remote
 
-# 安装依赖
-pip install -r python_bindings/requirements.txt
+# 安装SDK最小依赖
+pip install -r requirements.txt
+
+# 如需运行演示和笔记本，还需安装：
+pip install -r requirements-demo.txt
 
 # 直接从源码运行示例（自动发现）
 python examples/simple_pose.py
@@ -245,8 +274,8 @@ SDK包含全面的**Jupyter笔记本教程**，提供所有Aurora功能的分步
 
 **教程快速开始：**
 ```bash
-# 安装Jupyter和所需包
-pip install jupyter matplotlib numpy open3d
+# 安装演示和笔记本所需包
+pip install -r requirements-demo.txt
 
 # 在notebooks目录中启动Jupyter
 cd notebooks/
@@ -334,35 +363,50 @@ SDK包含展示所有功能的全面示例：
     python examples/vslam_map_saveload.py [device_ip]
     ```
 
-15. **2D激光雷达地图渲染** - 占用网格建图
+15. **选择性地图数据获取** - 优化的地图数据检索
+    ```bash
+    python examples/selective_map_data_fetch.py [device_ip] [--fetch-kf] [--fetch-mp] [--fetch-mapinfo]
+    ```
+
+16. **2D激光雷达地图渲染** - 占用网格建图
     ```bash
     python examples/lidar_2dmap_render.py [device_ip]
     ```
 
-16. **2D激光雷达地图保存** - 将2D地图保存到文件
+17. **2D激光雷达地图保存** - 将2D地图保存到文件
     ```bash
     python examples/lidar_2dmap_save.py [device_ip]
     ```
 
-17. **重定位** - 设备重定位演示
+18. **重定位** - 设备重定位演示
     ```bash
     python examples/relocalization.py [device_ip]
     ```
 
-18. **校准导出器** - 相机和变换校准
+19. **校准导出器** - 相机和变换校准
     ```bash
     python examples/calibration_exporter.py [--device device_ip] [--output file] [options]
     ```
 
 ### 实用工具和测试
-19. **设备信息监视器** - 设备状态和功能
+20. **设备信息监视器** - 设备状态和功能
     ```bash
     python examples/device_info_monitor.py [--device device_ip] [options]
     ```
 
-20. **上下文管理器演示** - 自动资源清理
+21. **上下文管理器演示** - 自动资源清理
     ```bash
     python examples/context_manager_demo.py [device_ip]
+    ```
+
+22. **IMU数据获取器** - IMU数据采集
+    ```bash
+    python examples/imu_fetcher.py [device_ip]
+    ```
+
+23. **深度相机预览** - 深度传感器可视化
+    ```bash
+    python examples/depthcam_preview.py [--device device_ip] [--headless]
     ```
 
 ## 架构
@@ -454,9 +498,80 @@ class DataProvider:
     def get_camera_calibration() -> CameraCalibrationInfo
     def get_transform_calibration() -> TransformCalibrationInfo
     
-    # 地图数据
+    # 增强的地图数据元数据 (SDK 2.0)
     def get_global_mapping_info() -> Dict
-    def get_map_data() -> Dict
+    def get_map_data(map_ids: Optional[List[int]] = None, 
+                     fetch_kf: bool = True, 
+                     fetch_mp: bool = True, 
+                     fetch_mapinfo: bool = False,
+                     kf_fetch_flags: Optional[int] = None,
+                     mp_fetch_flags: Optional[int] = None) -> Dict
+```
+
+### 增强的VSLAM地图数据 (SDK 2.0)
+
+`get_map_data()` 方法返回全面的VSLAM建图信息，包括地图点、关键帧和闭环，以及完整的元数据。**2.0.0版本新增**：选择性数据获取以优化性能。
+
+```python
+# 从活动地图获取数据（默认）
+map_data = sdk.data_provider.get_map_data()
+
+# 从所有地图获取数据
+map_data = sdk.data_provider.get_map_data(map_ids=[])
+
+# 从特定地图获取数据
+map_data = sdk.data_provider.get_map_data(map_ids=[1, 2, 3])
+
+# 选择性数据获取（2.0.0版本新增）- 仅获取所需数据
+# 仅获取关键帧（轨迹数据）
+map_data = sdk.data_provider.get_map_data(fetch_kf=True, fetch_mp=False, fetch_mapinfo=False)
+
+# 仅获取地图点（3D点云）
+map_data = sdk.data_provider.get_map_data(fetch_kf=False, fetch_mp=True, fetch_mapinfo=False)
+
+# 仅获取地图元数据（无实际数据，非常快速）
+map_data = sdk.data_provider.get_map_data(fetch_kf=False, fetch_mp=False, fetch_mapinfo=True)
+
+# 地图数据结构
+{
+    'map_points': [
+        {
+            'position': (x, y, z),      # 3D位置坐标
+            'id': int,                  # 唯一地图点ID
+            'map_id': int,             # 此点所属的地图ID
+            'timestamp': float         # 创建时间戳
+        },
+        # ... 更多地图点
+    ],
+    'keyframes': [
+        {
+            'position': (x, y, z),      # 3D位置坐标
+            'rotation': (qx, qy, qz, qw), # 四元数旋转
+            'id': int,                  # 唯一关键帧ID
+            'map_id': int,             # 此关键帧所属的地图ID
+            'timestamp': float,        # 创建时间戳
+            'fixed': bool              # 如果关键帧是固定的（不可优化）则为True
+        },
+        # ... 更多关键帧
+    ],
+    'loop_closures': [
+        (from_keyframe_id, to_keyframe_id),  # 闭环连接
+        # ... 更多闭环
+    ],
+    'map_info': {               # 当fetch_mapinfo=True时可用
+        0: {                    # 地图ID作为键
+            'id': 0,
+            'point_count': 17028,
+            'keyframe_count': 459,
+            'map_flags': 0,
+            'keyframe_id_start': 0,
+            'keyframe_id_end': 701,
+            'map_point_id_start': 0,
+            'map_point_id_end': 102789
+        },
+        # ... 更多地图
+    }
+}
 ```
 
 #### **EnhancedImaging**

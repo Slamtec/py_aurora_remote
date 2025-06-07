@@ -63,9 +63,9 @@
 <div class='signature'><code>set_raw_data_subscription(self, handle, enable)</code></div>
 <div class='docstring'>Enable/disable raw data subscription.</div>
 <div class='signature'><code>get_current_pose_se3(self, handle)</code></div>
-<div class='docstring'>Get current pose in SE3 format.</div>
+<div class='docstring'>Get current pose in SE3 format with timestamp.</div>
 <div class='signature'><code>get_current_pose(self, handle)</code></div>
-<div class='docstring'>Get current pose in Euler angle format.</div>
+<div class='docstring'>Get current pose in Euler angle format with timestamp.</div>
 <div class='signature'><code>get_device_basic_info(self, handle)</code></div>
 <div class='docstring'>Get device basic information.</div>
 <div class='signature'><code>peek_camera_preview_image(self, handle, timestamp_ns)</code></div>
@@ -86,8 +86,8 @@
 <div class='docstring'>Get current LIDAR 2D map preview.</div>
 <div class='signature'><code>get_global_mapping_info(self, handle)</code></div>
 <div class='docstring'>Get global mapping information.</div>
-<div class='signature'><code>access_map_data(self, handle)</code></div>
-<div class='docstring'>Access visual map data (map points and keyframes).</div>
+<div class='signature'><code>access_map_data(self, handle, map_ids, fetch_kf, fetch_mp, fetch_mapinfo, kf_fetch_flags, mp_fetch_flags)</code></div>
+<div class='docstring'>Access visual map data (map points and keyframes).<br><br>Args:<br>    handle: Session handle<br>    map_ids: Optional list/tuple of map IDs to fetch. If None, fetches only the active map.<br>            If empty list, fetches all maps.<br>    fetch_kf: Whether to fetch keyframes (default: True)<br>    fetch_mp: Whether to fetch map points (default: True)<br>    fetch_mapinfo: Whether to fetch map info (default: False)<br>    kf_fetch_flags: Keyframe fetch flags (default: None, uses FETCH_ALL)<br>    mp_fetch_flags: Map point fetch flags (default: None, uses FETCH_ALL)<br><br>Returns:<br>    Dict containing 'map_points', 'keyframes', and 'loop_closures' lists with full metadata</div>
 <div class='signature'><code>peek_recent_lidar_scan(self, handle, max_points, force_latest)</code></div>
 <div class='docstring'>Get the most recent LiDAR scan data.</div>
 <div class='signature'><code>start_lidar2dmap_preview(self, handle, options)</code></div>

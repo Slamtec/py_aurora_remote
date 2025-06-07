@@ -27,7 +27,7 @@ Responsible for:
 
 **get_current_pose**(self, use_se3)
 
-Get current device pose.
+Get current device pose with timestamp.
 
 Args:
     use_se3: If True, return SE3 format (position + quaternion),
@@ -35,7 +35,7 @@ Args:
             
 Returns:
     Tuple of (position, rotation, timestamp_ns)
-    - position: (x, y, z) tuple
+    - position: (x, y, z) tuple in meters
     - rotation: (qx, qy, qz, qw) if use_se3, (roll, pitch, yaw) otherwise
     - timestamp_ns: timestamp in nanoseconds
     
@@ -43,9 +43,13 @@ Raises:
     ConnectionError: If not connected to a device
     AuroraSDKError: If failed to get pose
 
-**get_camera_preview**(self)
+**get_camera_preview**(self, timestamp_ns, allow_nearest_frame)
 
 Get camera preview frames.
+
+Args:
+    timestamp_ns (int): Timestamp in nanoseconds (0 for latest frame)
+    allow_nearest_frame (bool): Allow nearest frame if exact timestamp not available
 
 Returns:
     Tuple of (left_frame, right_frame) ImageFrame objects
@@ -113,12 +117,27 @@ Raises:
     ConnectionError: If not connected to a device
     AuroraSDKError: If failed to get IMU data
 
-**get_map_data**(self)
+**get_map_data**(self, map_ids, fetch_kf, fetch_mp, fetch_mapinfo, kf_fetch_flags, mp_fetch_flags)
 
 Get visual map data including map points and keyframes.
 
+Args:
+    map_ids: Optional list/tuple of map IDs to fetch.
+            - None (default): fetches only the active map
+            - Empty list []: fetches all maps
+            - List of IDs: fetches specific maps
+    fetch_kf: Whether to fetch keyframes (default: True)
+    fetch_mp: Whether to fetch map points (default: True)
+    fetch_mapinfo: Whether to fetch map info (default: False)
+    kf_fetch_flags: Keyframe fetch flags (default: None, uses FETCH_ALL)
+    mp_fetch_flags: Map point fetch flags (default: None, uses FETCH_ALL)
+
 Returns:
-    dict: Dictionary containing 'map_points' and 'keyframes' lists
+    dict: Dictionary containing 'map_points', 'keyframes', 'loop_closures', and 'map_info'.
+          Each map point contains: {'position': (x,y,z), 'id': int, 'map_id': int, 'timestamp': float}
+          Each keyframe contains: {'position': (x,y,z), 'rotation': (qx,qy,qz,qw), 'id': int, 'map_id': int, 'timestamp': float, 'fixed': bool}
+          Loop closures are tuples: [(from_keyframe_id, to_keyframe_id), ...]
+          Map info is a dict keyed by map_id containing: {'id': int, 'point_count': int, 'keyframe_count': int, 'connection_count': int}
     
 Raises:
     ConnectionError: If not connected to a device

@@ -7,8 +7,10 @@ camera calibration, and transform calibration.
 
 import time
 from .c_bindings import get_c_bindings
-from .data_types import (DepthCameraFrame, 
-                        CameraCalibrationInfo, TransformCalibrationInfo, ImageFrame)
+from .data_types import (
+    CameraCalibrationInfo, TransformCalibrationInfo, ImageFrame,
+    DEPTHCAM_FRAME_TYPE_DEPTH_MAP, DEPTHCAM_FRAME_TYPE_POINT3D
+)
 from .exceptions import AuroraSDKError, ConnectionError, DataNotReadyError
 
 
@@ -91,17 +93,19 @@ class EnhancedImaging:
         except Exception:
             return False
     
-    def peek_depth_camera_frame(self, frame_type=0, timestamp_ns=0, allow_nearest_frame=True):
+    def peek_depth_camera_frame(self, frame_type=DEPTHCAM_FRAME_TYPE_DEPTH_MAP, timestamp_ns=0, allow_nearest_frame=True):
         """
         Get the latest depth camera frame from the device.
         
         Args:
-            frame_type (int): Type of depth frame (0: depth map, 1: point3d)
+            frame_type (int): Type of depth frame 
+                - DEPTHCAM_FRAME_TYPE_DEPTH_MAP (0): depth map
+                - DEPTHCAM_FRAME_TYPE_POINT3D (1): point3d
             timestamp_ns (int): Specific timestamp to retrieve (0 for latest)
             allow_nearest_frame (bool): Allow nearest frame if exact timestamp not available
             
         Returns:
-            DepthCameraFrame: Depth camera frame data with depth map and metadata
+            ImageFrame: Image frame with depth data (depth map or point3d)
             None: If no frame is available
             
         Raises:
@@ -117,7 +121,11 @@ class EnhancedImaging:
             )
             
             if frame_data:
-                return DepthCameraFrame.from_c_struct(frame_desc, frame_data)
+                # Use appropriate format based on frame type
+                if frame_type == DEPTHCAM_FRAME_TYPE_POINT3D:
+                    return ImageFrame.from_point3d_struct(frame_desc, frame_data)
+                else:  # DEPTHCAM_FRAME_TYPE_DEPTH_MAP
+                    return ImageFrame.from_depth_camera_struct(frame_desc, frame_data)
             return None
             
         except AuroraSDKError as e:
@@ -406,7 +414,7 @@ class EnhancedImaging:
         Get depth camera configuration information.
         
         Returns:
-            DepthCameraFrameInfo: Configuration information
+            DepthcamConfigInfo: Configuration information
             
         Raises:
             ConnectionError: If not connected to a device

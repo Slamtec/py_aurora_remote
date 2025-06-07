@@ -96,11 +96,11 @@ class MapRenderDemo:
         # Calculate map bounds from keyframes and map points
         all_points = []
         if keyframes:
-            all_points.extend([(kf[0], kf[1]) for kf in keyframes])
+            all_points.extend([(kf['position'][0], kf['position'][1]) for kf in keyframes])
         if map_points:
             # Sample map points to avoid performance issues with large datasets
             step = max(1, len(map_points) // 1000)  # Sample at most 1000 points for bounds
-            all_points.extend([(mp[0], mp[1]) for mp in map_points[::step]])
+            all_points.extend([(mp['position'][0], mp['position'][1]) for mp in map_points[::step]])
         if current_pose:
             all_points.append((current_pose[0], current_pose[1]))
             
@@ -162,7 +162,8 @@ class MapRenderDemo:
             points_to_draw = map_points[::step]
         
         for point in points_to_draw:
-            img_x, img_y = world_to_image(point[0], point[1])
+            x, y = point['position'][0], point['position'][1]
+            img_x, img_y = world_to_image(x, y)
             if 0 <= img_x < self.map_width and 0 <= img_y < self.map_height:
                 # Draw small square like C++ demo
                 for yy in range(max(0, img_y), min(img_y + 2, self.map_height)):
@@ -182,8 +183,8 @@ class MapRenderDemo:
                 prev_kf = keyframes[i-1]
                 curr_kf = keyframes[i]
                 
-                prev_x, prev_y = world_to_image(prev_kf[0], prev_kf[1])
-                curr_x, curr_y = world_to_image(curr_kf[0], curr_kf[1])
+                prev_x, prev_y = world_to_image(prev_kf['position'][0], prev_kf['position'][1])
+                curr_x, curr_y = world_to_image(curr_kf['position'][0], curr_kf['position'][1])
                 
                 # Draw trajectory line in red
                 if (0 <= prev_x < self.map_width and 0 <= prev_y < self.map_height and

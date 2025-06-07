@@ -28,19 +28,19 @@ This folder contains comprehensive Jupyter notebooks that provide step-by-step t
   - Map data management
 
 ### Advanced Features
-- **[04_enhanced_imaging.ipynb](04_enhanced_imaging.ipynb)** - AI-powered imaging
-  - Depth camera operations
-  - Semantic segmentation
-  - Point cloud generation from depth
+- **[04_enhanced_imaging.ipynb](04_enhanced_imaging.ipynb)** - AI-powered imaging with unified ImageFrame interface
+  - Depth camera operations using ImageFrame
+  - Semantic segmentation with timestamp correlation
+  - Point cloud generation from depth maps
   - Multi-modal sensor fusion
-  - Advanced computer vision
+  - Advanced computer vision with proper data handling
 
-- **[05_advanced_enhanced_imaging.ipynb](05_advanced_enhanced_imaging.ipynb)** - Advanced imaging techniques
-  - Dense point cloud processing
-  - Semantic analysis and visualization
-  - 3D reconstruction workflows
-  - Cross-modal data correlation
-  - Performance optimization
+- **[05_advanced_enhanced_imaging.ipynb](05_advanced_enhanced_imaging.ipynb)** - Advanced imaging techniques with enhanced correlation
+  - Dense point cloud processing from depth maps
+  - Semantic analysis and visualization with proper timestamp correlation
+  - 3D reconstruction workflows using unified ImageFrame interface
+  - Cross-modal data correlation with allow_nearest_frame support
+  - Performance optimization with selective data fetching
 
 - **[06_lidar_2d_mapping.ipynb](06_lidar_2d_mapping.ipynb)** - 2D LiDAR mapping and floor detection
   - Real-time LiDAR scan visualization

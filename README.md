@@ -14,16 +14,42 @@ This is a Python implementation of the SLAMTEC Aurora Remote SDK which is based 
 - **2D Grid Mapping**: LIDAR-based occupancy grid mapping with real-time preview
 
 ### SDK 2.0 Enhanced Features
-- **Semantic Segmentation**: Real-time scene understanding with multiple models
-- **Depth Camera**: Dense depth maps with rectified image correlation
+- **Semantic Segmentation**: Real-time scene understanding with multiple models and timestamp correlation
+- **Unified ImageFrame Interface**: Single interface supporting regular images, depth maps, and point clouds
+- **Depth Camera**: Dense depth maps with rectified image correlation and proper data conversion
 - **Floor Detection**: Automatic multi-floor detection and management
-- **Enhanced Imaging**: Advanced computer vision processing pipeline
+- **Enhanced Imaging**: Advanced computer vision processing pipeline with cross-modal alignment
 - **IMU Integration**: Inertial measurement unit data for robust tracking
+- **Timestamp-based Data Retrieval**: Precise temporal correlation between sensor modalities
 
 ### Python Ecosystem Integration
 - **NumPy/OpenCV**: Efficient image and point cloud processing
 - **Open3D**: Advanced 3D visualization and point cloud operations
 - **Scientific Computing**: Seamless integration with Python data science stack
+
+## Requirements
+
+The Aurora Python SDK has minimal core dependencies, with additional packages needed for demos and development:
+
+### Core Requirements
+- Python 3.7 or higher
+- NumPy >= 1.19.0
+
+### Requirements Files
+- **requirements.txt** - Minimal dependencies for SDK core functionality
+- **requirements-demo.txt** - Additional packages for running demos and Jupyter notebooks
+- **requirements-dev.txt** - Development tools for building packages and documentation
+
+```bash
+# Basic SDK usage
+pip install -r requirements.txt
+
+# Running demos and notebooks
+pip install -r requirements-demo.txt
+
+# Development and package building
+pip install -r requirements-dev.txt
+```
 
 ## Installation
 
@@ -78,8 +104,11 @@ Use the SDK directly from source code for development and customization:
 git clone --recursive https://github.com/Slamtec/py_aurora_remote.git
 cd py_aurora_remote
 
-# Install dependencies
-pip install -r python_bindings/requirements.txt
+# Install minimal dependencies for SDK
+pip install -r requirements.txt
+
+# For running demos and notebooks, also install:
+pip install -r requirements-demo.txt
 
 # Run examples directly from source (auto-discovery)
 python examples/simple_pose.py
@@ -167,6 +196,25 @@ Warning: Aurora SDK package not found, using source code from parent directory
 usage: simple_pose.py [-h] [connection_string]
 ```
 
+## Recent Improvements (SDK 2.0)
+
+### Enhanced ImageFrame Interface
+- **Unified Data Handling**: Single `ImageFrame` class now supports regular images, depth maps, and point clouds
+- **Depth Map Processing**: Direct conversion from depth data to numpy arrays and colorized visualizations
+- **Point Cloud Support**: Built-in methods for point3d data handling and Open3D integration
+
+### Timestamp-based Data Correlation
+- **Camera Preview**: `get_camera_preview()` now accepts `timestamp_ns` and `allow_nearest_frame` parameters
+- **Cross-modal Alignment**: Precise temporal correlation between depth, segmentation, and camera data
+- **Enhanced Imaging**: All enhanced imaging operations support timestamp-based retrieval
+
+### Improved Examples and Notebooks
+- **Updated Interface**: All examples now use the unified ImageFrame interface
+- **Better Error Handling**: Improved error reporting and graceful fallbacks
+- **Depth Map Conversion**: Examples demonstrate proper depth-to-point-cloud conversion
+- **Timestamp Correlation**: Semantic segmentation examples show proper camera preview correlation
+- **Named Constants**: Eliminated magic numbers with proper depth camera frame type constants
+
 ## Quick Start
 
 ### Basic Device Connection
@@ -225,9 +273,20 @@ sdk.controller.require_relocalization()
 sdk.lidar_2d_map_builder.start_lidar_2d_map_preview()
 preview_img = sdk.lidar_2d_map_builder.get_lidar_2d_map_preview()
 
-# Enhanced imaging operations
-sdk.enhanced_imaging.peek_depth_camera_frame()
-seg_frame = sdk.enhanced_imaging.peek_semantic_segmentation_frame()
+# Enhanced imaging operations (unified ImageFrame interface)
+depth_frame = sdk.enhanced_imaging.peek_depth_camera_frame(
+    frame_type=DEPTHCAM_FRAME_TYPE_DEPTH_MAP
+)  # Returns ImageFrame with depth map
+point_cloud_frame = sdk.enhanced_imaging.peek_depth_camera_frame(
+    frame_type=DEPTHCAM_FRAME_TYPE_POINT3D  
+)  # Returns ImageFrame with point3d data
+seg_frame = sdk.enhanced_imaging.peek_semantic_segmentation_frame()  # Returns ImageFrame
+
+# Timestamp-correlated camera preview
+if seg_frame:
+    left_img, right_img = sdk.data_provider.get_camera_preview(
+        seg_frame.timestamp_ns, allow_nearest_frame=False
+    )
 ```
 
 ## Interactive Tutorials
@@ -245,8 +304,8 @@ The SDK includes comprehensive **Jupyter notebook tutorials** that provide step-
 
 **Quick Start with Tutorials:**
 ```bash
-# Install Jupyter and required packages
-pip install jupyter matplotlib numpy open3d
+# Install demo and notebook requirements
+pip install -r requirements-demo.txt
 
 # Launch Jupyter in the notebooks directory
 cd notebooks/
@@ -288,17 +347,17 @@ The SDK also includes standalone example scripts demonstrating all features:
    ```
 
 ### Advanced SDK 2.0 Features
-6. **Semantic Segmentation** - Real-time scene understanding
+6. **Semantic Segmentation** - Real-time scene understanding with timestamp correlation
    ```bash
    python examples/semantic_segmentation.py [--device device_ip] [--headless]
    ```
 
-7. **Dense Point Cloud** - 3D visualization with Open3D
+7. **Dense Point Cloud** - 3D visualization with unified ImageFrame interface
    ```bash
    python examples/dense_point_cloud.py [--device device_ip] [--headless] [options]
    ```
 
-8. **Depth Camera Preview** - Enhanced imaging depth maps
+8. **Depth Camera Preview** - Enhanced imaging with proper depth map handling
    ```bash
    python examples/depthcam_preview.py [--device device_ip] [options]
    ```
@@ -334,35 +393,50 @@ The SDK also includes standalone example scripts demonstrating all features:
     python examples/vslam_map_saveload.py [device_ip]
     ```
 
-15. **2D LIDAR Map Render** - Occupancy grid mapping
+15. **Selective Map Data Fetch** - Optimized map data retrieval
+    ```bash
+    python examples/selective_map_data_fetch.py [device_ip] [--fetch-kf] [--fetch-mp] [--fetch-mapinfo]
+    ```
+
+16. **2D LIDAR Map Render** - Occupancy grid mapping
     ```bash
     python examples/lidar_2dmap_render.py [device_ip]
     ```
 
-16. **2D LIDAR Map Save** - Save 2D map to file
+17. **2D LIDAR Map Save** - Save 2D map to file
     ```bash
     python examples/lidar_2dmap_save.py [device_ip]
     ```
 
-17. **Relocalization** - Device relocalization demo
+18. **Relocalization** - Device relocalization demo
     ```bash
     python examples/relocalization.py [device_ip]
     ```
 
-18. **Calibration Exporter** - Camera and transform calibration
+19. **Calibration Exporter** - Camera and transform calibration
     ```bash
     python examples/calibration_exporter.py [--device device_ip] [--output file] [options]
     ```
 
 ### Utility and Testing
-19. **Device Info Monitor** - Device status and capabilities
+20. **Device Info Monitor** - Device status and capabilities
     ```bash
     python examples/device_info_monitor.py [--device device_ip] [options]
     ```
 
-20. **Context Manager Demo** - Automatic resource cleanup
+21. **Context Manager Demo** - Automatic resource cleanup
     ```bash
     python examples/context_manager_demo.py [device_ip]
+    ```
+
+22. **IMU Fetcher** - IMU data acquisition
+    ```bash
+    python examples/imu_fetcher.py [device_ip]
+    ```
+
+23. **Depth Camera Preview** - Depth sensor visualization
+    ```bash
+    python examples/depthcam_preview.py [--device device_ip] [--headless]
     ```
 
 
@@ -440,8 +514,8 @@ class DataProvider:
     # Pose data (returns position, rotation, timestamp)
     def get_current_pose(use_se3: bool = True) -> Tuple[Tuple[float, float, float], Tuple[float, float, float, float], int]
     
-    # Camera data
-    def get_camera_preview() -> Tuple[ImageFrame, ImageFrame]
+    # Camera data with timestamp correlation support
+    def get_camera_preview(timestamp_ns: int = 0, allow_nearest_frame: bool = True) -> Tuple[ImageFrame, ImageFrame]
     def get_tracking_frame() -> TrackingFrame
     
     # LiDAR data
@@ -455,38 +529,112 @@ class DataProvider:
     def get_camera_calibration() -> CameraCalibrationInfo
     def get_transform_calibration() -> TransformCalibrationInfo
     
-    # Map data
+    # Map data with enhanced metadata (SDK 2.0)
     def get_global_mapping_info() -> Dict
-    def get_map_data() -> Dict
+    def get_map_data(map_ids: Optional[List[int]] = None, 
+                     fetch_kf: bool = True, 
+                     fetch_mp: bool = True, 
+                     fetch_mapinfo: bool = False,
+                     kf_fetch_flags: Optional[int] = None,
+                     mp_fetch_flags: Optional[int] = None) -> Dict
+```
+
+### Enhanced VSLAM Map Data (SDK 2.0)
+
+The `get_map_data()` method returns comprehensive VSLAM mapping information including map points, keyframes, and loop closures with full metadata. **New in v2.0.0**: Selective data fetching for optimized performance.
+
+```python
+# Get map data from active map (default)
+map_data = sdk.data_provider.get_map_data()
+
+# Get map data from all maps
+map_data = sdk.data_provider.get_map_data(map_ids=[])
+
+# Get map data from specific maps
+map_data = sdk.data_provider.get_map_data(map_ids=[1, 2, 3])
+
+# Selective data fetching (new in v2.0.0) - fetch only what you need
+# Fetch only keyframes (trajectory data)
+map_data = sdk.data_provider.get_map_data(fetch_kf=True, fetch_mp=False, fetch_mapinfo=False)
+
+# Fetch only map points (3D point cloud)
+map_data = sdk.data_provider.get_map_data(fetch_kf=False, fetch_mp=True, fetch_mapinfo=False)
+
+# Fetch only map metadata (no actual data, very fast)
+map_data = sdk.data_provider.get_map_data(fetch_kf=False, fetch_mp=False, fetch_mapinfo=True)
+
+# Map data structure
+{
+    'map_points': [
+        {
+            'position': (x, y, z),      # 3D position coordinates
+            'id': int,                  # Unique map point ID
+            'map_id': int,             # Map ID this point belongs to
+            'timestamp': float         # Creation timestamp
+        },
+        # ... more map points
+    ],
+    'keyframes': [
+        {
+            'position': (x, y, z),      # 3D position coordinates  
+            'rotation': (qx, qy, qz, qw), # Quaternion rotation
+            'id': int,                  # Unique keyframe ID
+            'map_id': int,             # Map ID this keyframe belongs to
+            'timestamp': float,        # Creation timestamp
+            'fixed': bool              # True if keyframe is fixed (not optimizable)
+        },
+        # ... more keyframes
+    ],
+    'loop_closures': [
+        (from_keyframe_id, to_keyframe_id),  # Loop closure connections
+        # ... more loop closures
+    ],
+    'map_info': {               # Available when fetch_mapinfo=True
+        0: {                    # Map ID as key
+            'id': 0,
+            'point_count': 17028,
+            'keyframe_count': 459,
+            'map_flags': 0,
+            'keyframe_id_start': 0,
+            'keyframe_id_end': 701,
+            'map_point_id_start': 0,
+            'map_point_id_end': 102789
+        },
+        # ... more maps
+    }
+}
 ```
 
 #### **EnhancedImaging**
-SDK 2.0 advanced imaging capabilities.
+SDK 2.0 advanced imaging capabilities with unified ImageFrame interface.
 
 ```python
 class EnhancedImaging:
-    # Depth camera
-    def peek_depth_camera_frame() -> DepthCameraFrame
-    def peek_depth_camera_related_rectified_image(timestamp: int) -> ImageFrame
+    # Depth camera (returns unified ImageFrame)
+    def peek_depth_camera_frame(frame_type: int = DEPTHCAM_FRAME_TYPE_DEPTH_MAP, 
+                                timestamp_ns: int = 0, 
+                                allow_nearest_frame: bool = True) -> ImageFrame
+    def peek_depth_camera_related_rectified_image(timestamp_ns: int) -> ImageFrame
     def is_depth_camera_ready() -> bool
     def wait_depth_camera_next_frame(timeout_ms: int) -> bool
     
-    # Semantic segmentation  
-    def peek_semantic_segmentation_frame() -> ImageFrame
+    # Semantic segmentation (returns unified ImageFrame)
+    def peek_semantic_segmentation_frame(timestamp_ns: int = 0, 
+                                        allow_nearest_frame: bool = True) -> ImageFrame
     def get_semantic_segmentation_config() -> SemanticSegmentationConfig
     def get_semantic_segmentation_labels() -> SemanticSegmentationLabelInfo
     def get_semantic_segmentation_label_set_name() -> str
     def is_semantic_segmentation_ready() -> bool
     def wait_semantic_segmentation_next_frame(timeout_ms: int) -> bool
     
-    # Alignment operations
+    # Cross-modal alignment operations
     def calc_depth_camera_aligned_segmentation_map(seg_frame: ImageFrame) -> Tuple[bytes, int, int]
 ```
 
 ### Data Types
 
 #### **ImageFrame**
-Camera image data container with metadata.
+Unified image data container supporting regular images, depth maps, and enhanced imaging data.
 
 ```python
 class ImageFrame:
@@ -497,8 +645,39 @@ class ImageFrame:
     def data(self) -> bytes
     def timestamp_ns(self) -> int
     
-    def to_opencv(self) -> numpy.ndarray
-    def to_pil(self) -> PIL.Image.Image
+    # Image conversion methods
+    def to_opencv_image(self) -> numpy.ndarray
+    def has_image_data(self) -> bool
+    
+    # Depth data support (SDK 2.0)
+    def is_depth_frame(self) -> bool
+    def to_numpy_depth_map(self) -> numpy.ndarray
+    def to_colorized_depth_map(self, colormap=None) -> numpy.ndarray
+    
+    # Point cloud support (SDK 2.0)
+    def is_point3d_frame(self) -> bool
+    def to_point3d_array(self) -> numpy.ndarray
+    def to_point_cloud_data(self) -> Tuple[numpy.ndarray, numpy.ndarray]
+```
+
+#### **Depth Camera Frame Type Constants**
+Constants for specifying depth camera frame format.
+
+```python
+# Available frame types for peek_depth_camera_frame()
+DEPTHCAM_FRAME_TYPE_DEPTH_MAP = 0    # Float32 depth map data
+DEPTHCAM_FRAME_TYPE_POINT3D = 1      # 3D point cloud data (x,y,z)
+
+# Usage example
+from slamtec_aurora_sdk import DEPTHCAM_FRAME_TYPE_DEPTH_MAP, DEPTHCAM_FRAME_TYPE_POINT3D
+
+# Get depth map
+depth_frame = sdk.enhanced_imaging.peek_depth_camera_frame(DEPTHCAM_FRAME_TYPE_DEPTH_MAP)
+depth_map = depth_frame.to_numpy_depth_map()
+
+# Get point cloud
+point_frame = sdk.enhanced_imaging.peek_depth_camera_frame(DEPTHCAM_FRAME_TYPE_POINT3D)
+points_xyz = point_frame.to_point3d_array()
 ```
 
 #### **IMUData**
@@ -589,8 +768,11 @@ with AuroraSDK() as sdk:  # Session created automatically
 ### Enhanced Imaging Pipeline
 
 ```python
-# Semantic segmentation with depth alignment
-from slamtec_aurora_sdk import ENHANCED_IMAGE_TYPE_DEPTH, ENHANCED_IMAGE_TYPE_SEMANTIC_SEGMENTATION
+# Semantic segmentation with depth alignment using unified ImageFrame interface
+from slamtec_aurora_sdk import (
+    ENHANCED_IMAGE_TYPE_DEPTH, ENHANCED_IMAGE_TYPE_SEMANTIC_SEGMENTATION,
+    DEPTHCAM_FRAME_TYPE_DEPTH_MAP, DEPTHCAM_FRAME_TYPE_POINT3D
+)
 
 sdk.controller.set_enhanced_imaging_subscription(ENHANCED_IMAGE_TYPE_DEPTH, True)
 sdk.controller.set_enhanced_imaging_subscription(ENHANCED_IMAGE_TYPE_SEMANTIC_SEGMENTATION, True)
@@ -599,10 +781,21 @@ while True:
     try:
         # Wait for semantic segmentation frame
         if sdk.enhanced_imaging.wait_semantic_segmentation_next_frame(1000):
-            # Get semantic segmentation
+            # Get semantic segmentation frame (unified ImageFrame)
             seg_frame = sdk.enhanced_imaging.peek_semantic_segmentation_frame()
             
             if seg_frame:
+                # Get timestamp-correlated camera preview for overlay
+                left_img, right_img = sdk.data_provider.get_camera_preview(
+                    seg_frame.timestamp_ns, allow_nearest_frame=False
+                )
+                
+                # Get depth frame using proper constants
+                depth_frame = sdk.enhanced_imaging.peek_depth_camera_frame(
+                    frame_type=DEPTHCAM_FRAME_TYPE_DEPTH_MAP,
+                    timestamp_ns=seg_frame.timestamp_ns
+                )
+                
                 # Get depth-aligned version
                 aligned_data, width, height = sdk.enhanced_imaging.calc_depth_camera_aligned_segmentation_map(seg_frame)
                 
