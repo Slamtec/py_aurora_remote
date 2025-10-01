@@ -22,6 +22,7 @@ from .data_provider import DataProvider
 from .map_manager import MapManager
 from .lidar_2d_map_builder import LIDAR2DMapBuilder
 from .enhanced_imaging import EnhancedImaging
+from .data_recorder import DataRecorder
 
 # Data types and exceptions
 from .data_types import *
@@ -33,14 +34,15 @@ __author__ = "SLAMTEC Co., Ltd."
 __all__ = [
     # Main SDK class
     'AuroraSDK',           # Component-based SDK with convenience methods
-    
+
     # Components (for advanced usage)
     'Controller',
-    'DataProvider', 
+    'DataProvider',
     'MapManager',
     'LIDAR2DMapBuilder',
     'EnhancedImaging',
-    
+    'DataRecorder',
+
     # Exceptions
     'AuroraSDKError',
     'ConnectionError',

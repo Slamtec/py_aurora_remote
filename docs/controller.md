@@ -217,6 +217,83 @@ Raises:
     ConnectionError: If not connected to a device
     AuroraSDKError: If cancellation operation fails
 
+**require_local_relocalization**(self, center_pose, search_radius, timeout_ms)
+
+Require the device to perform local relocalization within a specified area.
+
+This method is more efficient than global relocalization as it searches
+only within a limited area around the specified center pose.
+
+Args:
+    center_pose: Center pose for the search area. Can be:
+        - PoseSE3 object
+        - Tuple of (position, quaternion) where:
+          * position is (x, y, z)
+          * quaternion is (qx, qy, qz, qw)
+    search_radius (float): Search radius in meters
+    timeout_ms (int): Timeout in milliseconds (default: 5000)
+
+Returns:
+    bool: True if relocalization was successful, False otherwise
+
+Raises:
+    ConnectionError: If not connected to a device
+    AuroraSDKError: If local relocalization operation fails
+
+Example:
+    center = ((1.0, 2.0, 0.0), (0.0, 0.0, 0.0, 1.0))
+    sdk.controller.require_local_relocalization(center, search_radius=5.0)
+
+**require_local_map_merge**(self, center_pose, search_radius, timeout_ms)
+
+Require the device to perform local map merge within a specified area.
+
+This merges map segments within a specified area around the center pose.
+
+Args:
+    center_pose: Center pose for the merge area. Can be:
+        - PoseSE3 object
+        - Tuple of (position, quaternion) where:
+          * position is (x, y, z)
+          * quaternion is (qx, qy, qz, qw)
+    search_radius (float): Search radius in meters
+    timeout_ms (int): Timeout in milliseconds (default: 5000)
+
+Returns:
+    bool: True if map merge was successful, False otherwise
+
+Raises:
+    ConnectionError: If not connected to a device
+    AuroraSDKError: If local map merge operation fails
+
+Example:
+    center = ((1.0, 2.0, 0.0), (0.0, 0.0, 0.0, 1.0))
+    sdk.controller.require_local_map_merge(center, search_radius=5.0)
+
+**get_last_relocalization_status**(self, timeout_ms)
+
+Get the last relocalization status from the device.
+
+Args:
+    timeout_ms (int): Timeout in milliseconds (default: 1000)
+
+Returns:
+    int: Relocalization status value:
+        - DEVICE_RELOCALIZATION_STATUS_NONE (0)
+        - DEVICE_RELOCALIZATION_STATUS_IN_PROGRESS (1)
+        - DEVICE_RELOCALIZATION_STATUS_SUCCEED (2)
+        - DEVICE_RELOCALIZATION_STATUS_FAILED (3)
+
+Raises:
+    ConnectionError: If not connected to a device
+    AuroraSDKError: If failed to query relocalization status
+
+Example:
+    from slamtec_aurora_sdk.data_types import DEVICE_RELOCALIZATION_STATUS_SUCCEED
+    status = sdk.controller.get_last_relocalization_status()
+    if status == DEVICE_RELOCALIZATION_STATUS_SUCCEED:
+        print("Relocalization succeeded!")
+
 **require_map_reset**(self, timeout_ms)
 
 Require the device to reset its map.
@@ -313,6 +390,46 @@ Returns:
 Raises:
     ConnectionError: If not connected to a device
     AuroraSDKError: If command fails
+
+**set_keyframe_fetch_flags**(self, flags)
+
+Set keyframe fetch flags to control what data is fetched.
+
+Args:
+    flags (int): Fetch flags (e.g. SLAMTEC_AURORA_SDK_KEYFRAME_FETCH_FLAG_RELATED_MP)
+    
+Raises:
+    ConnectionError: If not connected to a device
+
+**get_keyframe_fetch_flags**(self)
+
+Get current keyframe fetch flags.
+
+Returns:
+    int: Current fetch flags
+    
+Raises:
+    ConnectionError: If not connected to a device
+
+**set_map_point_fetch_flags**(self, flags)
+
+Set map point fetch flags to control what data is fetched.
+
+Args:
+    flags (int): Fetch flags
+    
+Raises:
+    ConnectionError: If not connected to a device
+
+**get_map_point_fetch_flags**(self)
+
+Get current map point fetch flags.
+
+Returns:
+    int: Current fetch flags
+    
+Raises:
+    ConnectionError: If not connected to a device
 
 #### Special Methods
 

@@ -200,6 +200,21 @@ Raises:
     ConnectionError: If not connected to a device
     AuroraSDKError: If failed to retrieve configuration
 
+**set_depth_camera_postfiltering**(self, enable, flags)
+
+Enable or disable depth camera post-filtering to refine depth estimation.
+
+Post-filtering is enabled by default and helps improve depth map quality
+by applying refinement algorithms to the raw depth data.
+
+Args:
+    enable (bool): True to enable post-filtering, False to disable
+    flags (int): Reserved for future use, should be 0
+    
+Raises:
+    ConnectionError: If not connected to a device
+    AuroraSDKError: If failed to set post-filtering
+
 #### Special Methods
 
 **__init__**(self, controller, c_bindings)

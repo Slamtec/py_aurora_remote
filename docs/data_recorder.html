@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>data_recorder - Aurora Python SDK</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px; }
+        h3 { color: #2980b9; }
+        h4 { color: #7f8c8d; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Consolas', monospace; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        .nav { background: #34495e; color: white; padding: 10px 0; margin: -40px -40px 40px -40px; border-radius: 8px 8px 0 0; }
+        .nav ul { list-style: none; padding: 0 20px; margin: 0; }
+        .nav li { display: inline-block; margin-right: 20px; }
+        .nav a { color: #3498db; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+        .signature { background: #e8f4fd; padding: 10px; border-left: 4px solid #3498db; margin: 10px 0; }
+        .docstring { margin: 15px 0; }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #3498db; color: white; padding: 10px; border-radius: 50%; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_recorder.html">data_recorder</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+            </ul>
+        </nav>
+        <h1>data_recorder</h1>
+<div class='docstring'>Aurora SDK DataRecorder component.<br><br>Handles sensor data recording for dataset generation and debugging.</div>
+<h2>Classes</h2>
+<h3>DataRecorder</h3>
+<div class='docstring'>DataRecorder component for Aurora SDK.<br><br>Handles recording of sensor data from Aurora device to disk:<br>- RAW_DATASET: Record raw sensor data for offline processing<br>- COLMAP_DATASET: Record COLMAP-compatible dataset for 3D reconstruction<br><br>The recorder supports extensive configuration through options system:<br>- Image quality settings (raw vs preview)<br>- Stereo recording options<br>- Image undistortion settings<br>- Map point filtering<br>- Output format options<br><br>Typical usage:<br>    # Configure options before starting<br>    recorder.set_option_string(DATARECORDER_TYPE_COLMAP_DATASET, "image_quality", "raw")<br>    recorder.set_option_bool(DATARECORDER_TYPE_COLMAP_DATASET, "stereo_recording", True)<br><br>    # Start recording<br>    recorder.start_recording(DATARECORDER_TYPE_COLMAP_DATASET, "/path/to/output")<br><br>    # Query status<br>    if recorder.is_recording(DATARECORDER_TYPE_COLMAP_DATASET):<br>        kf_count = recorder.query_status_int(DATARECORDER_TYPE_COLMAP_DATASET, "kf_count")<br>        print(f"Recorded {kf_count} keyframes")<br><br>    # Stop recording<br>    recorder.stop_recording(DATARECORDER_TYPE_COLMAP_DATASET)</div>
+<h4>Methods</h4>
+<div class='signature'><code>start_recording(self, recorder_type, target_folder)</code></div>
+<div class='docstring'>Start recording sensor data to specified folder.<br><br>Before calling this, you should:<br>1. Be connected to a device<br>2. Enable background map data syncing (for COLMAP recording)<br>3. Configure recorder options if needed<br><br>Args:<br>    recorder_type (int): Type of recorder (DATARECORDER_TYPE_RAW_DATASET or<br>                       DATARECORDER_TYPE_COLMAP_DATASET)<br>    target_folder (str): Folder path where recorded data will be stored<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to start recording<br><br>Example:<br>    sdk.controller.enable_map_data_syncing(True)<br>    sdk.data_recorder.set_option_string(DATARECORDER_TYPE_COLMAP_DATASET,<br>                                       "image_quality", "raw")<br>    sdk.data_recorder.start_recording(DATARECORDER_TYPE_COLMAP_DATASET,<br>                                     "/data/recording_001")</div>
+<div class='signature'><code>stop_recording(self, recorder_type)</code></div>
+<div class='docstring'>Stop an active recording session.<br><br>Args:<br>    recorder_type (int): Type of recorder to stop<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to stop recording<br><br>Example:<br>    sdk.data_recorder.stop_recording(DATARECORDER_TYPE_COLMAP_DATASET)</div>
+<div class='signature'><code>is_recording(self, recorder_type)</code></div>
+<div class='docstring'>Check if recorder is currently active.<br><br>Args:<br>    recorder_type (int): Type of recorder to check<br><br>Returns:<br>    bool: True if currently recording, False otherwise<br><br>Raises:<br>    ConnectionError: If not connected to a device<br><br>Example:<br>    if sdk.data_recorder.is_recording(DATARECORDER_TYPE_COLMAP_DATASET):<br>        print("Recording in progress...")</div>
+<div class='signature'><code>set_option_string(self, recorder_type, key, value)</code></div>
+<div class='docstring'>Set a string option for recorder configuration.<br><br>Common string options:<br>- "image_quality": "raw" or "preview" (default: "raw")<br>- "file_format": "binary", "text", or "all" (default: "binary", COLMAP only)<br><br>Args:<br>    recorder_type (int): Type of recorder<br>    key (str): Option key name<br>    value (str): String value to set<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to set option<br><br>Example:<br>    sdk.data_recorder.set_option_string(DATARECORDER_TYPE_COLMAP_DATASET,<br>                                       "image_quality", "raw")</div>
+<div class='signature'><code>set_option_int(self, recorder_type, key, value)</code></div>
+<div class='docstring'>Set an integer option for recorder configuration.<br><br>Args:<br>    recorder_type (int): Type of recorder<br>    key (str): Option key name<br>    value (int): Integer value to set<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to set option<br><br>Example:<br>    sdk.data_recorder.set_option_int(DATARECORDER_TYPE_RAW_DATASET,<br>                                   "frame_skip", 2)</div>
+<div class='signature'><code>set_option_float(self, recorder_type, key, value)</code></div>
+<div class='docstring'>Set a float option for recorder configuration.<br><br>Args:<br>    recorder_type (int): Type of recorder<br>    key (str): Option key name<br>    value (float): Float value to set<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to set option<br><br>Example:<br>    sdk.data_recorder.set_option_float(DATARECORDER_TYPE_RAW_DATASET,<br>                                      "target_fps", 30.0)</div>
+<div class='signature'><code>set_option_bool(self, recorder_type, key, value)</code></div>
+<div class='docstring'>Set a boolean option for recorder configuration.<br><br>Common boolean options for COLMAP recorder:<br>- "stereo_recording": Record both left and right images (default: False)<br>- "undistort": Apply undistortion to images (default: True)<br>- "undistort_force_focal_center": Force focal center to image center (default: True)<br>- "keep_unused_map_points": Keep unused map points in output (default: False)<br>- "multi_mapper": Store data in sparse/n/ folder (default: False)<br><br>Args:<br>    recorder_type (int): Type of recorder<br>    key (str): Option key name<br>    value (bool): Boolean value to set<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to set option<br><br>Example:<br>    sdk.data_recorder.set_option_bool(DATARECORDER_TYPE_COLMAP_DATASET,<br>                                     "stereo_recording", True)<br>    sdk.data_recorder.set_option_bool(DATARECORDER_TYPE_COLMAP_DATASET,<br>                                     "undistort", True)</div>
+<div class='signature'><code>reset_options(self, recorder_type)</code></div>
+<div class='docstring'>Reset all recorder options to defaults.<br><br>Args:<br>    recorder_type (int): Type of recorder to reset<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to reset options<br><br>Example:<br>    sdk.data_recorder.reset_options(DATARECORDER_TYPE_COLMAP_DATASET)</div>
+<div class='signature'><code>query_status_int(self, recorder_type, key, use_cached)</code></div>
+<div class='docstring'>Query an integer status value from recorder.<br><br>Common status keys:<br>- "kf_count": Number of keyframes recorded<br>- "frame_count": Number of frames recorded<br><br>Args:<br>    recorder_type (int): Type of recorder<br>    key (str): Status key to query<br>    use_cached (bool): Use cached value instead of fresh query<br><br>Returns:<br>    int: Status value<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to query status<br><br>Example:<br>    kf_count = sdk.data_recorder.query_status_int(<br>        DATARECORDER_TYPE_COLMAP_DATASET, "kf_count")<br>    print(f"Recorded {kf_count} keyframes")</div>
+<div class='signature'><code>query_status_float(self, recorder_type, key, use_cached)</code></div>
+<div class='docstring'>Query a float status value from recorder.<br><br>Args:<br>    recorder_type (int): Type of recorder<br>    key (str): Status key to query<br>    use_cached (bool): Use cached value instead of fresh query<br><br>Returns:<br>    float: Status value<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If failed to query status<br><br>Example:<br>    progress = sdk.data_recorder.query_status_float(<br>        DATARECORDER_TYPE_COLMAP_DATASET, "progress")<br>    print(f"Progress: {progress:.1f}%")</div>
+        <a href="#" class="back-to-top">↑</a>
+    </div>
+</body>
+</html>

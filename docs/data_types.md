@@ -701,7 +701,7 @@ Transform calibration info structure (slamtec_aurora_sdk_transform_calibration_t
 
 **Inherits from:** ctypes.Structure
 
-Semantic segmentation configuration structure.
+Semantic segmentation configuration structure (slamtec_aurora_sdk_semantic_segmentation_config_info_t).
 
 ### SemanticSegmentationLabelName
 
@@ -754,6 +754,13 @@ IMU information structure (slamtec_aurora_sdk_imu_info_t).
 - **ENHANCED_IMAGE_TYPE_SEMANTIC_SEGMENTATION** = `2`
 - **DEPTHCAM_FRAME_TYPE_DEPTH_MAP** = `0`
 - **DEPTHCAM_FRAME_TYPE_POINT3D** = `1`
+- **DATARECORDER_TYPE_NONE** = `0`
+- **DATARECORDER_TYPE_RAW_DATASET** = `1`
+- **DATARECORDER_TYPE_COLMAP_DATASET** = `2`
+- **DEVICE_RELOCALIZATION_STATUS_NONE** = `0`
+- **DEVICE_RELOCALIZATION_STATUS_IN_PROGRESS** = `1`
+- **DEVICE_RELOCALIZATION_STATUS_SUCCEED** = `2`
+- **DEVICE_RELOCALIZATION_STATUS_FAILED** = `3`
 - **SLAMTEC_AURORA_SDK_HW_FEATURE_BIT_LIDAR** = `<complex_value>`
 - **SLAMTEC_AURORA_SDK_HW_FEATURE_BIT_IMU** = `<complex_value>`
 - **SLAMTEC_AURORA_SDK_HW_FEATURE_BIT_STEREO_CAMERA** = `<complex_value>`
@@ -778,6 +785,9 @@ IMU information structure (slamtec_aurora_sdk_imu_info_t).
 - **SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_ABORTED** = `<complex_value>`
 - **SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_REJECTED** = `<complex_value>`
 - **SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_TIMEOUT** = `<complex_value>`
+- **SLAMTEC_AURORA_SDK_KEYFRAME_FETCH_FLAG_NONE** = `0`
+- **SLAMTEC_AURORA_SDK_KEYFRAME_FETCH_FLAG_RELATED_MP** = `<complex_value>`
+- **SLAMTEC_AURORA_SDK_MAP_POINT_FETCH_FLAG_NONE** = `0`
 - **NUMPY_AVAILABLE** = `True`
 - **FORMAT_DEPTH_FLOAT32** = `100`
 - **FORMAT_POINT3D_FLOAT32** = `101`

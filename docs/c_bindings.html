@@ -29,7 +29,7 @@
         <nav class="nav">
             <ul>
                 <li><a href="index.html">Home</a></li>
-                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_recorder.html">data_recorder</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
             </ul>
         </nav>
         <h1>c_bindings</h1>
@@ -68,7 +68,7 @@
 <div class='docstring'>Get current pose in Euler angle format with timestamp.</div>
 <div class='signature'><code>get_device_basic_info(self, handle)</code></div>
 <div class='docstring'>Get device basic information.</div>
-<div class='signature'><code>peek_camera_preview_image(self, handle, timestamp_ns)</code></div>
+<div class='signature'><code>peek_camera_preview_image(self, handle, timestamp_ns, allow_nearest_frame)</code></div>
 <div class='docstring'>Get camera preview image with actual pixel data.</div>
 <div class='signature'><code>peek_tracking_data(self, handle)</code></div>
 <div class='docstring'>Get tracking frame data with keypoints.</div>
@@ -196,13 +196,23 @@
 <div class='docstring'>Force global map optimization.</div>
 <div class='signature'><code>send_custom_command(self, handle, command_id, data, timeout_ms)</code></div>
 <div class='docstring'>Send custom command - CORRECTED: proper parameter order and types.</div>
+<div class='signature'><code>set_keyframe_fetch_flags(self, handle, flags)</code></div>
+<div class='docstring'>Set keyframe fetch flags.</div>
+<div class='signature'><code>get_keyframe_fetch_flags(self, handle)</code></div>
+<div class='docstring'>Get current keyframe fetch flags.</div>
+<div class='signature'><code>set_map_point_fetch_flags(self, handle, flags)</code></div>
+<div class='docstring'>Set map point fetch flags.</div>
+<div class='signature'><code>get_map_point_fetch_flags(self, handle)</code></div>
+<div class='docstring'>Get current map point fetch flags.</div>
+<div class='signature'><code>depthcam_set_postfiltering(self, handle, enable, flags)</code></div>
+<div class='docstring'>Enable/disable depth camera post-filtering.</div>
 <h2>Functions</h2>
 <div class='signature'><code>load_aurora_sdk_library()</code></div>
 <div class='docstring'>Load the Aurora SDK dynamic library based on platform.</div>
 <div class='signature'><code>get_c_bindings()</code></div>
 <div class='docstring'>Get global C bindings instance.</div>
 <div class='signature'><code>map_point_callback(user_data, map_point_ptr)</code></div>
-<div class='signature'><code>keyframe_callback(user_data, keyframe_ptr, looped_ids, connected_ids)</code></div>
+<div class='signature'><code>keyframe_callback(user_data, keyframe_ptr, looped_ids, connected_ids, related_mp_ids)</code></div>
 <div class='signature'><code>map_desc_callback(user_data, map_desc_ptr)</code></div>
         <a href="#" class="back-to-top">↑</a>
     </div>

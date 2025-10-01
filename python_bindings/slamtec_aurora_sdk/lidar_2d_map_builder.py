@@ -73,20 +73,76 @@ class LIDAR2DMapBuilder:
     def stop_lidar_2d_map_preview(self):
         """
         Stop LIDAR 2D map preview generation.
-        
+
         Stops the real-time 2D map generation process.
-        
+
         Raises:
             ConnectionError: If not connected to a device
             AuroraSDKError: If failed to stop 2D map preview
         """
         self._ensure_connected()
-        
+
         try:
             self._c_bindings.stop_lidar2d_preview_map(self._controller.session_handle)
         except Exception as e:
             raise AuroraSDKError(f"Failed to stop LIDAR 2D map preview: {e}")
-    
+
+    def get_preview_map_generation_options(self):
+        """
+        Get the current generation options of the LIDAR 2D preview map.
+
+        This returns the actual options being used for map generation,
+        which may differ from the requested options (e.g., when auto
+        floor detection is enabled and adjusts height ranges).
+
+        Returns:
+            dict: Current map generation options containing:
+                - resolution (float): Map resolution in meters per pixel
+                - map_canvas_width (float): Canvas width in meters
+                - map_canvas_height (float): Canvas height in meters
+                - active_map_only (bool): Whether generating only active map
+                - height_range_specified (bool): Whether height range is specified
+                - min_height (float): Minimum height to include (if specified)
+                - max_height (float): Maximum height to include (if specified)
+
+        Raises:
+            ConnectionError: If not connected to a device
+            AuroraSDKError: If failed to get generation options
+
+        Example:
+            options = sdk.lidar_2d_map_builder.get_preview_map_generation_options()
+            print(f"Current resolution: {options['resolution']}m")
+            print(f"Height range: {options['min_height']} - {options['max_height']}m")
+        """
+        self._ensure_connected()
+
+        try:
+            from .data_types import ERRORCODE_OK, GridMapGenerationOptions
+            import ctypes
+
+            options_out = GridMapGenerationOptions()
+
+            error_code = self._c_bindings.lib.slamtec_aurora_sdk_lidar2dmap_previewmap_get_generation_options(
+                self._controller.session_handle,
+                ctypes.byref(options_out)
+            )
+
+            if error_code != ERRORCODE_OK:
+                raise AuroraSDKError("Failed to get generation options (error code: {})".format(error_code))
+
+            return {
+                'resolution': options_out.resolution,
+                'map_canvas_width': options_out.map_canvas_width,
+                'map_canvas_height': options_out.map_canvas_height,
+                'active_map_only': bool(options_out.active_map_only),
+                'height_range_specified': bool(options_out.height_range_specified),
+                'min_height': options_out.min_height,
+                'max_height': options_out.max_height
+            }
+
+        except Exception as e:
+            raise AuroraSDKError("Failed to get preview map generation options: {}".format(e))
+
     def get_lidar_2d_map_preview(self):
         """
         Get current LIDAR 2D map preview image.

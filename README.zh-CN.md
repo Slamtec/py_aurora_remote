@@ -21,6 +21,7 @@
 - **增强成像**：具有跨模态对齐的先进计算机视觉处理管道
 - **IMU集成**：惯性测量单元数据用于鲁棒跟踪
 - **基于时间戳的数据检索**：传感器模态之间的精确时间关联
+- **数据记录器**：以RAW格式或COLMAP兼容数据集记录传感器数据以供离线处理
 
 ### Python生态系统集成
 - **NumPy/OpenCV**：高效的图像和点云处理
@@ -409,6 +410,11 @@ SDK包含展示所有功能的全面示例：
     python examples/depthcam_preview.py [--device device_ip] [--headless]
     ```
 
+24. **COLMAP数据集记录器** - 记录COLMAP兼容数据集以供离线处理
+    ```bash
+    python examples/colmap_recorder.py --output OUTPUT_DIR [--device device_ip] [options]
+    ```
+
 ## 架构
 
 ### 基于组件的设计
@@ -422,7 +428,8 @@ AuroraSDK
 ├── MapManager          # VSLAM地图操作
 ├── LIDAR2DMapBuilder   # 2D占用网格建图
 ├── EnhancedImaging     # 深度相机和语义分割
-└── FloorDetector       # 多楼层检测
+├── FloorDetector       # 多楼层检测
+└── DataRecorder        # 数据集记录（RAW/COLMAP格式）
 ```
 
 ## API参考
@@ -461,6 +468,8 @@ class AuroraSDK:
     def enhanced_imaging(self) -> EnhancedImaging
     @property
     def floor_detector(self) -> FloorDetector
+    @property
+    def data_recorder(self) -> DataRecorder
 ```
 
 #### **Controller**
@@ -469,6 +478,9 @@ class AuroraSDK:
 ```python
 class Controller:
     def require_relocalization(timeout_ms: int = 5000) -> None
+    def require_local_relocalization(center_pose, search_radius: float, timeout_ms: int = 5000) -> bool
+    def require_local_map_merge(center_pose, search_radius: float, timeout_ms: int = 5000) -> bool
+    def get_last_relocalization_status(timeout_ms: int = 1000) -> int
     def cancel_relocalization() -> None
     def require_mapping_mode(timeout_ms: int = 10000) -> None
     def enable_raw_data_subscription(enable: bool) -> None
@@ -572,6 +584,53 @@ map_data = sdk.data_provider.get_map_data(fetch_kf=False, fetch_mp=False, fetch_
         # ... 更多地图
     }
 }
+```
+
+#### **DataRecorder**
+将传感器数据记录到磁盘，支持多种格式以供离线处理。
+
+```python
+class DataRecorder:
+    # 记录控制
+    def start_recording(recorder_type: int, target_folder: str) -> None
+    def stop_recording(recorder_type: int) -> None
+    def is_recording(recorder_type: int) -> bool
+
+    # 配置选项
+    def set_option_string(recorder_type: int, key: str, value: str) -> None
+    def set_option_int(recorder_type: int, key: str, value: int) -> None
+    def set_option_float(recorder_type: int, key: str, value: float) -> None
+    def set_option_bool(recorder_type: int, key: str, value: bool) -> None
+    def reset_options(recorder_type: int) -> None
+
+    # 状态查询
+    def query_status_int(recorder_type: int, key: str) -> int
+    def query_status_float(recorder_type: int, key: str) -> float
+```
+
+**记录器类型：**
+- `DATARECORDER_TYPE_RAW_DATASET` (1): 原始传感器数据格式
+- `DATARECORDER_TYPE_COLMAP_DATASET` (2): COLMAP兼容格式，用于结构运动恢复
+
+**示例：**
+```python
+from slamtec_aurora_sdk import AuroraSDK, DATARECORDER_TYPE_COLMAP_DATASET
+
+with AuroraSDK() as sdk:
+    sdk.connect(connection_string="192.168.1.212")
+    sdk.controller.enable_map_data_syncing(True)
+
+    # 配置COLMAP记录器
+    sdk.data_recorder.set_option_string(DATARECORDER_TYPE_COLMAP_DATASET, "image_quality", "raw")
+    sdk.data_recorder.set_option_bool(DATARECORDER_TYPE_COLMAP_DATASET, "undistort_image", True)
+
+    # 开始记录
+    sdk.data_recorder.start_recording(DATARECORDER_TYPE_COLMAP_DATASET, "./colmap_dataset")
+
+    # ... 移动设备 ...
+
+    # 停止记录
+    sdk.data_recorder.stop_recording(DATARECORDER_TYPE_COLMAP_DATASET)
 ```
 
 #### **EnhancedImaging**

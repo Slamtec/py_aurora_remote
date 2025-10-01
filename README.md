@@ -21,6 +21,7 @@ This is a Python implementation of the SLAMTEC Aurora Remote SDK which is based 
 - **Enhanced Imaging**: Advanced computer vision processing pipeline with cross-modal alignment
 - **IMU Integration**: Inertial measurement unit data for robust tracking
 - **Timestamp-based Data Retrieval**: Precise temporal correlation between sensor modalities
+- **Data Recorder**: Record sensor data in RAW format or COLMAP-compatible datasets for offline processing
 
 ### Python Ecosystem Integration
 - **NumPy/OpenCV**: Efficient image and point cloud processing
@@ -439,6 +440,11 @@ The SDK also includes standalone example scripts demonstrating all features:
     python examples/depthcam_preview.py [--device device_ip] [--headless]
     ```
 
+24. **COLMAP Dataset Recorder** - Record COLMAP-compatible datasets for offline processing
+    ```bash
+    python examples/colmap_recorder.py --output OUTPUT_DIR [--device device_ip] [options]
+    ```
+
 
 ## Architecture
 
@@ -453,7 +459,8 @@ AuroraSDK
 ├── MapManager          # VSLAM map operations
 ├── LIDAR2DMapBuilder   # 2D occupancy grid mapping
 ├── EnhancedImaging     # Depth camera and semantic segmentation
-└── FloorDetector       # Multi-floor detection
+├── FloorDetector       # Multi-floor detection
+└── DataRecorder        # Dataset recording (RAW/COLMAP formats)
 ```
 
 ## API Reference
@@ -492,6 +499,8 @@ class AuroraSDK:
     def enhanced_imaging(self) -> EnhancedImaging
     @property
     def floor_detector(self) -> FloorDetector
+    @property
+    def data_recorder(self) -> DataRecorder
 ```
 
 #### **Controller**
@@ -500,6 +509,9 @@ Device connection and control operations.
 ```python
 class Controller:
     def require_relocalization(timeout_ms: int = 5000) -> None
+    def require_local_relocalization(center_pose, search_radius: float, timeout_ms: int = 5000) -> bool
+    def require_local_map_merge(center_pose, search_radius: float, timeout_ms: int = 5000) -> bool
+    def get_last_relocalization_status(timeout_ms: int = 1000) -> int
     def cancel_relocalization() -> None
     def require_mapping_mode(timeout_ms: int = 10000) -> None
     def enable_raw_data_subscription(enable: bool) -> None
@@ -603,6 +615,53 @@ map_data = sdk.data_provider.get_map_data(fetch_kf=False, fetch_mp=False, fetch_
         # ... more maps
     }
 }
+```
+
+#### **DataRecorder**
+Record sensor data to disk in various formats for offline processing.
+
+```python
+class DataRecorder:
+    # Recording control
+    def start_recording(recorder_type: int, target_folder: str) -> None
+    def stop_recording(recorder_type: int) -> None
+    def is_recording(recorder_type: int) -> bool
+
+    # Configuration options
+    def set_option_string(recorder_type: int, key: str, value: str) -> None
+    def set_option_int(recorder_type: int, key: str, value: int) -> None
+    def set_option_float(recorder_type: int, key: str, value: float) -> None
+    def set_option_bool(recorder_type: int, key: str, value: bool) -> None
+    def reset_options(recorder_type: int) -> None
+
+    # Status queries
+    def query_status_int(recorder_type: int, key: str) -> int
+    def query_status_float(recorder_type: int, key: str) -> float
+```
+
+**Recorder Types:**
+- `DATARECORDER_TYPE_RAW_DATASET` (1): Raw sensor data format
+- `DATARECORDER_TYPE_COLMAP_DATASET` (2): COLMAP-compatible format for structure-from-motion
+
+**Example:**
+```python
+from slamtec_aurora_sdk import AuroraSDK, DATARECORDER_TYPE_COLMAP_DATASET
+
+with AuroraSDK() as sdk:
+    sdk.connect(connection_string="192.168.1.212")
+    sdk.controller.enable_map_data_syncing(True)
+
+    # Configure COLMAP recorder
+    sdk.data_recorder.set_option_string(DATARECORDER_TYPE_COLMAP_DATASET, "image_quality", "raw")
+    sdk.data_recorder.set_option_bool(DATARECORDER_TYPE_COLMAP_DATASET, "undistort_image", True)
+
+    # Start recording
+    sdk.data_recorder.start_recording(DATARECORDER_TYPE_COLMAP_DATASET, "./colmap_dataset")
+
+    # ... move the device around ...
+
+    # Stop recording
+    sdk.data_recorder.stop_recording(DATARECORDER_TYPE_COLMAP_DATASET)
 ```
 
 #### **EnhancedImaging**

@@ -91,35 +91,42 @@ class CameraPreviewDemo:
             # Connect to device
             if connection_string:
                 print(f"Connecting to device at: {connection_string}")
-                # First discover devices to see what's available
-                devices = self.sdk.discover_devices(timeout=5.0)
-                
-                if not devices:
-                    print("No Aurora devices found!")
-                    return 1
-                
-                print(f"Found {len(devices)} Aurora device(s):")
-                for i, device in enumerate(devices):
-                    print(f"  Device {i}: {device['device_name']}")
-                    for j, option in enumerate(device['options']):
-                        print(f"    Option {j}: {option['protocol']}://{option['address']}:{option['port']}")
-                
-                # Find device matching the connection string
-                target_device = None
-                for device in devices:
-                    for option in device['options']:
-                        if connection_string in option['address']:
-                            target_device = device
-                            break
-                    if target_device:
-                        break
-                
-                if target_device:
-                    print(f"Found matching device for {connection_string}")
-                    self.sdk.connect(device_info=target_device)
-                else:
-                    print(f"No discovered device matches {connection_string}, trying direct connection...")
+                # Try direct connection first
+                try:
                     self.sdk.connect(connection_string=connection_string)
+                    print("Connected successfully!")
+                except Exception as e:
+                    print(f"Direct connection failed: {e}")
+                    print("Trying device discovery...")
+                    # Fallback to discovery
+                    devices = self.sdk.discover_devices(timeout=5.0)
+
+                    if not devices:
+                        print("No Aurora devices found!")
+                        return 1
+
+                    print(f"Found {len(devices)} Aurora device(s):")
+                    for i, device in enumerate(devices):
+                        print(f"  Device {i}: {device['device_name']}")
+                        for j, option in enumerate(device['options']):
+                            print(f"    Option {j}: {option['protocol']}://{option['address']}:{option['port']}")
+
+                    # Find device matching the connection string
+                    target_device = None
+                    for device in devices:
+                        for option in device['options']:
+                            if connection_string in option['address']:
+                                target_device = device
+                                break
+                        if target_device:
+                            break
+
+                    if target_device:
+                        print(f"Found matching device for {connection_string}")
+                        self.sdk.connect(device_info=target_device)
+                    else:
+                        print(f"No discovered device matches {connection_string}")
+                        return 1
             else:
                 print("Discovering Aurora devices...")
                 devices = self.sdk.discover_devices(timeout=5.0)

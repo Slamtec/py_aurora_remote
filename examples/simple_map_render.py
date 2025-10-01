@@ -30,22 +30,36 @@ def setup_sdk_import():
 # Setup SDK import
 AuroraSDK, AuroraSDKError, ConnectionError, DataNotReadyError = setup_sdk_import()
 
-def simple_map_demo():
-    """Simple map demonstration without OpenCV."""
+def simple_map_demo(connection_string=None):
+    """Simple map demonstration without OpenCV.
+
+    Args:
+        connection_string: IP address or connection string. If None, auto-discover.
+    """
     try:
         # Create SDK instance
         print("Creating Aurora SDK instance...")
         sdk = AuroraSDK()
-        
+
         # Print version info
         version_info = sdk.get_version_info()
         print(f"Aurora SDK Version: {version_info['version_string']}")
-        
+
         # Session created automatically
         print("SDK session created automatically...")
-        
-        print("Connecting to device...")
-        sdk.connect(connection_string="192.168.1.212")
+
+        # Connect to device
+        if connection_string:
+            print(f"Connecting to device at {connection_string}...")
+            sdk.connect(connection_string=connection_string)
+        else:
+            print("Discovering devices...")
+            devices = sdk.discover_devices(timeout=5.0)
+            if not devices:
+                print("No devices found!")
+                return 1
+            print(f"Found device: {devices[0].device_address}")
+            sdk.connect(device_info=devices[0])
         print("Connected!")
         
         # Get device info
@@ -82,10 +96,11 @@ def simple_map_demo():
             
             try:
                 # Try to get LiDAR scan
-                scan_data = sdk.get_lidar_scan()
-                scan_count += 1
-                if i % 4 == 0:  # Print every 2 seconds
-                    print(f"LiDAR scan: {len(scan_data.points)} points")
+                scan_data = sdk.get_recent_lidar_scan()
+                if scan_data is not None:
+                    scan_count += 1
+                    if i % 4 == 0:  # Print every 2 seconds
+                        print(f"LiDAR scan: {len(scan_data.points)} points")
             except DataNotReadyError:
                 pass
             except Exception as e:
@@ -116,4 +131,12 @@ def simple_map_demo():
     return 0
 
 if __name__ == "__main__":
-    sys.exit(simple_map_demo())
+    # Get connection string from command line argument
+    connection_string = sys.argv[1] if len(sys.argv) > 1 else None
+
+    if connection_string:
+        print(f"Using specified connection: {connection_string}")
+    else:
+        print("No connection specified, will auto-discover device")
+
+    sys.exit(simple_map_demo(connection_string))

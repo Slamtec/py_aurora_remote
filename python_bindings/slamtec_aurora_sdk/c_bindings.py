@@ -151,7 +151,30 @@ class CBindings:
             ctypes.c_uint64  # timeout_ms
         ]
         self.lib.slamtec_aurora_sdk_controller_require_mapping_mode.restype = ctypes.c_int
-        
+
+        self.lib.slamtec_aurora_sdk_controller_require_local_relocalization.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.POINTER(PoseSE3),  # center_pose
+            ctypes.c_float,  # search_radius
+            ctypes.c_uint64  # timeout_ms
+        ]
+        self.lib.slamtec_aurora_sdk_controller_require_local_relocalization.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_controller_require_local_map_merge.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.POINTER(PoseSE3),  # center_pose
+            ctypes.c_float,  # search_radius
+            ctypes.c_uint64  # timeout_ms
+        ]
+        self.lib.slamtec_aurora_sdk_controller_require_local_map_merge.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_controller_get_last_relocalization_status.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.POINTER(ctypes.c_uint32),  # status_out (device_relocalization_status_t)
+            ctypes.c_uint64  # timeout_ms
+        ]
+        self.lib.slamtec_aurora_sdk_controller_get_last_relocalization_status.restype = ctypes.c_int
+
         # Data provider operations (using new timestamp-enabled functions)
         self.lib.slamtec_aurora_sdk_dataprovider_get_current_pose_se3_with_timestamp.argtypes = [
             ctypes.c_void_p,  # handle
@@ -295,7 +318,13 @@ class CBindings:
             ctypes.c_void_p  # handle
         ]
         self.lib.slamtec_aurora_sdk_lidar2dmap_previewmap_is_background_updating.restype = ctypes.c_int
-        
+
+        self.lib.slamtec_aurora_sdk_lidar2dmap_previewmap_get_generation_options.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.POINTER(GridMapGenerationOptions)  # options_out
+        ]
+        self.lib.slamtec_aurora_sdk_lidar2dmap_previewmap_get_generation_options.restype = ctypes.c_int
+
         self.lib.slamtec_aurora_sdk_lidar2dmap_previewmap_require_redraw.argtypes = [
             ctypes.c_void_p  # handle
         ]
@@ -423,6 +452,14 @@ class CBindings:
         ]
         self.lib.slamtec_aurora_sdk_dataprovider_depthcam_wait_next_frame.restype = ctypes.c_int
         
+        # void slamtec_aurora_sdk_dataprovider_depthcam_set_postfiltering(handle, int enable, uint64_t flags)
+        self.lib.slamtec_aurora_sdk_dataprovider_depthcam_set_postfiltering.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_int,     # enable
+            ctypes.c_uint64   # flags
+        ]
+        self.lib.slamtec_aurora_sdk_dataprovider_depthcam_set_postfiltering.restype = None
+        
         self.lib.slamtec_aurora_sdk_dataprovider_semantic_segmentation_is_ready.argtypes = [ctypes.c_void_p]
         self.lib.slamtec_aurora_sdk_dataprovider_semantic_segmentation_is_ready.restype = ctypes.c_int
         
@@ -513,9 +550,85 @@ class CBindings:
         ]
         self.lib.slamtec_aurora_sdk_controller_require_semantic_segmentation_alternative_model.restype = ctypes.c_int
         
+        # DataRecorder operations
+        self.lib.slamtec_aurora_sdk_datarecorder_start_recording.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_uint32,  # type (datarecorder_type_t)
+            ctypes.c_char_p   # target_folder
+        ]
+        self.lib.slamtec_aurora_sdk_datarecorder_start_recording.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_datarecorder_stop_recording.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_uint32   # type
+        ]
+        self.lib.slamtec_aurora_sdk_datarecorder_stop_recording.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_datarecorder_is_recording.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_uint32   # type
+        ]
+        self.lib.slamtec_aurora_sdk_datarecorder_is_recording.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_datarecorder_set_option_string.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_uint32,  # type
+            ctypes.c_char_p,  # key
+            ctypes.c_char_p   # value
+        ]
+        self.lib.slamtec_aurora_sdk_datarecorder_set_option_string.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_datarecorder_set_option_int32.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_uint32,  # type
+            ctypes.c_char_p,  # key
+            ctypes.c_int32    # value
+        ]
+        self.lib.slamtec_aurora_sdk_datarecorder_set_option_int32.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_datarecorder_set_option_float64.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_uint32,  # type
+            ctypes.c_char_p,  # key
+            ctypes.c_double   # value
+        ]
+        self.lib.slamtec_aurora_sdk_datarecorder_set_option_float64.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_datarecorder_set_option_bool.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_uint32,  # type
+            ctypes.c_char_p,  # key
+            ctypes.c_int      # value
+        ]
+        self.lib.slamtec_aurora_sdk_datarecorder_set_option_bool.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_datarecorder_set_option_reset.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_uint32   # type
+        ]
+        self.lib.slamtec_aurora_sdk_datarecorder_set_option_reset.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_datarecorder_query_status_int64.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_uint32,  # type
+            ctypes.c_char_p,  # key
+            ctypes.POINTER(ctypes.c_int64),  # value_out
+            ctypes.c_int      # use_cached_value
+        ]
+        self.lib.slamtec_aurora_sdk_datarecorder_query_status_int64.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_datarecorder_query_status_float64.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_uint32,  # type
+            ctypes.c_char_p,  # key
+            ctypes.POINTER(ctypes.c_double),  # value_out
+            ctypes.c_int      # use_cached_value
+        ]
+        self.lib.slamtec_aurora_sdk_datarecorder_query_status_float64.restype = ctypes.c_int
+
         # Map manager operations
         from .data_types import MapStorageSessionResultCallback, MapStorageSessionStatus
-        
+
         self.lib.slamtec_aurora_sdk_mapmanager_start_storage_session.argtypes = [
             ctypes.c_void_p,  # handle
             ctypes.c_char_p,  # map_file_name
@@ -613,6 +726,32 @@ class CBindings:
             ctypes.POINTER(ctypes.c_size_t)  # response_retrieved_size
         ]
         self.lib.slamtec_aurora_sdk_controller_send_custom_command.restype = ctypes.c_int
+        
+        # void slamtec_aurora_sdk_controller_set_keyframe_fetch_flags(handle, uint64_t flags)
+        self.lib.slamtec_aurora_sdk_controller_set_keyframe_fetch_flags.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_uint64   # flags
+        ]
+        self.lib.slamtec_aurora_sdk_controller_set_keyframe_fetch_flags.restype = None
+        
+        # uint64_t slamtec_aurora_sdk_controller_get_keyframe_fetch_flags(handle)
+        self.lib.slamtec_aurora_sdk_controller_get_keyframe_fetch_flags.argtypes = [
+            ctypes.c_void_p   # handle
+        ]
+        self.lib.slamtec_aurora_sdk_controller_get_keyframe_fetch_flags.restype = ctypes.c_uint64
+        
+        # void slamtec_aurora_sdk_controller_set_map_point_fetch_flags(handle, uint64_t flags)
+        self.lib.slamtec_aurora_sdk_controller_set_map_point_fetch_flags.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_uint64   # flags
+        ]
+        self.lib.slamtec_aurora_sdk_controller_set_map_point_fetch_flags.restype = None
+        
+        # uint64_t slamtec_aurora_sdk_controller_get_map_point_fetch_flags(handle)
+        self.lib.slamtec_aurora_sdk_controller_get_map_point_fetch_flags.argtypes = [
+            ctypes.c_void_p   # handle
+        ]
+        self.lib.slamtec_aurora_sdk_controller_get_map_point_fetch_flags.restype = ctypes.c_uint64
     
     def get_version_info(self):
         """Get SDK version information."""
@@ -1060,7 +1199,7 @@ class CBindings:
                 pass  # Ignore errors in callback to prevent crashes
         
         # Callback to collect keyframes - make more robust
-        def keyframe_callback(user_data, keyframe_ptr, looped_ids, connected_ids):
+        def keyframe_callback(user_data, keyframe_ptr, looped_ids, connected_ids, related_mp_ids):
             try:
                 if keyframe_ptr and fetch_kf:
                     kf = keyframe_ptr.contents
@@ -1081,6 +1220,20 @@ class CBindings:
                         'timestamp': float(kf.timestamp),
                         'fixed': is_fixed
                     }
+                    
+                    # Process related map points if available (SDK 2.0.1)
+                    if related_mp_ids and kf.related_mp_count > 0:
+                        try:
+                            related_mp_list = []
+                            for i in range(kf.related_mp_count):
+                                mp_id = related_mp_ids[i]
+                                if mp_id > 0:  # Valid map point ID
+                                    related_mp_list.append(int(mp_id))
+                            if related_mp_list:
+                                keyframe_data['related_map_points'] = related_mp_list
+                        except Exception:
+                            pass  # Ignore errors in processing related map points
+                    
                     collected_data['keyframes'].append(keyframe_data)
                     
                     # Process loop closure connections
@@ -1959,6 +2112,26 @@ class CBindings:
             raise AuroraSDKError("Failed to send custom command, error code: {}".format(error_code))
         
         return response_buffer.raw[:actual_response_size.value]
+    
+    def set_keyframe_fetch_flags(self, handle, flags):
+        """Set keyframe fetch flags."""
+        self.lib.slamtec_aurora_sdk_controller_set_keyframe_fetch_flags(handle, flags)
+    
+    def get_keyframe_fetch_flags(self, handle):
+        """Get current keyframe fetch flags."""
+        return self.lib.slamtec_aurora_sdk_controller_get_keyframe_fetch_flags(handle)
+    
+    def set_map_point_fetch_flags(self, handle, flags):
+        """Set map point fetch flags."""
+        self.lib.slamtec_aurora_sdk_controller_set_map_point_fetch_flags(handle, flags)
+    
+    def get_map_point_fetch_flags(self, handle):
+        """Get current map point fetch flags."""
+        return self.lib.slamtec_aurora_sdk_controller_get_map_point_fetch_flags(handle)
+    
+    def depthcam_set_postfiltering(self, handle, enable, flags=0):
+        """Enable/disable depth camera post-filtering."""
+        self.lib.slamtec_aurora_sdk_dataprovider_depthcam_set_postfiltering(handle, int(enable), flags)
 
 
 # Global instance

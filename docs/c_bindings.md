@@ -364,6 +364,26 @@ Force global map optimization.
 
 Send custom command - CORRECTED: proper parameter order and types.
 
+**set_keyframe_fetch_flags**(self, handle, flags)
+
+Set keyframe fetch flags.
+
+**get_keyframe_fetch_flags**(self, handle)
+
+Get current keyframe fetch flags.
+
+**set_map_point_fetch_flags**(self, handle, flags)
+
+Set map point fetch flags.
+
+**get_map_point_fetch_flags**(self, handle)
+
+Get current map point fetch flags.
+
+**depthcam_set_postfiltering**(self, handle, enable, flags)
+
+Enable/disable depth camera post-filtering.
+
 #### Special Methods
 
 **__init__**(self)
@@ -380,6 +400,6 @@ Get global C bindings instance.
 
 **map_point_callback**(user_data, map_point_ptr)
 
-**keyframe_callback**(user_data, keyframe_ptr, looped_ids, connected_ids)
+**keyframe_callback**(user_data, keyframe_ptr, looped_ids, connected_ids, related_mp_ids)
 
 **map_desc_callback**(user_data, map_desc_ptr)

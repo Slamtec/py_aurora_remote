@@ -579,29 +579,53 @@ class DataProvider:
         except Exception as e:
             raise AuroraSDKError(f"Failed to get all map info: {e}")
     
-    def peek_history_pose(self, timestamp_ns=0, allow_interpolation=True, max_time_diff_ns=1000000000):
+    def peek_history_pose(self, timestamp_ns, allow_interpolation=False, max_time_diff_ns=1000000000):
         """
         Peek historical pose at specific timestamp.
         
+        This function retrieves pose data from the device's pose history buffer at the specified
+        timestamp. The timestamp must be a valid sensor timestamp from actual sensor data 
+        (e.g., from depth camera frames, IMU data, etc.). Using timestamp_ns=0 or system time
+        will not work reliably.
+        
         Args:
-            timestamp_ns (int): Timestamp in nanoseconds (0 for latest)
-            allow_interpolation (bool): Allow pose interpolation (default: True)
-            max_time_diff_ns (int): Maximum time difference in nanoseconds (default: 1 second)
+            timestamp_ns (int): REQUIRED valid sensor timestamp in nanoseconds. Must be an actual
+                               timestamp from sensor data (e.g., depth_frame.timestamp_ns).
+                               Do not use 0 or system time - these will not work.
+            allow_interpolation (bool): Allow pose interpolation if exact timestamp not found.
+                                      Set to False for exact timestamp matching (default: False)
+            max_time_diff_ns (int): Maximum time difference in nanoseconds for matching 
+                                   (default: 1 second)
             
         Returns:
-            PoseSE3: Historical pose data
+            PoseSE3: Historical pose data containing position and quaternion
             
         Raises:
             ConnectionError: If not connected to a device
+            DataNotReadyError: If historical pose data is not ready for the given timestamp
             AuroraSDKError: If failed to retrieve historical pose
+            
+        Example:
+            # Get a depth frame first to obtain a valid timestamp
+            depth_frame = sdk.enhanced_imaging.peek_depth_camera_frame(...)
+            if depth_frame:
+                # Use the depth frame's timestamp to get corresponding pose
+                pose = sdk.data_provider.peek_history_pose(
+                    timestamp_ns=depth_frame.timestamp_ns,
+                    allow_interpolation=False
+                )
         """
         self._ensure_connected()
         self._ensure_c_bindings()
+        
         
         try:
             return self._c_bindings.peek_history_pose(
                 self._controller.session_handle, timestamp_ns, allow_interpolation, max_time_diff_ns
             )
         except Exception as e:
-            raise AuroraSDKError(f"Failed to peek history pose: {e}")
+            if "error code: -7" in str(e):  # NOT_READY
+                raise DataNotReadyError("Historical pose data not ready")
+            else:
+                raise AuroraSDKError(f"Failed to peek history pose: {e}")
     

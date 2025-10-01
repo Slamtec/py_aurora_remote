@@ -10,6 +10,7 @@ from .map_manager import MapManager
 from .lidar_2d_map_builder import LIDAR2DMapBuilder
 from .floor_detector import FloorDetector
 from .enhanced_imaging import EnhancedImaging
+from .data_recorder import DataRecorder
 from .exceptions import AuroraSDKError
 
 
@@ -24,6 +25,7 @@ class AuroraSDK:
     - MapManager: VSLAM (3D visual mapping) operations
     - LIDAR2DMapBuilder: CoMap (2D LIDAR mapping) operations
     - EnhancedImaging: Enhanced imaging features (depth camera, semantic segmentation)
+    - DataRecorder: Sensor data recording for dataset generation
     
     Example usage:
         sdk = AuroraSDK()
@@ -57,7 +59,8 @@ class AuroraSDK:
         self._lidar_2d_map_builder = LIDAR2DMapBuilder(self._controller)
         self._enhanced_imaging = EnhancedImaging(self._controller)
         self._floor_detector = FloorDetector(self._controller)
-        
+        self._data_recorder = DataRecorder(self._controller)
+
         # Set cross-component references
         self._enhanced_imaging._set_data_provider(self._data_provider)
     
@@ -145,7 +148,7 @@ class AuroraSDK:
     def enhanced_imaging(self):
         """
         Get the EnhancedImaging component (SDK 2.0).
-        
+
         The EnhancedImaging component handles:
         - Depth camera frame retrieval and processing
         - Semantic segmentation frame retrieval and processing
@@ -153,12 +156,28 @@ class AuroraSDK:
         - Transform calibration data access
         - Model switching for semantic segmentation
         - Depth-aligned segmentation map calculation
-        
+
         Returns:
             EnhancedImaging: EnhancedImaging component instance
         """
         return self._enhanced_imaging
-    
+
+    @property
+    def data_recorder(self):
+        """
+        Get the DataRecorder component.
+
+        The DataRecorder component handles:
+        - Recording raw sensor data to disk
+        - Generating COLMAP-compatible datasets
+        - Recording configuration and status monitoring
+        - Dataset generation for offline processing
+
+        Returns:
+            DataRecorder: DataRecorder component instance
+        """
+        return self._data_recorder
+
     def __enter__(self):
         """Context manager entry."""
         return self
@@ -376,12 +395,12 @@ class AuroraSDK:
     
     def get_map_info(self):
         """
-        Convenience helper: Get map information.
-        
+        Convenience helper: Get global mapping information.
+
         Returns:
-            dict: Map information including status, count, etc.
+            GlobalMappingInfo: Object containing map status, active map ID, map count, etc.
         """
-        return self.map_manager.get_map_info()
+        return self.data_provider.get_global_mapping_info()
     
     def get_recent_lidar_scan(self, max_points=8192):
         """

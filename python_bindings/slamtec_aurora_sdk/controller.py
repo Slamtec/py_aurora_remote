@@ -419,7 +419,166 @@ class Controller:
                 
         except Exception as e:
             raise AuroraSDKError("Failed to cancel relocalization: {}".format(e))
-    
+
+    def require_local_relocalization(self, center_pose, search_radius, timeout_ms=5000):
+        """
+        Require the device to perform local relocalization within a specified area.
+
+        This method is more efficient than global relocalization as it searches
+        only within a limited area around the specified center pose.
+
+        Args:
+            center_pose: Center pose for the search area. Can be:
+                - PoseSE3 object
+                - Tuple of (position, quaternion) where:
+                  * position is (x, y, z)
+                  * quaternion is (qx, qy, qz, qw)
+            search_radius (float): Search radius in meters
+            timeout_ms (int): Timeout in milliseconds (default: 5000)
+
+        Returns:
+            bool: True if relocalization was successful, False otherwise
+
+        Raises:
+            ConnectionError: If not connected to a device
+            AuroraSDKError: If local relocalization operation fails
+
+        Example:
+            center = ((1.0, 2.0, 0.0), (0.0, 0.0, 0.0, 1.0))
+            sdk.controller.require_local_relocalization(center, search_radius=5.0)
+        """
+        self._ensure_c_bindings()
+        if not self.is_connected():
+            raise ConnectionError("Not connected to any device")
+
+        try:
+            from .data_types import ERRORCODE_OK, PoseSE3
+            import ctypes
+
+            # Convert pose to PoseSE3 if needed
+            if isinstance(center_pose, tuple):
+                position, quaternion = center_pose
+                pose_se3 = PoseSE3()
+                pose_se3.translation.x, pose_se3.translation.y, pose_se3.translation.z = position
+                pose_se3.quaternion.x, pose_se3.quaternion.y, pose_se3.quaternion.z, pose_se3.quaternion.w = quaternion
+            else:
+                pose_se3 = center_pose
+
+            error_code = self._c_bindings.lib.slamtec_aurora_sdk_controller_require_local_relocalization(
+                self._session_handle,
+                ctypes.byref(pose_se3),
+                float(search_radius),
+                timeout_ms
+            )
+
+            return error_code == ERRORCODE_OK
+
+        except Exception as e:
+            raise AuroraSDKError("Failed to perform local relocalization: {}".format(e))
+
+    def require_local_map_merge(self, center_pose, search_radius, timeout_ms=5000):
+        """
+        Require the device to perform local map merge within a specified area.
+
+        This merges map segments within a specified area around the center pose.
+
+        Args:
+            center_pose: Center pose for the merge area. Can be:
+                - PoseSE3 object
+                - Tuple of (position, quaternion) where:
+                  * position is (x, y, z)
+                  * quaternion is (qx, qy, qz, qw)
+            search_radius (float): Search radius in meters
+            timeout_ms (int): Timeout in milliseconds (default: 5000)
+
+        Returns:
+            bool: True if map merge was successful, False otherwise
+
+        Raises:
+            ConnectionError: If not connected to a device
+            AuroraSDKError: If local map merge operation fails
+
+        Example:
+            center = ((1.0, 2.0, 0.0), (0.0, 0.0, 0.0, 1.0))
+            sdk.controller.require_local_map_merge(center, search_radius=5.0)
+        """
+        self._ensure_c_bindings()
+        if not self.is_connected():
+            raise ConnectionError("Not connected to any device")
+
+        try:
+            from .data_types import ERRORCODE_OK, PoseSE3
+            import ctypes
+
+            # Convert pose to PoseSE3 if needed
+            if isinstance(center_pose, tuple):
+                position, quaternion = center_pose
+                pose_se3 = PoseSE3()
+                pose_se3.translation.x, pose_se3.translation.y, pose_se3.translation.z = position
+                pose_se3.quaternion.x, pose_se3.quaternion.y, pose_se3.quaternion.z, pose_se3.quaternion.w = quaternion
+            else:
+                pose_se3 = center_pose
+
+            error_code = self._c_bindings.lib.slamtec_aurora_sdk_controller_require_local_map_merge(
+                self._session_handle,
+                ctypes.byref(pose_se3),
+                float(search_radius),
+                timeout_ms
+            )
+
+            return error_code == ERRORCODE_OK
+
+        except Exception as e:
+            raise AuroraSDKError("Failed to perform local map merge: {}".format(e))
+
+    def get_last_relocalization_status(self, timeout_ms=1000):
+        """
+        Get the last relocalization status from the device.
+
+        Args:
+            timeout_ms (int): Timeout in milliseconds (default: 1000)
+
+        Returns:
+            int: Relocalization status value:
+                - DEVICE_RELOCALIZATION_STATUS_NONE (0)
+                - DEVICE_RELOCALIZATION_STATUS_IN_PROGRESS (1)
+                - DEVICE_RELOCALIZATION_STATUS_SUCCEED (2)
+                - DEVICE_RELOCALIZATION_STATUS_FAILED (3)
+
+        Raises:
+            ConnectionError: If not connected to a device
+            AuroraSDKError: If failed to query relocalization status
+
+        Example:
+            from slamtec_aurora_sdk.data_types import DEVICE_RELOCALIZATION_STATUS_SUCCEED
+            status = sdk.controller.get_last_relocalization_status()
+            if status == DEVICE_RELOCALIZATION_STATUS_SUCCEED:
+                print("Relocalization succeeded!")
+        """
+        self._ensure_c_bindings()
+        if not self.is_connected():
+            raise ConnectionError("Not connected to any device")
+
+        try:
+            from .data_types import ERRORCODE_OK
+            import ctypes
+
+            status_out = ctypes.c_uint32()
+
+            error_code = self._c_bindings.lib.slamtec_aurora_sdk_controller_get_last_relocalization_status(
+                self._session_handle,
+                ctypes.byref(status_out),
+                timeout_ms
+            )
+
+            if error_code != ERRORCODE_OK:
+                raise AuroraSDKError("Failed to get relocalization status (error code: {})".format(error_code))
+
+            return status_out.value
+
+        except Exception as e:
+            raise AuroraSDKError("Failed to get relocalization status: {}".format(e))
+
     def require_map_reset(self, timeout_ms=10000):
         """
         Require the device to reset its map.
@@ -589,6 +748,70 @@ class Controller:
             return self._c_bindings.send_custom_command(self._session_handle, command_id, data, timeout_ms)
         except Exception as e:
             raise AuroraSDKError("Failed to send custom command: {}".format(e))
+    
+    def set_keyframe_fetch_flags(self, flags):
+        """
+        Set keyframe fetch flags to control what data is fetched.
+        
+        Args:
+            flags (int): Fetch flags (e.g. SLAMTEC_AURORA_SDK_KEYFRAME_FETCH_FLAG_RELATED_MP)
+            
+        Raises:
+            ConnectionError: If not connected to a device
+        """
+        self._ensure_c_bindings()
+        if not self.is_connected():
+            raise ConnectionError("Not connected to any device")
+        
+        self._c_bindings.set_keyframe_fetch_flags(self._session_handle, flags)
+    
+    def get_keyframe_fetch_flags(self):
+        """
+        Get current keyframe fetch flags.
+        
+        Returns:
+            int: Current fetch flags
+            
+        Raises:
+            ConnectionError: If not connected to a device
+        """
+        self._ensure_c_bindings()
+        if not self.is_connected():
+            raise ConnectionError("Not connected to any device")
+        
+        return self._c_bindings.get_keyframe_fetch_flags(self._session_handle)
+    
+    def set_map_point_fetch_flags(self, flags):
+        """
+        Set map point fetch flags to control what data is fetched.
+        
+        Args:
+            flags (int): Fetch flags
+            
+        Raises:
+            ConnectionError: If not connected to a device
+        """
+        self._ensure_c_bindings()
+        if not self.is_connected():
+            raise ConnectionError("Not connected to any device")
+        
+        self._c_bindings.set_map_point_fetch_flags(self._session_handle, flags)
+    
+    def get_map_point_fetch_flags(self):
+        """
+        Get current map point fetch flags.
+        
+        Returns:
+            int: Current fetch flags
+            
+        Raises:
+            ConnectionError: If not connected to a device
+        """
+        self._ensure_c_bindings()
+        if not self.is_connected():
+            raise ConnectionError("Not connected to any device")
+        
+        return self._c_bindings.get_map_point_fetch_flags(self._session_handle)
     
     @property
     def session_handle(self):

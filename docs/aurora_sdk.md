@@ -23,6 +23,7 @@ components following the C++ SDK design pattern:
 - MapManager: VSLAM (3D visual mapping) operations
 - LIDAR2DMapBuilder: CoMap (2D LIDAR mapping) operations
 - EnhancedImaging: Enhanced imaging features (depth camera, semantic segmentation)
+- DataRecorder: Sensor data recording for dataset generation
 
 Example usage:
     sdk = AuroraSDK()
@@ -119,6 +120,19 @@ The EnhancedImaging component handles:
 
 Returns:
     EnhancedImaging: EnhancedImaging component instance
+
+**data_recorder**
+
+Get the DataRecorder component.
+
+The DataRecorder component handles:
+- Recording raw sensor data to disk
+- Generating COLMAP-compatible datasets
+- Recording configuration and status monitoring
+- Dataset generation for offline processing
+
+Returns:
+    DataRecorder: DataRecorder component instance
 
 #### Methods
 
@@ -248,10 +262,10 @@ Returns:
 
 **get_map_info**(self)
 
-Convenience helper: Get map information.
+Convenience helper: Get global mapping information.
 
 Returns:
-    dict: Map information including status, count, etc.
+    GlobalMappingInfo: Object containing map status, active map ID, map count, etc.
 
 **get_recent_lidar_scan**(self, max_points)
 

@@ -428,4 +428,27 @@ class EnhancedImaging:
         except Exception as e:
             raise AuroraSDKError(f"Failed to get depth camera config: {e}")
     
+    def set_depth_camera_postfiltering(self, enable, flags=0):
+        """
+        Enable or disable depth camera post-filtering to refine depth estimation.
+        
+        Post-filtering is enabled by default and helps improve depth map quality
+        by applying refinement algorithms to the raw depth data.
+        
+        Args:
+            enable (bool): True to enable post-filtering, False to disable
+            flags (int): Reserved for future use, should be 0
+            
+        Raises:
+            ConnectionError: If not connected to a device
+            AuroraSDKError: If failed to set post-filtering
+        """
+        self._ensure_connected()
+        self._ensure_c_bindings()
+        
+        try:
+            self._c_bindings.depthcam_set_postfiltering(self._controller.session_handle, enable, flags)
+        except Exception as e:
+            raise AuroraSDKError(f"Failed to set depth camera post-filtering: {e}")
+    
     

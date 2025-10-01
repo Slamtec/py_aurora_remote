@@ -52,6 +52,33 @@ Raises:
     ConnectionError: If not connected to a device
     AuroraSDKError: If failed to stop 2D map preview
 
+**get_preview_map_generation_options**(self)
+
+Get the current generation options of the LIDAR 2D preview map.
+
+This returns the actual options being used for map generation,
+which may differ from the requested options (e.g., when auto
+floor detection is enabled and adjusts height ranges).
+
+Returns:
+    dict: Current map generation options containing:
+        - resolution (float): Map resolution in meters per pixel
+        - map_canvas_width (float): Canvas width in meters
+        - map_canvas_height (float): Canvas height in meters
+        - active_map_only (bool): Whether generating only active map
+        - height_range_specified (bool): Whether height range is specified
+        - min_height (float): Minimum height to include (if specified)
+        - max_height (float): Maximum height to include (if specified)
+
+Raises:
+    ConnectionError: If not connected to a device
+    AuroraSDKError: If failed to get generation options
+
+Example:
+    options = sdk.lidar_2d_map_builder.get_preview_map_generation_options()
+    print(f"Current resolution: {options['resolution']}m")
+    print(f"Height range: {options['min_height']} - {options['max_height']}m")
+
 **get_lidar_2d_map_preview**(self)
 
 Get current LIDAR 2D map preview image.

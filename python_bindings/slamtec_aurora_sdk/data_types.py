@@ -252,6 +252,17 @@ ENHANCED_IMAGE_TYPE_SEMANTIC_SEGMENTATION = 2
 DEPTHCAM_FRAME_TYPE_DEPTH_MAP = 0
 DEPTHCAM_FRAME_TYPE_POINT3D = 1
 
+# DataRecorder Types (SDK 2.0)
+DATARECORDER_TYPE_NONE = 0
+DATARECORDER_TYPE_RAW_DATASET = 1
+DATARECORDER_TYPE_COLMAP_DATASET = 2
+
+# Device Relocalization Status Types
+DEVICE_RELOCALIZATION_STATUS_NONE = 0
+DEVICE_RELOCALIZATION_STATUS_IN_PROGRESS = 1
+DEVICE_RELOCALIZATION_STATUS_SUCCEED = 2
+DEVICE_RELOCALIZATION_STATUS_FAILED = 3
+
 # Feature Bitmap Constants (SDK 2.0)
 # Hardware Feature Bits
 SLAMTEC_AURORA_SDK_HW_FEATURE_BIT_LIDAR = (1 << 0)
@@ -290,6 +301,13 @@ SLAMTEC_AURORA_SDK_MP_FETCH_FLAG_ALL = 0xFFFFFFFF   # Fetch all map point data
 SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_ABORTED = -2
 SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_REJECTED = -3
 SLAMTEC_AURORA_SDK_MAPSTORAGE_SESSION_STATUS_TIMEOUT = -4
+
+# Keyframe Fetch Flags (SDK 2.0.1)
+SLAMTEC_AURORA_SDK_KEYFRAME_FETCH_FLAG_NONE = 0
+SLAMTEC_AURORA_SDK_KEYFRAME_FETCH_FLAG_RELATED_MP = (1 << 0)  # Fetch related map points
+
+# Map Point Fetch Flags (SDK 2.0.1)
+SLAMTEC_AURORA_SDK_MAP_POINT_FETCH_FLAG_NONE = 0
 
 
 class MapStorageSessionStatus(ctypes.Structure):
@@ -744,20 +762,25 @@ class ImageFrame:
             img_array = np.frombuffer(self.data, dtype=np.uint8)
             if len(img_array) >= self.width * self.height:
                 img = img_array[:self.width * self.height].reshape((self.height, self.width))
+                # Make writable copy before converting (frombuffer creates read-only array)
+                img = img.copy()
                 # Convert grayscale to BGR for OpenCV
                 return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-                
-        elif self.pixel_format == 1:  # RGB
+
+        elif self.pixel_format == 1:  # BGR (Aurora sends BGR directly)
             img_array = np.frombuffer(self.data, dtype=np.uint8)
             if len(img_array) >= self.width * self.height * 3:
                 img = img_array[:self.width * self.height * 3].reshape((self.height, self.width, 3))
-                # Convert RGB to BGR for OpenCV
-                return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-                
+                # Aurora already sends BGR format, no conversion needed
+                # Return a writable copy so OpenCV can draw on it (frombuffer creates read-only array)
+                return img.copy()
+
         elif self.pixel_format == 2:  # RGBA
             img_array = np.frombuffer(self.data, dtype=np.uint8)
             if len(img_array) >= self.width * self.height * 4:
                 img = img_array[:self.width * self.height * 4].reshape((self.height, self.width, 4))
+                # Make writable copy before converting (frombuffer creates read-only array)
+                img = img.copy()
                 # Convert RGBA to BGR for OpenCV
                 return cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
         
@@ -1207,6 +1230,7 @@ class KeyframeDesc(ctypes.Structure):
         ("pose", Pose),
         ("looped_frame_count", ctypes.c_size_t),
         ("connected_frame_count", ctypes.c_size_t),
+        ("related_mp_count", ctypes.c_size_t),      # Number of related map points (SDK 2.0.1)
         ("flags", ctypes.c_uint32),
         ("_padding2", ctypes.c_uint32)   # Padding to align structure size
     ]
@@ -1228,7 +1252,7 @@ class MapDesc(ctypes.Structure):
 
 # Callback function types for map data visitor
 MapPointCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.POINTER(MapPointDesc))
-KeyframeCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.POINTER(KeyframeDesc), ctypes.POINTER(ctypes.c_uint64), ctypes.POINTER(ctypes.c_uint64))
+KeyframeCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.POINTER(KeyframeDesc), ctypes.POINTER(ctypes.c_uint64), ctypes.POINTER(ctypes.c_uint64), ctypes.POINTER(ctypes.c_uint64))
 MapDescCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.POINTER(MapDesc))
 
 # Callback function type for map storage session result
@@ -1397,16 +1421,13 @@ class TransformCalibrationInfo(ctypes.Structure):
 
 
 class SemanticSegmentationConfig(ctypes.Structure):
-    """Semantic segmentation configuration structure."""
+    """Semantic segmentation configuration structure (slamtec_aurora_sdk_semantic_segmentation_config_info_t)."""
     _fields_ = [
-        ("model_type", ctypes.c_int),                    # 0: default model, 1: alternative model
-        ("class_count", ctypes.c_int),                   # number of classes supported
-        ("model_name", ctypes.c_char * 64),              # model name string
-        ("version", ctypes.c_char * 32),                 # model version
-        ("input_width", ctypes.c_int),                   # input image width
-        ("input_height", ctypes.c_int),                  # input image height
-        ("output_width", ctypes.c_int),                  # output segmentation map width
-        ("output_height", ctypes.c_int)                  # output segmentation map height
+        ("fps", ctypes.c_float),                         # frames per second
+        ("frame_skip", ctypes.c_int),                    # frame skip count
+        ("image_width", ctypes.c_int),                   # image width
+        ("image_height", ctypes.c_int),                  # image height
+        ("support_alternative_model", ctypes.c_int)      # whether alternative model is supported
     ]
 
 

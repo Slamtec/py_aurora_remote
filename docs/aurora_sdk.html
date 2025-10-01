@@ -29,14 +29,14 @@
         <nav class="nav">
             <ul>
                 <li><a href="index.html">Home</a></li>
-                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_recorder.html">data_recorder</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
             </ul>
         </nav>
         <h1>aurora_sdk</h1>
 <div class='docstring'>Aurora SDK v2 - Component-based architecture.<br><br>This is the new component-based implementation following C++ SDK patterns.</div>
 <h2>Classes</h2>
 <h3>AuroraSDK</h3>
-<div class='docstring'>Aurora SDK main class with component-based architecture.<br><br>This class provides access to Aurora device functionality through separate<br>components following the C++ SDK design pattern:<br>- Controller: Device connection and control<br>- DataProvider: Data retrieval (pose, images, sensors)<br>- MapManager: VSLAM (3D visual mapping) operations<br>- LIDAR2DMapBuilder: CoMap (2D LIDAR mapping) operations<br>- EnhancedImaging: Enhanced imaging features (depth camera, semantic segmentation)<br><br>Example usage:<br>    sdk = AuroraSDK()<br>    sdk.controller.connect(connection_string="192.168.1.212")<br>    <br>    # Get camera preview and tracking data<br>    left_img, right_img = sdk.data_provider.get_camera_preview()<br>    tracking_frame = sdk.data_provider.get_tracking_frame()<br>    <br>    # VSLAM operations<br>    sdk.map_manager.save_vslam_map("my_map.vslam")<br>    <br>    # 2D LIDAR mapping (CoMap)<br>    sdk.lidar_2d_map_builder.start_lidar_2d_map_preview()</div>
+<div class='docstring'>Aurora SDK main class with component-based architecture.<br><br>This class provides access to Aurora device functionality through separate<br>components following the C++ SDK design pattern:<br>- Controller: Device connection and control<br>- DataProvider: Data retrieval (pose, images, sensors)<br>- MapManager: VSLAM (3D visual mapping) operations<br>- LIDAR2DMapBuilder: CoMap (2D LIDAR mapping) operations<br>- EnhancedImaging: Enhanced imaging features (depth camera, semantic segmentation)<br>- DataRecorder: Sensor data recording for dataset generation<br><br>Example usage:<br>    sdk = AuroraSDK()<br>    sdk.controller.connect(connection_string="192.168.1.212")<br>    <br>    # Get camera preview and tracking data<br>    left_img, right_img = sdk.data_provider.get_camera_preview()<br>    tracking_frame = sdk.data_provider.get_tracking_frame()<br>    <br>    # VSLAM operations<br>    sdk.map_manager.save_vslam_map("my_map.vslam")<br>    <br>    # 2D LIDAR mapping (CoMap)<br>    sdk.lidar_2d_map_builder.start_lidar_2d_map_preview()</div>
 <h4>Methods</h4>
 <div class='signature'><code>create_session(self)</code></div>
 <div class='docstring'>Convenience helper: Create SDK session.<br><br>NOTE: Session is created automatically during SDK initialization.<br>This method is deprecated and should not be called manually.<br><br>Raises:<br>    AuroraSDKError: If session is already created</div>
@@ -67,7 +67,7 @@
 <div class='signature'><code>get_camera_preview(self)</code></div>
 <div class='docstring'>Convenience helper: Get camera preview images.<br><br>Returns:<br>    tuple: (left_image, right_image) as ImageFrame objects</div>
 <div class='signature'><code>get_map_info(self)</code></div>
-<div class='docstring'>Convenience helper: Get map information.<br><br>Returns:<br>    dict: Map information including status, count, etc.</div>
+<div class='docstring'>Convenience helper: Get global mapping information.<br><br>Returns:<br>    GlobalMappingInfo: Object containing map status, active map ID, map count, etc.</div>
 <div class='signature'><code>get_recent_lidar_scan(self, max_points)</code></div>
 <div class='docstring'>Convenience helper: Get recent LiDAR scan data.<br><br>Args:<br>    max_points: Maximum number of scan points to retrieve<br><br>Returns:<br>    LidarScanData object with scan points and metadata</div>
 <div class='signature'><code>start_lidar_2d_map_preview(self, resolution)</code></div>

@@ -94,12 +94,15 @@ class FramePreviewDemo:
                 print(f"Connecting to device at: {connection_string}")
                 self.sdk.connect(connection_string=connection_string)
             else:
-                # Auto-discover and connect using convenience method
-                print("Auto-discovering and connecting...")
-                if not self.sdk.quick_start_preview():
-                    print("Failed to auto-connect to any device!")
+                # Auto-discover and connect
+                print("Auto-discovering devices...")
+                devices = self.sdk.discover_devices(timeout=5.0)
+                if not devices:
+                    print("No devices found!")
                     return 1
-            
+                print(f"Found device: {devices[0].device_address}")
+                self.sdk.connect(device_info=devices[0])
+
             print("Connected to Aurora device!")
             
             # Get device info using convenience method
