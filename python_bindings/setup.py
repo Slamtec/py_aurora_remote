@@ -23,8 +23,12 @@ def get_version():
             # Version is on the 4th line
             if len(lines) >= 4:
                 version_line = lines[3].strip()
-                # Extract version number (e.g., "2.0.0-alpha" -> "2.0.0a0")
-                version = version_line.replace('-alpha', 'a0').replace('-beta', 'b0').replace('-rc', 'rc')
+                # Extract version number and convert to PEP 440 format
+                # "2.0.0-alpha" -> "2.0.0a0"
+                # "2.0.0-beta" -> "2.0.0b0"
+                # "2.0.0-rc" -> "2.0.0rc0"
+                # "2.1.0-rtm" -> "2.1.0" (RTM is final release)
+                version = version_line.replace('-alpha', 'a0').replace('-beta', 'b0').replace('-rc', 'rc').replace('-rtm', '')
                 return version
     return "1.0.0"  # fallback version
 
