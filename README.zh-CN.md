@@ -13,7 +13,7 @@
 - **地图管理**：VSLAM地图创建、保存和加载
 - **2D网格建图**：基于激光雷达的占用网格建图和实时预览
 
-### SDK 2.0增强功能
+### SDK 2.x成像与记录功能
 - **语义分割**：基于多种模型的实时场景理解，支持时间戳关联
 - **统一ImageFrame接口**：支持常规图像、深度图和点云的单一接口
 - **深度相机**：支持校正图像关联的密集深度图和适当的数据转换
@@ -22,6 +22,16 @@
 - **IMU集成**：惯性测量单元数据用于鲁棒跟踪
 - **基于时间戳的数据检索**：传感器模态之间的精确时间关联
 - **数据记录器**：以RAW格式或COLMAP兼容数据集记录传感器数据以供离线处理
+
+### SDK 2.1.1设备管理与时间同步
+- **时间同步**：独立的软件时间同步客户端，可将Aurora时间戳转换到客户端稳态时钟或墙钟域
+- **位姿增强**：支持监听器回调和轮询接口的高频IMU辅助位姿输出
+- **位姿协方差**：获取位姿不确定度并转换为可读置信度指标
+- **持久化配置**：基于JSON的配置枚举、读取、设置和重置接口
+- **变换管理器**：设备侧SE3变换的列举、读取、设置和重置
+- **相机遮罩管理器**：静态遮罩开关控制，以及灰度遮罩上传/下载
+- **行车记录仪**：设备端数据记录器状态、存储和会话管理
+- **系统电源控制**：通过Controller API请求重启或关机
 
 ### Python生态系统集成
 - **NumPy/OpenCV**：高效的图像和点云处理
@@ -73,16 +83,16 @@ python tools/build_package.py --all-platforms --clean
 
 # 安装适合您平台的wheel包
 # Linux x86_64:
-pip install wheels/slamtec_aurora_python_sdk_linux_x86_64-2.0.0a0-py3-none-any.whl
+pip install wheels/slamtec_aurora_python_sdk_linux_x86_64-2.1.1-py3-none-any.whl
 
 # Linux ARM64:
-pip install wheels/slamtec_aurora_python_sdk_linux_aarch64-2.0.0a0-py3-none-any.whl
+pip install wheels/slamtec_aurora_python_sdk_linux_aarch64-2.1.1-py3-none-any.whl
 
 # macOS ARM64 (Apple Silicon):
-pip install wheels/slamtec_aurora_python_sdk_macos_arm64-2.0.0a0-py3-none-any.whl
+pip install wheels/slamtec_aurora_python_sdk_macos_arm64-2.1.1-py3-none-any.whl
 
 # Windows x64:
-pip install wheels/slamtec_aurora_python_sdk_win64-2.0.0a0-py3-none-any.whl
+pip install wheels/slamtec_aurora_python_sdk_win64-2.1.1-py3-none-any.whl
 ```
 
 **示例命令：**
@@ -90,7 +100,7 @@ pip install wheels/slamtec_aurora_python_sdk_win64-2.0.0a0-py3-none-any.whl
 # 使用已安装的包运行示例（自动发现）
 python examples/simple_pose.py
 python examples/camera_preview.py
-python examples/semantic_segmentation.py --device 192.168.1.212
+python examples/semantic_segmentation.py --device 192.168.11.1
 
 # 验证安装
 python -c "import slamtec_aurora_sdk; print('Aurora SDK安装成功')"
@@ -113,7 +123,7 @@ pip install -r requirements-demo.txt
 
 # 直接从源码运行示例（自动发现）
 python examples/simple_pose.py
-python examples/device_info_monitor.py --device 192.168.1.212
+python examples/device_info_monitor.py --device 192.168.11.1
 ```
 
 **示例命令：**
@@ -122,8 +132,8 @@ python examples/device_info_monitor.py --device 192.168.1.212
 cd Aurora-Remote-Python-SDK
 
 # 运行任何示例（自动回退到源码）
-python examples/lidar_scan_plot.py 192.168.1.212
-python examples/dense_point_cloud.py --device 192.168.1.212 --headless
+python examples/lidar_scan_plot.py 192.168.11.1
+python examples/dense_point_cloud.py --device 192.168.11.1 --headless
 python examples/semantic_segmentation.py --device auto
 
 # 在开发过程中构建自己的wheel包
@@ -146,7 +156,7 @@ python tools/build_package.py --platforms linux_x86_64 linux_aarch64 macos_arm64
 ls -la wheels/
 
 # 安装您自定义构建的wheel包
-pip install wheels/slamtec_aurora_python_sdk_linux_x86_64-2.0.0a0-py3-none-any.whl
+pip install wheels/slamtec_aurora_python_sdk_linux_x86_64-2.1.1-py3-none-any.whl
 ```
 
 **示例命令：**
@@ -229,7 +239,7 @@ from slamtec_aurora_sdk import AuroraSDK
 
 # 使用上下文管理器自动清理（推荐）
 with AuroraSDK() as sdk:  # 会话自动创建
-    sdk.connect(connection_string="192.168.1.212")
+    sdk.connect(connection_string="192.168.11.1")
     
     # 获取当前位姿和时间戳
     position, rotation, timestamp = sdk.data_provider.get_current_pose()
@@ -245,7 +255,7 @@ with AuroraSDK() as sdk:  # 会话自动创建
 ```python
 # 直接访问组件以使用高级功能
 sdk = AuroraSDK()  # 会话自动创建
-sdk.connect(connection_string="192.168.1.212")
+sdk.connect(connection_string="192.168.11.1")
 
 # 通过MapManager进行VSLAM操作
 sdk.map_manager.save_vslam_map("my_map.vslam")
@@ -260,6 +270,41 @@ sdk.enhanced_imaging.peek_depth_camera_frame()
 seg_frame = sdk.enhanced_imaging.peek_semantic_segmentation_frame()
 ```
 
+### 监听器与会话创建标志
+
+```python
+from slamtec_aurora_sdk import (
+    AuroraSDK,
+    SDKListener,
+    SESSION_FLAG_NO_PREVIEW_IMAGE_SUBSCRIPTION,
+)
+
+class PoseListener(SDKListener):
+    def on_pose_covariance(self, timestamp_ns, covariance):
+        readable = covariance.to_readable()
+        print(timestamp_ns, readable.as_dict())
+
+with AuroraSDK(
+    listener=PoseListener(),
+    creation_flags=SESSION_FLAG_NO_PREVIEW_IMAGE_SUBSCRIPTION,
+) as sdk:
+    sdk.connect(connection_string="192.168.11.1")
+    sdk.data_provider.get_recent_pose_covariance()
+```
+
+### 独立时间同步
+
+```python
+from slamtec_aurora_sdk import TimeSyncClient, TIMESYNC_DOMAIN_STEADY_CLOCK
+
+with TimeSyncClient(TIMESYNC_DOMAIN_STEADY_CLOCK) as client:
+    client.connect("192.168.11.1")
+    client.initialize()
+    if client.is_synchronized():
+        translated_ns = client.translate_timestamp(aurora_timestamp_ns=123456789)
+        print(translated_ns)
+```
+
 ## 交互式教程
 
 SDK包含全面的**Jupyter笔记本教程**，提供所有Aurora功能的分步指导：
@@ -272,6 +317,8 @@ SDK包含全面的**Jupyter笔记本教程**，提供所有Aurora功能的分步
 - **[增强成像](notebooks/04_enhanced_imaging.ipynb)** - AI驱动的深度感知和语义分割
 - **[高级增强成像](notebooks/05_advanced_enhanced_imaging.ipynb)** - 高级计算机视觉工作流程
 - **[2D激光雷达建图](notebooks/06_lidar_2d_mapping.ipynb)** - 2D占用建图和楼层检测
+
+本次发布没有新增或修改笔记本。2.1.1新增能力当前通过独立示例脚本和自动生成的API文档提供说明。
 
 **教程快速开始：**
 ```bash
@@ -317,7 +364,7 @@ SDK包含展示所有功能的全面示例：
    python examples/lidar_scan_plot_vector.py [device_ip]
    ```
 
-### 高级SDK 2.0功能
+### 高级成像与传感器
 6. **语义分割** - 实时场景理解
    ```bash
    python examples/semantic_segmentation.py [--device device_ip] [--headless]
@@ -415,6 +462,52 @@ SDK包含展示所有功能的全面示例：
     python examples/colmap_recorder.py --output OUTPUT_DIR [--device device_ip] [options]
     ```
 
+### SDK 2.1.1时间同步与设备管理
+25. **时间同步** - 将Aurora时间戳转换到客户端时间域
+    ```bash
+    python examples/time_sync.py [--device device_ip] [--mode steady|wallclock]
+    ```
+
+26. **墙钟同步** - 查询设备墙钟偏移、执行同步并评估同步精度
+    ```bash
+    python examples/wallclock_sync.py [device_ip] [--force-sync] [--samples N]
+    ```
+
+27. **位姿增强** - 高频IMU辅助位姿输出
+    ```bash
+    python examples/pose_augmentation.py [--device device_ip] [options]
+    ```
+
+28. **位姿协方差** - 轮询并解释位姿不确定度指标
+    ```bash
+    python examples/pose_covariance.py [--device device_ip] [options]
+    ```
+
+29. **持久化配置** - 枚举、读取、设置和重置持久化JSON配置项
+    ```bash
+    python examples/persistent_config.py [--device device_ip] <command> [options]
+    ```
+
+30. **变换管理器** - 列举、查询、更新和重置设备变换
+    ```bash
+    python examples/transform_manager.py [--device device_ip] <command> [options]
+    ```
+
+31. **相机遮罩管理器** - 启用遮罩并上传/下载灰度遮罩图像
+    ```bash
+    python examples/camera_mask.py [--device device_ip] <command> [options]
+    ```
+
+32. **行车记录仪** - 监控存储状态并控制数据记录器
+    ```bash
+    python examples/dashcam_recorder.py [--device device_ip] <command> [options]
+    ```
+
+33. **系统电源** - 查询状态并请求重启或关机
+    ```bash
+    python examples/system_power.py [--device device_ip] <status|reboot|shutdown> [--yes]
+    ```
+
 ## 架构
 
 ### 基于组件的设计
@@ -429,8 +522,14 @@ AuroraSDK
 ├── LIDAR2DMapBuilder   # 2D占用网格建图
 ├── EnhancedImaging     # 深度相机和语义分割
 ├── FloorDetector       # 多楼层检测
-└── DataRecorder        # 数据集记录（RAW/COLMAP格式）
+├── DataRecorder        # 数据集记录（RAW/COLMAP格式）
+├── PersistentConfig    # 持久化JSON配置管理
+├── TransformManager    # 设备侧SE3变换
+├── CameraMask          # 静态相机遮罩管理
+└── DashcamRecorder     # 数据记录器控制与存储查询
 ```
+
+`TimeSyncClient` 作为独立工具暴露，不属于会话组件。
 
 ## API参考
 
@@ -617,7 +716,7 @@ class DataRecorder:
 from slamtec_aurora_sdk import AuroraSDK, DATARECORDER_TYPE_COLMAP_DATASET
 
 with AuroraSDK() as sdk:
-    sdk.connect(connection_string="192.168.1.212")
+    sdk.connect(connection_string="192.168.11.1")
     sdk.controller.enable_map_data_syncing(True)
 
     # 配置COLMAP记录器
@@ -634,7 +733,7 @@ with AuroraSDK() as sdk:
 ```
 
 #### **EnhancedImaging**
-SDK 2.0高级成像功能。
+统一ImageFrame接口下的高级成像功能。
 
 ```python
 class EnhancedImaging:
@@ -735,7 +834,7 @@ from slamtec_aurora_sdk import AuroraSDK, DataNotReadyError
 
 # 带自动清理的实时位姿跟踪
 with AuroraSDK() as sdk:  # 会话自动创建
-    sdk.connect(connection_string="192.168.1.212")
+    sdk.connect(connection_string="192.168.11.1")
     
     while True:
         try:

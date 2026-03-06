@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/imu_fetcher.py
+#  *
+#  */
 """
 SLAMTEC Aurora Python SDK Demo - IMU Data Fetcher
 
@@ -123,7 +133,7 @@ Examples:
   python3 imu_fetcher.py
   
   # Connect to specific device
-  python3 imu_fetcher.py 192.168.1.212
+  python3 imu_fetcher.py 192.168.11.1
   
   # Adjust update rate to 50 Hz
   python3 imu_fetcher.py --rate 50

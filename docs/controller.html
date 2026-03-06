@@ -29,7 +29,7 @@
         <nav class="nav">
             <ul>
                 <li><a href="index.html">Home</a></li>
-                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_recorder.html">data_recorder</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="camera_mask.html">camera_mask</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="dashcam_recorder.html">dashcam_recorder</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_recorder.html">data_recorder</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="listener.html">listener</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="persistent_config.html">persistent_config</a></li>\n<li><a href="timesync.html">timesync</a></li>\n<li><a href="transform_manager.html">transform_manager</a></li>\n<li><a href="utils.html">utils</a></li>
             </ul>
         </nav>
         <h1>controller</h1>
@@ -40,8 +40,8 @@
 <h4>Methods</h4>
 <div class='signature'><code>get_version_info(self)</code></div>
 <div class='docstring'>Get SDK version information.<br><br>Returns:<br>    dict containing version information</div>
-<div class='signature'><code>create_session(self)</code></div>
-<div class='docstring'>Create SDK session.<br><br>Raises:<br>    AuroraSDKError: If session creation fails</div>
+<div class='signature'><code>create_session(self, listener, creation_flags)</code></div>
+<div class='docstring'>Create SDK session.<br><br>Args:<br>    listener: Optional SDKListener instance for async callbacks<br>    creation_flags: Session creation flags bitmask<br><br>Raises:<br>    AuroraSDKError: If session creation fails</div>
 <div class='signature'><code>release_session(self)</code></div>
 <div class='docstring'>Release SDK session.</div>
 <div class='signature'><code>discover_devices(self, timeout)</code></div>
@@ -58,6 +58,12 @@
 <div class='docstring'>Enable/disable raw data subscription for better image quality.<br><br>Args:<br>    enable: True to enable, False to disable<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If operation fails</div>
 <div class='signature'><code>reset_device(self)</code></div>
 <div class='docstring'>Reset the connected device.<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If reset fails</div>
+<div class='signature'><code>request_power_operation(self, operation, timeout_ms)</code></div>
+<div class='docstring'>Request a power operation on the connected device.<br><br>Args:<br>    operation: Power operation enum value<br>    timeout_ms: Timeout in milliseconds<br><br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If the operation fails</div>
+<div class='signature'><code>reboot_device(self, timeout_ms)</code></div>
+<div class='docstring'>Request a device reboot.</div>
+<div class='signature'><code>shutdown_device(self, timeout_ms)</code></div>
+<div class='docstring'>Request a device shutdown.</div>
 <div class='signature'><code>enable_map_data_syncing(self, enable)</code></div>
 <div class='docstring'>Enable/disable map data syncing.<br><br>Args:<br>    enable: True to enable, False to disable<br>    <br>Raises:<br>    ConnectionError: If not connected to a device<br>    AuroraSDKError: If operation fails</div>
 <div class='signature'><code>require_mapping_mode(self, timeout_ms)</code></div>

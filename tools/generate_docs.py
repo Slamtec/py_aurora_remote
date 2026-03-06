@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: tools/generate_docs.py
+#  *
+#  */
 """
 Documentation Generator for SLAMTEC Aurora Python SDK
 
@@ -24,6 +34,7 @@ import os
 import sys
 import ast
 import inspect
+import re
 import argparse
 import shutil
 import subprocess
@@ -381,7 +392,7 @@ class DocGenerator:
             "sdk = AuroraSDK()",
             "",
             "# Connect to device",
-            "sdk.connect(connection_string=\"192.168.1.212\")",
+            "sdk.connect(connection_string=\"192.168.11.1\")",
             "",
             "# Get data",
             "pose = sdk.data_provider.get_current_pose()",
@@ -576,9 +587,11 @@ class DocGenerator:
         first_line = lines[0].strip()
         
         if first_line:
-            # Take first sentence
-            if '.' in first_line:
-                return first_line.split('.')[0] + '.'
+            # Take the first sentence, but avoid splitting inside version
+            # strings such as 2.1.1.
+            sentence_end = re.search(r'\.(?=\s|$)', first_line)
+            if sentence_end:
+                return first_line[: sentence_end.end()]
             return first_line
         
         return "No description available"
@@ -732,7 +745,7 @@ class DocGenerator:
         content.extend([
             "</ul>",
             "<h2>Quick Start</h2>",
-            "<pre><code>from slamtec_aurora_sdk import AuroraSDK\n\n# Create SDK instance\nsdk = AuroraSDK()\n\n# Connect to device\nsdk.connect(connection_string=\"192.168.1.212\")\n\n# Get data\npose = sdk.data_provider.get_current_pose()\nleft_img, right_img = sdk.data_provider.get_camera_preview()\n\n# Cleanup\nsdk.disconnect()\nsdk.release()</code></pre>",
+            "<pre><code>from slamtec_aurora_sdk import AuroraSDK\n\n# Create SDK instance\nsdk = AuroraSDK()\n\n# Connect to device\nsdk.connect(connection_string=\"192.168.11.1\")\n\n# Get data\npose = sdk.data_provider.get_current_pose()\nleft_img, right_img = sdk.data_provider.get_camera_preview()\n\n# Cleanup\nsdk.disconnect()\nsdk.release()</code></pre>",
         ])
         
         return "\n".join(content)

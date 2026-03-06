@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/dense_point_cloud.py
+#  *
+#  */
 """
 SLAMTEC Aurora Python SDK Demo - Dense Point Cloud Visualization
 
@@ -12,8 +22,6 @@ import time
 import signal
 import argparse
 import threading
-from collections import deque
-import struct
 
 def setup_sdk_import():
     """
@@ -71,6 +79,63 @@ def signal_handler(sig, frame):
     print("\nCtrl-C pressed, exiting...")
     is_ctrl_c = True
 
+
+def _build_strided_uint8_image(data, width, height, channels, stride=0):
+    """Create a NumPy image view while honoring optional row stride."""
+    if data is None:
+        return None
+
+    packed_row_bytes = width * channels
+    row_stride = stride or packed_row_bytes
+    required_size = packed_row_bytes + row_stride * (height - 1 if height > 1 else 0)
+    if len(data) < required_size or row_stride < packed_row_bytes:
+        return None
+
+    shape = (height, width) if channels == 1 else (height, width, channels)
+    strides = (row_stride, 1) if channels == 1 else (row_stride, channels, 1)
+    try:
+        return np.ndarray(shape=shape, dtype=np.uint8, buffer=data, strides=strides)
+    except (TypeError, ValueError, BufferError):
+        return None
+
+
+def extract_camera_rgb_image(camera_image):
+    """Convert a related rectified image into normalized RGB colors for Open3D."""
+    if camera_image is None or not getattr(camera_image, 'data', None):
+        return None
+
+    if hasattr(camera_image, 'to_numpy_image'):
+        img_rgb = camera_image.to_numpy_image(color_order="rgb")
+        if img_rgb is not None:
+            return img_rgb.astype(np.float32) / 255.0
+
+    img_height = camera_image.height
+    img_width = camera_image.width
+    pixel_format = camera_image.pixel_format
+    img_stride = getattr(camera_image, 'stride', 0)
+    img_data = camera_image.data
+
+    if pixel_format == 0:
+        gray = _build_strided_uint8_image(img_data, img_width, img_height, 1, img_stride)
+        if gray is None:
+            return None
+        normalized_gray = gray.astype(np.float32) / 255.0
+        return np.repeat(normalized_gray[:, :, np.newaxis], 3, axis=2)
+
+    if pixel_format == 1:
+        bgr = _build_strided_uint8_image(img_data, img_width, img_height, 3, img_stride)
+        if bgr is None:
+            return None
+        return bgr[:, :, ::-1].astype(np.float32) / 255.0
+
+    if pixel_format == 2:
+        rgba = _build_strided_uint8_image(img_data, img_width, img_height, 4, img_stride)
+        if rgba is None:
+            return None
+        return rgba[:, :, :3].astype(np.float32) / 255.0
+
+    return None
+
 def parse_point_cloud_data(frame, camera_image=None, max_points=100000):
     """
     Parse 3D point cloud data from depth camera frame.
@@ -101,9 +166,6 @@ def parse_point_cloud_data(frame, camera_image=None, max_points=100000):
     if points_xyz is None:
         if debug_mode:
             print("Failed to extract point3d data")
-        return None, None, None
-    
-    if points_xyz is None:
         return None, None, None
     
     # Store original shape for organized point cloud
@@ -157,22 +219,6 @@ def parse_point_cloud_data(frame, camera_image=None, max_points=100000):
               f"Y=[{points_xyz[:, 1].min():.2f}, {points_xyz[:, 1].max():.2f}], "
               f"Z=[{points_xyz[:, 2].min():.2f}, {points_xyz[:, 2].max():.2f}]")
     
-    # Apply coordinate system transformation
-    # Based on the XYZ data analysis, Y axis appears to be inverted
-    points_xyz[:, 1] = -points_xyz[:, 1]
-    
-    # Check if we need to scale the data
-    # If mean distance is > 10m, the data might be in millimeters
-    mean_distance = np.mean(np.linalg.norm(points_xyz, axis=1))
-    if mean_distance > 100:  # Likely in millimeters
-        if debug_mode:
-            print(f"Scaling from millimeters to meters (mean distance: {mean_distance:.1f})")
-        points_xyz *= 0.001
-    elif mean_distance > 10:  # Might need scaling
-        if debug_mode:
-            print(f"Applying 0.1x scale factor (mean distance: {mean_distance:.1f})")
-        points_xyz *= 0.1
-    
     # Get timestamp for camera image sync
     timestamp = frame.timestamp_ns if hasattr(frame, 'timestamp_ns') else 0
     
@@ -182,65 +228,15 @@ def parse_point_cloud_data(frame, camera_image=None, max_points=100000):
         try:
             img_height = camera_image.height
             img_width = camera_image.width
-            img_data = camera_image.data
-            pixel_format = camera_image.pixel_format
+            img_rgb = extract_camera_rgb_image(camera_image)
             
             if debug_mode:
-                print(f"Camera image: {img_width}x{img_height}, format: {pixel_format}, data size: {len(img_data)} bytes")
-            
-            # Process camera image based on pixel format
-            img_rgb = None
-            
-            if pixel_format == 0:  # Grayscale
-                if len(img_data) >= img_width * img_height:
-                    # Extract grayscale camera data (uint8)
-                    camera_data = np.frombuffer(img_data, dtype=np.uint8)
-                    camera_array = camera_data[:img_width * img_height]
-                    camera_gray = camera_array.reshape(img_height, img_width)
-                    
-                    # Convert directly to 0-1 range for Open3D (no enhancement needed)
-                    normalized_gray = camera_gray.astype(np.float32) / 255.0
-                    
-                    if debug_mode:
-                        print(f"Camera mean brightness: {camera_gray.mean():.1f}/255")
-                        print(f"Normalized range: [{normalized_gray.min():.3f}, {normalized_gray.max():.3f}]")
-                    
-                    # Convert to RGB by replicating grayscale to all channels
-                    img_rgb = np.stack([normalized_gray, normalized_gray, normalized_gray], axis=-1)
-                    
-                    if debug_mode:
-                        print(f"Camera image processed as grayscale")
-                        print(f"Gray range: [{normalized_gray.min():.3f}, {normalized_gray.max():.3f}]")
-                        print(f"Unique values: {len(np.unique(camera_gray))}")
-            
-            elif pixel_format == 1:  # RGB
-                if len(img_data) >= img_width * img_height * 3:
-                    camera_data = np.frombuffer(img_data, dtype=np.uint8)
-                    camera_array = camera_data[:img_width * img_height * 3]
-                    camera_rgb = camera_array.reshape(img_height, img_width, 3)
-                    
-                    # Normalize to 0-1 range for Open3D
-                    img_rgb = camera_rgb.astype(np.float32) / 255.0
-                    
-                    if debug_mode:
-                        print(f"Camera image processed as RGB")
-            
-            elif pixel_format == 2:  # RGBA
-                if len(img_data) >= img_width * img_height * 4:
-                    camera_data = np.frombuffer(img_data, dtype=np.uint8)
-                    camera_array = camera_data[:img_width * img_height * 4]
-                    camera_rgba = camera_array.reshape(img_height, img_width, 4)
-                    
-                    # Take RGB channels only, normalize to 0-1 range
-                    img_rgb = camera_rgba[:, :, :3].astype(np.float32) / 255.0
-                    
-                    if debug_mode:
-                        print(f"Camera image processed as RGBA")
+                data_size = len(camera_image.data)
+                pixel_format = camera_image.pixel_format
+                stride = getattr(camera_image, 'stride', 0)
+                print(f"Camera image: {img_width}x{img_height}, format: {pixel_format}, stride: {stride}, data size: {data_size} bytes")
             
             if img_rgb is not None:
-                
-                # Project 3D points back to image coordinates
-                # This is simplified - ideally we'd use proper camera calibration
                 colors_rgb = np.zeros((len(points_xyz), 3))  # Start with black, not gray
                 
                 # For organized point cloud - direct 1:1 correspondence between depth and camera
@@ -329,8 +325,7 @@ def parse_point_cloud_data(frame, camera_image=None, max_points=100000):
                     colors_rgb[:, 2] = 0.5  # Blue constant
             else:
                 if debug_mode:
-                    print(f"Unsupported pixel format: {pixel_format}")
-                    print(f"Supported formats: 0=Grayscale, 1=RGB, 2=RGBA")
+                    print("Failed to convert camera image, falling back to height-based coloring")
                 # Fall back to height-based coloring
                 heights = points_xyz[:, 1]
                 height_normalized = (heights - heights.min()) / (heights.max() - heights.min() + 1e-8)
@@ -499,7 +494,7 @@ def main():
         description='Aurora Dense Point Cloud Demo - Real-time 3D point cloud visualization',
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument('--device', '-d', type=str, help='Device IP address', default='192.168.1.212')
+    parser.add_argument('--device', '-d', type=str, help='Device IP address', default='192.168.11.1')
     parser.add_argument('--max-points', type=int, help='Maximum points per frame', default=50000)
     parser.add_argument('--update-rate', type=float, help='Update rate in Hz', default=10.0)
     parser.add_argument('--software-render', action='store_true', help='Use software rendering')
@@ -576,8 +571,9 @@ def main():
             print("  Scroll: Zoom")
             print("  Shift+Mouse: Pan")
             print("  R: Reset view")
-            print("\nColoring: Camera image grayscale (enhanced contrast)")
+            print("\nColoring: Camera-aligned texture (grayscale on mono-camera devices)")
             print("Coordinate frame: Red=X, Green=Y, Blue=Z")
+            print("SDK camera coordinates: X=right, Y=down, Z=forward")
             print("Lighting: Disabled for true color display")
             
             # Main visualization loop

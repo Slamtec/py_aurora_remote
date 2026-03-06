@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/simple_pose.py
+#  *
+#  */
 """
 Simple Pose Example
 
@@ -9,7 +19,7 @@ Usage:
     python simple_pose.py [connection_string]
     
 Example:
-    python simple_pose.py 192.168.1.212
+    python simple_pose.py 192.168.11.1
 """
 
 import sys
@@ -62,7 +72,7 @@ class SimplePoseDemo:
         Run the simple pose demo.
         
         Args:
-            connection_string connection string (e.g., "192.168.1.212")
+            connection_string connection string (e.g., "192.168.11.1")
         """
         try:
             # Create SDK instance
@@ -192,13 +202,13 @@ def main():
         epilog="""
 Examples:
     python simple_pose.py                    # Auto-discover and connect
-    python simple_pose.py 192.168.1.212     # Connect to specific IP
+    python simple_pose.py 192.168.11.1     # Connect to specific IP
         """
     )
     parser.add_argument(
         'connection_string',
         nargs='?',
-        help='Aurora device connection string (e.g., 192.168.1.212)'
+        help='Aurora device connection string (e.g., 192.168.11.1)'
     )
     
     args = parser.parse_args()

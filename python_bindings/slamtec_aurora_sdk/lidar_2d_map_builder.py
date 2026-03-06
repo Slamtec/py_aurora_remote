@@ -1,3 +1,13 @@
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: python_bindings/slamtec_aurora_sdk/lidar_2d_map_builder.py
+#  *
+#  */
 """
 Aurora SDK LIDAR2DMapBuilder component.
 

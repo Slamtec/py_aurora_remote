@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/lidar_scan_plot.py
+#  *
+#  */
 """
 LiDAR Scan Plot Example
 
@@ -9,7 +19,7 @@ Usage:
     python lidar_scan_plot.py [connection_string]
     
 Example:
-    python lidar_scan_plot.py 192.168.1.212
+    python lidar_scan_plot.py 192.168.11.1
 """
 
 import sys
@@ -146,7 +156,7 @@ class LidarScanPlotter:
         Run the LiDAR scan plotter.
         
         Args:
-            connection_string: Aurora device connection string (e.g., "192.168.1.212")
+            connection_string: Aurora device connection string (e.g., "192.168.11.1")
         """
         if not OPENCV_AVAILABLE:
             print("Error: OpenCV is required for this demo.")
@@ -288,7 +298,7 @@ def main():
         epilog="""
 Examples:
     python lidar_scan_plot.py                    # Auto-discover and connect
-    python lidar_scan_plot.py 192.168.1.212     # Connect to specific IP
+    python lidar_scan_plot.py 192.168.11.1     # Connect to specific IP
 
 Controls:
     ESC    - Exit the demo
@@ -304,7 +314,7 @@ This demo visualizes real-time 2D LiDAR scan data from Aurora device:
     parser.add_argument(
         'connection_string',
         nargs='?',
-        help='Aurora device connection string (e.g., 192.168.1.212)'
+        help='Aurora device connection string (e.g., 192.168.11.1)'
     )
     
     args = parser.parse_args()

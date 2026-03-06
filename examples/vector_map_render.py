@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/vector_map_render.py
+#  *
+#  */
 # -*- coding: utf-8 -*-
 """
 Vector Map Render Example
@@ -19,7 +29,7 @@ Usage:
     python vector_map_render.py [connection_string]
     
 Example:
-    python vector_map_render.py 192.168.1.212
+    python vector_map_render.py 192.168.11.1
 """
 
 import sys
@@ -1338,7 +1348,7 @@ def main():
         epilog="""
 Examples:
     python vector_map_render.py                    # Auto-discover and connect
-    python vector_map_render.py 192.168.1.212     # Connect to specific IP
+    python vector_map_render.py 192.168.11.1     # Connect to specific IP
     python vector_map_render.py --3d               # Enable 3D visualization
 
 Features:
@@ -1360,7 +1370,7 @@ This demo visualizes VSLAM map data with:
     parser.add_argument(
         'connection_string',
         nargs='?',
-        help='Aurora device connection string (e.g., 192.168.1.212)'
+        help='Aurora device connection string (e.g., 192.168.11.1)'
     )
     parser.add_argument(
         '--3d', action='store_true',

@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
 
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: python_bindings/slamtec_aurora_sdk/floor_detector.py
+#  *
+#  */
 """
 Floor Detector module for Aurora SDK.
 

@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/camera_preview.py
+#  *
+#  */
 """
 Camera Preview Example
 
@@ -11,7 +21,7 @@ Usage:
     python camera_preview.py [connection_string]
     
 Example:
-    python camera_preview.py 192.168.1.212
+    python camera_preview.py 192.168.11.1
 """
 
 import sys
@@ -72,7 +82,7 @@ class CameraPreviewDemo:
         Run the camera preview demo.
         
         Args:
-            connection_string: connection string (e.g., "192.168.1.212")
+            connection_string: connection string (e.g., "192.168.11.1")
         """
         if not OPENCV_AVAILABLE:
             print("Error: OpenCV is required for this demo.")
@@ -305,7 +315,7 @@ def main():
         epilog="""
 Examples:
     python camera_preview.py                    # Auto-discover and connect
-    python camera_preview.py 192.168.1.212     # Connect to specific IP
+    python camera_preview.py 192.168.11.1     # Connect to specific IP
 
 Controls:
     ESC    - Exit the demo
@@ -315,7 +325,7 @@ Controls:
     parser.add_argument(
         'connection_string',
         nargs='?',
-        help='Aurora device connection string (e.g., 192.168.1.212)'
+        help='Aurora device connection string (e.g., 192.168.11.1)'
     )
     
     args = parser.parse_args()

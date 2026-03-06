@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/selective_map_data_fetch.py
+#  *
+#  */
 """
 Selective Map Data Fetch Example
 
@@ -10,7 +20,7 @@ Usage:
     python selective_map_data_fetch.py [connection_string] [options]
     
 Example:
-    python selective_map_data_fetch.py 192.168.1.212 --fetch-kf --fetch-mp
+    python selective_map_data_fetch.py 192.168.11.1 --fetch-kf --fetch-mp
 """
 
 import sys
@@ -49,7 +59,7 @@ def main():
         epilog="""
 Examples:
     python selective_map_data_fetch.py                           # Auto-discover, fetch all data
-    python selective_map_data_fetch.py 192.168.1.212            # Connect to specific IP
+    python selective_map_data_fetch.py 192.168.11.1            # Connect to specific IP
     python selective_map_data_fetch.py --fetch-kf               # Fetch only keyframes
     python selective_map_data_fetch.py --fetch-mp               # Fetch only map points
     python selective_map_data_fetch.py --fetch-mapinfo          # Fetch only map info
@@ -66,7 +76,7 @@ This demo shows how to selectively fetch map data components:
     parser.add_argument(
         'connection_string',
         nargs='?',
-        help='Aurora device connection string (e.g., 192.168.1.212)'
+        help='Aurora device connection string (e.g., 192.168.11.1)'
     )
     parser.add_argument('--fetch-kf', action='store_true', default=False, 
                        help='Fetch keyframes')

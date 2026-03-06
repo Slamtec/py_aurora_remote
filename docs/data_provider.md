@@ -237,7 +237,7 @@ Raises:
 Get relocalization status information.
 
 Returns:
-    RelocalizationStatus: Current relocalization status
+    tuple: `(status, timestamp_ns)` for the latest relocalization status enum
     
 Raises:
     ConnectionError: If not connected to a device
@@ -253,6 +253,40 @@ Returns:
 Raises:
     ConnectionError: If not connected to a device
     AuroraSDKError: If failed to retrieve mapping flags
+
+**get_recent_pose_covariance**(self)
+
+Get the latest pose covariance estimate.
+
+Returns:
+    tuple: `(covariance, timestamp_ns)` where covariance is a PoseCovariance object
+
+**start_pose_augmentation**(self, mode, config)
+
+Start pose augmentation for high-frequency pose output.
+
+Args:
+    mode: Pose augmentation mode enum
+    config: Optional PoseAugmentationConfig. Defaults to 200Hz, no smoothing.
+
+**stop_pose_augmentation**(self)
+
+Stop pose augmentation.
+
+**get_pose_augmentation_mode**(self)
+
+Get the current pose augmentation mode.
+
+**get_pose_augmentation_config**(self)
+
+Get the current pose augmentation configuration.
+
+**get_augmented_pose**(self)
+
+Get the current augmented pose.
+
+Returns:
+    tuple: `(position, quaternion, timestamp_ns)`
 
 **get_imu_info**(self)
 

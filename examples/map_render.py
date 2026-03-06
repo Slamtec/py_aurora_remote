@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/map_render.py
+#  *
+#  */
 """
 Map Render Example
 
@@ -11,7 +21,7 @@ Usage:
     python map_render.py [connection_string]
     
 Example:
-    python map_render.py 192.168.1.212
+    python map_render.py 192.168.11.1
 """
 
 import sys
@@ -211,7 +221,7 @@ class MapRenderDemo:
         Run the map render demo.
         
         Args:
-            connection_string connection string (e.g., "192.168.1.212")
+            connection_string connection string (e.g., "192.168.11.1")
         """
         if not OPENCV_AVAILABLE:
             print("Error is required for this demo.")
@@ -394,7 +404,7 @@ def main():
         epilog="""
 Examples:
     python map_render.py                    # Auto-discover and connect
-    python map_render.py 192.168.1.212     # Connect to specific IP
+    python map_render.py 192.168.11.1     # Connect to specific IP
 
 Controls:
     ESC    - Exit the demo
@@ -410,7 +420,7 @@ This demo visualizes VSLAM map data including:
     parser.add_argument(
         'connection_string',
         nargs='?',
-        help='Aurora device connection string (e.g., 192.168.1.212)'
+        help='Aurora device connection string (e.g., 192.168.11.1)'
     )
     
     args = parser.parse_args()

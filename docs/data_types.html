@@ -29,7 +29,7 @@
         <nav class="nav">
             <ul>
                 <li><a href="index.html">Home</a></li>
-                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_recorder.html">data_recorder</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="camera_mask.html">camera_mask</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="dashcam_recorder.html">dashcam_recorder</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_recorder.html">data_recorder</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="listener.html">listener</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="persistent_config.html">persistent_config</a></li>\n<li><a href="timesync.html">timesync</a></li>\n<li><a href="transform_manager.html">transform_manager</a></li>\n<li><a href="utils.html">utils</a></li>
             </ul>
         </nav>
         <h1>data_types</h1>
@@ -78,6 +78,43 @@
 <div class='docstring'>LiDAR scan data header.</div>
 <h3>VersionInfo</h3>
 <div class='docstring'>SDK version info structure.</div>
+<h3>SessionConfig</h3>
+<div class='docstring'>Session configuration structure (slamtec_aurora_sdk_session_config_t).</div>
+<h3>CameraMaskImageBuffer</h3>
+<div class='docstring'>Camera mask image buffer (slamtec_aurora_sdk_camera_mask_image_buffer_t).</div>
+<h3>DashcamStatus</h3>
+<div class='docstring'>Dashcam recorder status (slamtec_aurora_sdk_dashcam_status_t).</div>
+<h3>DashcamStorageStatus</h3>
+<div class='docstring'>Dashcam storage status (slamtec_aurora_sdk_dashcam_storage_status_t).</div>
+<h3>DashcamSessionInfo</h3>
+<div class='docstring'>Dashcam session info (slamtec_aurora_sdk_dashcam_session_info_t).</div>
+<h3>PoseCovariance</h3>
+<div class='docstring'>Raw pose covariance matrix (slamtec_aurora_sdk_pose_covariance_t).</div>
+<h4>Methods</h4>
+<div class='signature'><code>to_list(self)</code></div>
+<div class='signature'><code>to_numpy(self)</code></div>
+<div class='signature'><code>copy(self)</code></div>
+<div class='signature'><code>to_readable(self)</code></div>
+<h3>PoseCovarianceReadable</h3>
+<div class='docstring'>Human-readable pose covariance metrics (slamtec_aurora_sdk_pose_covariance_readable_t).</div>
+<h4>Methods</h4>
+<div class='signature'><code>as_dict(self)</code></div>
+<h3>PoseAugmentationConfig</h3>
+<div class='docstring'>Pose augmentation config (slamtec_aurora_sdk_pose_augmentation_config_t).</div>
+<h3>TimeSyncOptions</h3>
+<div class='docstring'>Time synchronization client options (slamtec_aurora_sdk_timesync_options_t).</div>
+<h4>Methods</h4>
+<div class='signature'><code>as_dict(self)</code></div>
+<h3>TimeSyncQuality</h3>
+<div class='docstring'>Time synchronization quality metrics (slamtec_aurora_sdk_timesync_quality_t).</div>
+<h4>Methods</h4>
+<div class='signature'><code>as_dict(self)</code></div>
+<h3>WallclockOffsetResult</h3>
+<div class='docstring'>Wall clock offset query result (slamtec_aurora_sdk_wallclock_offset_result_t).</div>
+<h3>WallclockSyncResult</h3>
+<div class='docstring'>Wall clock sync result (slamtec_aurora_sdk_wallclock_sync_result_t).</div>
+<h3>WallclockAccuracyResult</h3>
+<div class='docstring'>Wall clock sync accuracy result (slamtec_aurora_sdk_wallclock_accuracy_result_t).</div>
 <h3>MapStorageSessionStatus</h3>
 <div class='docstring'>Map storage session status structure (slamtec_aurora_sdk_mapstorage_session_status_t).</div>
 <h4>Methods</h4>
@@ -110,6 +147,8 @@
 <div class='docstring'>Convert IMU data to dictionary.</div>
 <div class='signature'><code>to_numpy(self)</code></div>
 <div class='docstring'>Convert IMU data to numpy arrays (if available).</div>
+<h3>SDKListenerStruct</h3>
+<div class='docstring'>Native listener structure (slamtec_aurora_sdk_listener_t).</div>
 <h3>DeviceBasicInfoWrapper</h3>
 <div class='docstring'>Python wrapper for device basic information matching C++ RemoteDeviceBasicInfo.<br><br>This class wraps slamtec_aurora_sdk_device_basic_info_t and provides<br>capability checking methods matching the C++ SDK interface.</div>
 <h4>Methods</h4>
@@ -140,20 +179,20 @@
 <div class='docstring'>Create legacy DeviceInfo from DeviceBasicInfo.</div>
 <div class='signature'><code>from_c_struct(cls, c_struct, timestamp_ns)</code></div>
 <div class='docstring'>Create DeviceInfo from C structure (DeviceBasicInfo).</div>
-<h3>DeviceStatus</h3>
-<div class='docstring'>Device status information structure.</div>
-<h3>RelocalizationStatus</h3>
-<div class='docstring'>Relocalization status information structure.</div>
+<h3>DeviceStatusDesc</h3>
+<div class='docstring'>Device status descriptor (slamtec_aurora_sdk_device_status_desc_t).</div>
 <h3>ImageFrame</h3>
-<div class='docstring'>Python wrapper for image frame data.<br><br>This class handles various image formats including regular images (grayscale, RGB, RGBA)<br>and depth data (float32 depth maps).</div>
+<div class='docstring'>Python wrapper for image frame data.<br><br>This class handles various image formats including regular images (grayscale, BGR, RGBA)<br>and depth data (float32 depth maps).</div>
 <h4>Methods</h4>
 <div class='signature'><code>from_c_desc(cls, desc, data)</code></div>
 <div class='signature'><code>from_depth_camera_struct(cls, frame_desc, frame_data)</code></div>
 <div class='docstring'>Create ImageFrame from depth camera C structures.</div>
 <div class='signature'><code>from_point3d_struct(cls, frame_desc, frame_data)</code></div>
 <div class='docstring'>Create ImageFrame from point3d C structures.</div>
+<div class='signature'><code>to_numpy_image(self, color_order)</code></div>
+<div class='docstring'>Convert regular image data to a NumPy array while honoring row stride.<br><br>Args:<br>    color_order (str): `gray`, `rgb`, `bgr`, or `rgba`<br><br>Returns:<br>    numpy.ndarray: Image array in the requested color order, or None if not applicable</div>
 <div class='signature'><code>to_opencv_image(self)</code></div>
-<div class='docstring'>Convert image data to OpenCV-compatible numpy array.<br><br>Returns:<br>    numpy.ndarray: BGR image array ready for OpenCV, or None if no data<br>    <br>Note:<br>    Requires opencv-python and numpy to be installed.</div>
+<div class='docstring'>Convert image data to OpenCV-compatible numpy array.<br><br>Returns:<br>    numpy.ndarray: BGR image array ready for OpenCV, or None if no data<br>    <br>Note:<br>    Requires NumPy to be installed.</div>
 <div class='signature'><code>has_image_data(self)</code></div>
 <div class='docstring'>Check if this frame contains actual image data.</div>
 <div class='signature'><code>is_depth_frame(self)</code></div>

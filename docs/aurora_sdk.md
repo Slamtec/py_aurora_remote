@@ -24,18 +24,25 @@ components following the C++ SDK design pattern:
 - LIDAR2DMapBuilder: CoMap (2D LIDAR mapping) operations
 - EnhancedImaging: Enhanced imaging features (depth camera, semantic segmentation)
 - DataRecorder: Sensor data recording for dataset generation
+- PersistentConfigManager: JSON-backed persistent device configuration
+- TransformManager: configurable SE3 transforms on the device
+- CameraMaskManager: static camera mask upload/download and enable control
+- DashcamRecorderManager: dashcam/datalogger status and session management
+
+Standalone utilities such as TimeSyncClient are exposed by the package but
+are not attached to an AuroraSDK session object.
 
 Example usage:
     sdk = AuroraSDK()
-    sdk.controller.connect(connection_string="192.168.1.212")
-    
+    sdk.controller.connect(connection_string="192.168.11.1")
+
     # Get camera preview and tracking data
     left_img, right_img = sdk.data_provider.get_camera_preview()
     tracking_frame = sdk.data_provider.get_tracking_frame()
-    
+
     # VSLAM operations
     sdk.map_manager.save_vslam_map("my_map.vslam")
-    
+
     # 2D LIDAR mapping (CoMap)
     sdk.lidar_2d_map_builder.start_lidar_2d_map_preview()
 
@@ -108,7 +115,7 @@ Returns:
 
 **enhanced_imaging**
 
-Get the EnhancedImaging component (SDK 2.0).
+Get the EnhancedImaging component.
 
 The EnhancedImaging component handles:
 - Depth camera frame retrieval and processing
@@ -133,6 +140,22 @@ The DataRecorder component handles:
 
 Returns:
     DataRecorder: DataRecorder component instance
+
+**persistent_config**
+
+Get the persistent configuration manager.
+
+**transform_manager**
+
+Get the transform manager.
+
+**camera_mask**
+
+Get the camera mask manager.
+
+**dashcam_recorder**
+
+Get the dashcam recorder manager.
 
 #### Methods
 
@@ -342,9 +365,14 @@ Raises:
 
 #### Special Methods
 
-**__init__**(self)
+**__init__**(self, listener, creation_flags)
 
 Initialize Aurora SDK with component-based architecture.
+
+Args:
+    listener: Optional SDKListener instance for asynchronous callbacks.
+    creation_flags: Optional session creation flags such as
+        SESSION_FLAG_NO_PREVIEW_IMAGE_SUBSCRIPTION.
 
 **__enter__**(self)
 

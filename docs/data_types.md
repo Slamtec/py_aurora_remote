@@ -142,6 +142,110 @@ LiDAR scan data header.
 
 SDK version info structure.
 
+### SessionConfig
+
+**Inherits from:** ctypes.Structure
+
+Session configuration structure (slamtec_aurora_sdk_session_config_t).
+
+### CameraMaskImageBuffer
+
+**Inherits from:** ctypes.Structure
+
+Camera mask image buffer (slamtec_aurora_sdk_camera_mask_image_buffer_t).
+
+### DashcamStatus
+
+**Inherits from:** ctypes.Structure
+
+Dashcam recorder status (slamtec_aurora_sdk_dashcam_status_t).
+
+#### Properties
+
+**message**
+
+### DashcamStorageStatus
+
+**Inherits from:** ctypes.Structure
+
+Dashcam storage status (slamtec_aurora_sdk_dashcam_storage_status_t).
+
+### DashcamSessionInfo
+
+**Inherits from:** ctypes.Structure
+
+Dashcam session info (slamtec_aurora_sdk_dashcam_session_info_t).
+
+### PoseCovariance
+
+**Inherits from:** ctypes.Structure
+
+Raw pose covariance matrix (slamtec_aurora_sdk_pose_covariance_t).
+
+#### Methods
+
+**to_list**(self)
+
+**to_numpy**(self)
+
+**copy**(self)
+
+**to_readable**(self)
+
+### PoseCovarianceReadable
+
+**Inherits from:** ctypes.Structure
+
+Human-readable pose covariance metrics (slamtec_aurora_sdk_pose_covariance_readable_t).
+
+#### Methods
+
+**as_dict**(self)
+
+### PoseAugmentationConfig
+
+**Inherits from:** ctypes.Structure
+
+Pose augmentation config (slamtec_aurora_sdk_pose_augmentation_config_t).
+
+### TimeSyncOptions
+
+**Inherits from:** ctypes.Structure
+
+Time synchronization client options (slamtec_aurora_sdk_timesync_options_t).
+
+#### Methods
+
+**as_dict**(self)
+
+### TimeSyncQuality
+
+**Inherits from:** ctypes.Structure
+
+Time synchronization quality metrics (slamtec_aurora_sdk_timesync_quality_t).
+
+#### Methods
+
+**as_dict**(self)
+
+### WallclockOffsetResult
+
+**Inherits from:** ctypes.Structure
+
+Wall clock offset query result (slamtec_aurora_sdk_wallclock_offset_result_t).
+
+### WallclockSyncResult
+
+**Inherits from:** ctypes.Structure
+
+Wall clock sync result (slamtec_aurora_sdk_wallclock_sync_result_t).
+
+### WallclockAccuracyResult
+
+**Inherits from:** ctypes.Structure
+
+Wall clock sync accuracy result (slamtec_aurora_sdk_wallclock_accuracy_result_t).
+
 ### MapStorageSessionStatus
 
 **Inherits from:** ctypes.Structure
@@ -215,6 +319,12 @@ Convert IMU data to numpy arrays (if available).
 **__str__**(self)
 
 String representation of IMU data.
+
+### SDKListenerStruct
+
+**Inherits from:** ctypes.Structure
+
+Native listener structure (slamtec_aurora_sdk_listener_t).
 
 ### DeviceBasicInfoWrapper
 
@@ -378,23 +488,17 @@ Create DeviceInfo from C structure (DeviceBasicInfo).
 
 **__init__**(self, device_name, device_model_string, firmware_version, hardware_version, serial_number, model_major, model_sub, model_revision)
 
-### DeviceStatus
+### DeviceStatusDesc
 
 **Inherits from:** ctypes.Structure
 
-Device status information structure.
-
-### RelocalizationStatus
-
-**Inherits from:** ctypes.Structure
-
-Relocalization status information structure.
+Device status descriptor (slamtec_aurora_sdk_device_status_desc_t).
 
 ### ImageFrame
 
 Python wrapper for image frame data.
 
-This class handles various image formats including regular images (grayscale, RGB, RGBA)
+This class handles various image formats including regular images (grayscale, BGR, RGBA)
 and depth data (float32 depth maps).
 
 #### Methods
@@ -409,6 +513,16 @@ Create ImageFrame from depth camera C structures.
 
 Create ImageFrame from point3d C structures.
 
+**to_numpy_image**(self, color_order)
+
+Convert regular image data to a NumPy array while honoring row stride.
+
+Args:
+    color_order (str): `gray`, `rgb`, `bgr`, or `rgba`
+
+Returns:
+    numpy.ndarray: Image array in the requested color order, or None if not applicable
+
 **to_opencv_image**(self)
 
 Convert image data to OpenCV-compatible numpy array.
@@ -417,7 +531,7 @@ Returns:
     numpy.ndarray: BGR image array ready for OpenCV, or None if no data
     
 Note:
-    Requires opencv-python and numpy to be installed.
+    Requires NumPy to be installed.
 
 **has_image_data**(self)
 
@@ -465,7 +579,7 @@ Returns:
 
 #### Special Methods
 
-**__init__**(self, width, height, pixel_format, timestamp_ns, data, depth_scale, min_depth, max_depth)
+**__init__**(self, width, height, pixel_format, timestamp_ns, data, depth_scale, min_depth, max_depth, stride)
 
 ### TrackingFrame
 
@@ -749,6 +863,7 @@ IMU information structure (slamtec_aurora_sdk_imu_info_t).
 - **ERRORCODE_TIMEOUT** = `<complex_value>`
 - **ERRORCODE_IO_ERROR** = `<complex_value>`
 - **ERRORCODE_NOT_READY** = `<complex_value>`
+- **ERRORCODE_INSUFFICIENT_BUFFER** = `<complex_value>`
 - **ENHANCED_IMAGE_TYPE_NONE** = `0`
 - **ENHANCED_IMAGE_TYPE_DEPTH** = `1`
 - **ENHANCED_IMAGE_TYPE_SEMANTIC_SEGMENTATION** = `2`
@@ -757,6 +872,46 @@ IMU information structure (slamtec_aurora_sdk_imu_info_t).
 - **DATARECORDER_TYPE_NONE** = `0`
 - **DATARECORDER_TYPE_RAW_DATASET** = `1`
 - **DATARECORDER_TYPE_COLMAP_DATASET** = `2`
+- **SESSION_FLAG_DEFAULT** = `0`
+- **SESSION_FLAG_NO_PREVIEW_IMAGE_SUBSCRIPTION** = `<complex_value>`
+- **POWER_OP_REBOOT** = `0`
+- **POWER_OP_SHUTDOWN** = `1`
+- **POSE_AUGMENTATION_MODE_VISUAL_ONLY** = `0`
+- **POSE_AUGMENTATION_MODE_IMU_VISION_MIXED** = `1`
+- **POSE_OUTPUT_FREQ_HIGHEST_POSSIBLE** = `0`
+- **POSE_OUTPUT_FREQ_50HZ** = `50`
+- **POSE_OUTPUT_FREQ_100HZ** = `100`
+- **POSE_OUTPUT_FREQ_200HZ** = `200`
+- **TIMESYNC_DEFAULT_PORT** = `9527`
+- **TIMESYNC_DOMAIN_STEADY_CLOCK** = `0`
+- **TIMESYNC_DOMAIN_WALL_CLOCK** = `1`
+- **DASHCAM_STATE_UNKNOWN** = `0`
+- **DASHCAM_STATE_INITIALIZING** = `1`
+- **DASHCAM_STATE_READY** = `2`
+- **DASHCAM_STATE_RECORDING** = `3`
+- **DASHCAM_STATE_ERROR_INIT** = `4`
+- **DASHCAM_STATE_ERROR_STORAGE_FULL** = `5`
+- **DASHCAM_STATE_ERROR_WRITE_FAILED** = `6`
+- **CONNECTION_STATUS_LOST** = `0`
+- **CONNECTION_STATUS_RESTORED** = `1`
+- **CONNECTION_STATUS_DEVICE_CONFIG_CHANGED** = `2`
+- **DEVICE_STATUS_INITED** = `0`
+- **DEVICE_STATUS_INIT_FAILED** = `1`
+- **DEVICE_STATUS_LOOP_CLOSURE** = `2`
+- **DEVICE_STATUS_OPTIMIZATION_COMPLETED** = `3`
+- **DEVICE_STATUS_TRACKING_LOST** = `4`
+- **DEVICE_STATUS_TRACKING_RECOVERED** = `5`
+- **DEVICE_STATUS_MAP_UPDATED** = `6`
+- **DEVICE_STATUS_MAP_CLEARED** = `7`
+- **DEVICE_STATUS_MAP_SWITCHED** = `8`
+- **DEVICE_STATUS_MAP_LOADING_STARTED** = `9`
+- **DEVICE_STATUS_MAP_SAVING_STARTED** = `10`
+- **DEVICE_STATUS_MAP_LOADING_COMPLETED** = `11`
+- **DEVICE_STATUS_MAP_SAVING_COMPLETED** = `12`
+- **DEVICE_STATUS_RELOCALIZATION_SUCCESS** = `13`
+- **DEVICE_STATUS_RELOCALIZATION_FAILED** = `14`
+- **DEVICE_STATUS_RELOCALIZATION_CANCELLED** = `15`
+- **DEVICE_STATUS_RELOCALIZATION_STARTED** = `16`
 - **DEVICE_RELOCALIZATION_STATUS_NONE** = `0`
 - **DEVICE_RELOCALIZATION_STATUS_IN_PROGRESS** = `1`
 - **DEVICE_RELOCALIZATION_STATUS_SUCCEED** = `2`

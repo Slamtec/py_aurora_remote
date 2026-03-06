@@ -184,7 +184,7 @@ pip install path/to/aurora_sdk_wheel.whl
 **连接问题：**
 ```python
 # 检查设备 IP 和网络
-ping 192.168.1.212
+ping 192.168.11.1
 
 # 验证 Aurora SDK 安装
 import slamtec_aurora_sdk

@@ -184,7 +184,7 @@ If you prefer VS Code:
 **Connection Problems:**
 ```python
 # Check device IP and network
-ping 192.168.1.212
+ping 192.168.11.1
 
 # Verify Aurora SDK installation
 import slamtec_aurora_sdk

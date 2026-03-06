@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/relocalization.py
+#  *
+#  */
 """
 SLAMTEC Aurora Python SDK Demo - Relocalization
 
@@ -111,7 +121,7 @@ Examples:
   python3 relocalization.py
   
   # Connect to specific device
-  python3 relocalization.py 192.168.1.212
+  python3 relocalization.py 192.168.11.1
   
   # Use custom timeout
   python3 relocalization.py --timeout 10000

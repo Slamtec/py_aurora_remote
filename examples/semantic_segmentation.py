@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/semantic_segmentation.py
+#  *
+#  */
 """
 SLAMTEC Aurora Python SDK Demo - Semantic Segmentation
 
@@ -228,8 +238,16 @@ def get_depth_aligned_segmentation_map(sdk, seg_frame, colors):
                 if result:
                     aligned_data, aligned_width, aligned_height = result
                     if aligned_data and aligned_width > 0 and aligned_height > 0:
-                        # Convert aligned data to numpy array
-                        aligned_seg_map = np.frombuffer(aligned_data, dtype=np.uint8).reshape((aligned_height, aligned_width))
+                        aligned_frame = seg_frame.__class__(
+                            width=aligned_width,
+                            height=aligned_height,
+                            pixel_format=0,
+                            timestamp_ns=seg_frame.timestamp_ns,
+                            data=aligned_data
+                        )
+                        aligned_seg_map = to_numpy_segmentation_map(aligned_frame)
+                        if aligned_seg_map is None:
+                            return None
                         
                         # Colorize the aligned segmentation map (like C++ demo) using utils function
                         aligned_colorized = manual_colorize_segmentation(aligned_seg_map, colors)
@@ -251,7 +269,7 @@ def main():
     global is_using_alternative_model, is_model_switching, model_switch_status
     
     parser = argparse.ArgumentParser(description='Aurora Semantic Segmentation Demo')
-    parser.add_argument('--device', '-d', type=str, help='Device IP address', default='192.168.1.212')
+    parser.add_argument('--device', '-d', type=str, help='Device IP address', default='192.168.11.1')
     parser.add_argument('--headless', action='store_true', help='Run without GUI')
     args = parser.parse_args()
     

@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/frame_preview.py
+#  *
+#  */
 """
 Frame Preview Example (Component-based SDK)
 
@@ -10,7 +20,7 @@ Usage:
     python frame_preview_v2.py [connection_string]
     
 Example:
-    python frame_preview_v2.py 192.168.1.212
+    python frame_preview_v2.py 192.168.11.1
 """
 
 import sys
@@ -72,7 +82,7 @@ class FramePreviewDemo:
         Run the frame preview demo using component-based SDK.
         
         Args:
-            connection_string: connection string (e.g., "192.168.1.212")
+            connection_string: connection string (e.g., "192.168.11.1")
         """
         if not OPENCV_AVAILABLE:
             print("Error: OpenCV is required for this demo.")
@@ -274,7 +284,7 @@ def main():
         epilog="""
 Examples:
     python frame_preview_v2.py                    # Auto-discover and connect
-    python frame_preview_v2.py 192.168.1.212     # Connect to specific IP
+    python frame_preview_v2.py 192.168.11.1     # Connect to specific IP
 
 Features:
     - Component-based SDK architecture
@@ -291,7 +301,7 @@ Controls:
     parser.add_argument(
         'connection_string',
         nargs='?',
-        help='Aurora device connection string (e.g., 192.168.1.212)'
+        help='Aurora device connection string (e.g., 192.168.11.1)'
     )
     
     args = parser.parse_args()

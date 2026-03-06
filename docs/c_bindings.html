@@ -29,7 +29,7 @@
         <nav class="nav">
             <ul>
                 <li><a href="index.html">Home</a></li>
-                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_recorder.html">data_recorder</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="camera_mask.html">camera_mask</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="dashcam_recorder.html">dashcam_recorder</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_recorder.html">data_recorder</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="listener.html">listener</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="persistent_config.html">persistent_config</a></li>\n<li><a href="timesync.html">timesync</a></li>\n<li><a href="transform_manager.html">transform_manager</a></li>\n<li><a href="utils.html">utils</a></li>
             </ul>
         </nav>
         <h1>c_bindings</h1>
@@ -40,7 +40,9 @@
 <h4>Methods</h4>
 <div class='signature'><code>get_version_info(self)</code></div>
 <div class='docstring'>Get SDK version information.</div>
-<div class='signature'><code>create_session(self)</code></div>
+<div class='signature'><code>convert_pose_covariance_to_readable(self, covariance)</code></div>
+<div class='docstring'>Convert raw pose covariance to human-readable metrics.</div>
+<div class='signature'><code>create_session(self, listener, creation_flags)</code></div>
 <div class='docstring'>Create a new SDK session.</div>
 <div class='signature'><code>release_session(self, handle)</code></div>
 <div class='docstring'>Release SDK session.</div>
@@ -146,7 +148,7 @@
 <div class='docstring'>Check if semantic segmentation is using alternative model.</div>
 <div class='signature'><code>set_semantic_segmentation_model(self, handle, model_type)</code></div>
 <div class='docstring'>Set semantic segmentation model type.</div>
-<div class='signature'><code>calc_depth_aligned_segmentation_map(self, handle, segmentation_data, seg_width, seg_height)</code></div>
+<div class='signature'><code>calc_depth_aligned_segmentation_map(self, handle, segmentation_data, seg_width, seg_height, seg_stride)</code></div>
 <div class='docstring'>Calculate depth camera aligned segmentation map (matching C++ implementation).</div>
 <div class='signature'><code>require_map_reset(self, handle, timeout_ms)</code></div>
 <div class='docstring'>Require the device to reset its map.</div>
@@ -162,6 +164,20 @@
 <div class='docstring'>Get relocalization status information.</div>
 <div class='signature'><code>get_mapping_flags(self, handle)</code></div>
 <div class='docstring'>Get current mapping flags.</div>
+<div class='signature'><code>get_recent_pose_covariance(self, handle)</code></div>
+<div class='docstring'>Get the most recent pose covariance and timestamp.</div>
+<div class='signature'><code>start_pose_augmentation(self, handle, mode, config)</code></div>
+<div class='docstring'>Start pose augmentation.</div>
+<div class='signature'><code>stop_pose_augmentation(self, handle)</code></div>
+<div class='docstring'>Stop pose augmentation.</div>
+<div class='signature'><code>get_pose_augmentation_mode(self, handle)</code></div>
+<div class='docstring'>Get the current pose augmentation mode.</div>
+<div class='signature'><code>get_pose_augmentation_config(self, handle)</code></div>
+<div class='docstring'>Get the current pose augmentation config.</div>
+<div class='signature'><code>get_augmented_pose(self, handle)</code></div>
+<div class='docstring'>Get the current augmented pose and timestamp.</div>
+<div class='signature'><code>request_power_operation(self, handle, operation, timeout_ms)</code></div>
+<div class='docstring'>Request a power operation on the device.</div>
 <div class='signature'><code>convert_quaternion_to_euler(self, qx, qy, qz, qw)</code></div>
 <div class='docstring'>Convert quaternion to Euler angles.</div>
 <div class='signature'><code>depthcam_is_ready(self, handle)</code></div>

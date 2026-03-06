@@ -1,3 +1,13 @@
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: python_bindings/slamtec_aurora_sdk/data_provider.py
+#  *
+#  */
 """
 Aurora SDK DataProvider component.
 
@@ -6,7 +16,14 @@ Handles data retrieval operations including pose, images, tracking data, and sen
 
 import time
 from .c_bindings import get_c_bindings
-from .data_types import ImageFrame, TrackingFrame, ScanData, LidarScanData, DeviceBasicInfoWrapper, DeviceInfo
+from .data_types import (
+    DeviceBasicInfoWrapper,
+    DeviceInfo,
+    ImageFrame,
+    LidarScanData,
+    PoseAugmentationConfig,
+    TrackingFrame,
+)
 from .exceptions import AuroraSDKError, ConnectionError, DataNotReadyError
 
 
@@ -502,7 +519,7 @@ class DataProvider:
         Get relocalization status information.
         
         Returns:
-            RelocalizationStatus: Current relocalization status
+            tuple: `(status, timestamp_ns)` for the latest relocalization status enum
             
         Raises:
             ConnectionError: If not connected to a device
@@ -512,8 +529,7 @@ class DataProvider:
         self._ensure_c_bindings()
         
         try:
-            status = self._c_bindings.get_relocalization_status(self._controller.session_handle)
-            return status
+            return self._c_bindings.get_relocalization_status(self._controller.session_handle)
         except Exception as e:
             raise AuroraSDKError(f"Failed to get relocalization status: {e}")
     
@@ -536,6 +552,91 @@ class DataProvider:
             return flags
         except Exception as e:
             raise AuroraSDKError(f"Failed to get mapping flags: {e}")
+
+    def get_recent_pose_covariance(self):
+        """
+        Get the latest pose covariance estimate.
+
+        Returns:
+            tuple: `(covariance, timestamp_ns)` where covariance is a PoseCovariance object
+        """
+        self._ensure_connected()
+        self._ensure_c_bindings()
+
+        try:
+            return self._c_bindings.get_recent_pose_covariance(self._controller.session_handle)
+        except Exception as e:
+            if "error code: -7" in str(e):
+                raise DataNotReadyError("Pose covariance data not ready")
+            raise AuroraSDKError(f"Failed to get recent pose covariance: {e}")
+
+    def start_pose_augmentation(self, mode, config=None):
+        """
+        Start pose augmentation for high-frequency pose output.
+
+        Args:
+            mode: Pose augmentation mode enum
+            config: Optional PoseAugmentationConfig. Defaults to 200Hz, no smoothing.
+        """
+        self._ensure_connected()
+        self._ensure_c_bindings()
+
+        if config is None:
+            config = PoseAugmentationConfig()
+            config.output_frequency = 200
+            config.enable_smoothing = 0
+            config.smoothing_factor = 0.2
+
+        try:
+            self._c_bindings.start_pose_augmentation(self._controller.session_handle, mode, config)
+        except Exception as e:
+            raise AuroraSDKError(f"Failed to start pose augmentation: {e}")
+
+    def stop_pose_augmentation(self):
+        """Stop pose augmentation."""
+        self._ensure_connected()
+        self._ensure_c_bindings()
+
+        try:
+            self._c_bindings.stop_pose_augmentation(self._controller.session_handle)
+        except Exception as e:
+            raise AuroraSDKError(f"Failed to stop pose augmentation: {e}")
+
+    def get_pose_augmentation_mode(self):
+        """Get the current pose augmentation mode."""
+        self._ensure_connected()
+        self._ensure_c_bindings()
+
+        try:
+            return self._c_bindings.get_pose_augmentation_mode(self._controller.session_handle)
+        except Exception as e:
+            raise AuroraSDKError(f"Failed to get pose augmentation mode: {e}")
+
+    def get_pose_augmentation_config(self):
+        """Get the current pose augmentation configuration."""
+        self._ensure_connected()
+        self._ensure_c_bindings()
+
+        try:
+            return self._c_bindings.get_pose_augmentation_config(self._controller.session_handle)
+        except Exception as e:
+            raise AuroraSDKError(f"Failed to get pose augmentation config: {e}")
+
+    def get_augmented_pose(self):
+        """
+        Get the current augmented pose.
+
+        Returns:
+            tuple: `(position, quaternion, timestamp_ns)`
+        """
+        self._ensure_connected()
+        self._ensure_c_bindings()
+
+        try:
+            pose, timestamp_ns = self._c_bindings.get_augmented_pose(self._controller.session_handle)
+            return pose.translation.to_tuple(), pose.quaternion.to_tuple(), timestamp_ns
+        except Exception as e:
+            raise AuroraSDKError(f"Failed to get augmented pose: {e}")
     
     # CRITICAL MISSING METHODS that supervisor overlooked
     def get_imu_info(self):

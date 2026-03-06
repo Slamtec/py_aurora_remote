@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/lidar_2dmap_render.py
+#  *
+#  */
 # -*- coding: utf-8 -*-
 """
 LiDAR 2D Map Render Example
@@ -18,7 +28,7 @@ Usage:
     python lidar_2dmap_render.py [connection_string]
     
 Example:
-    python lidar_2dmap_render.py 192.168.1.212
+    python lidar_2dmap_render.py 192.168.11.1
 """
 
 import sys

@@ -1,3 +1,13 @@
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: python_bindings/slamtec_aurora_sdk/utils.py
+#  *
+#  */
 """
 Aurora SDK Utility Functions
 
@@ -192,7 +202,12 @@ def to_numpy_segmentation_map(image_frame):
         return None
     
     try:
-        # Convert bytes to uint8 array
+        if hasattr(image_frame, 'to_numpy_image'):
+            seg_map = image_frame.to_numpy_image(color_order="gray")
+            if seg_map is not None:
+                return seg_map
+
+        # Fallback for older ImageFrame implementations without stride-aware helpers
         seg_array = np.frombuffer(image_frame.data, dtype=np.uint8)
         if len(seg_array) >= image_frame.width * image_frame.height:
             return seg_array[:image_frame.width * image_frame.height].reshape((image_frame.height, image_frame.width))

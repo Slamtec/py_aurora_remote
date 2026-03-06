@@ -13,7 +13,7 @@ This is a Python implementation of the SLAMTEC Aurora Remote SDK which is based 
 - **Map Management**: VSLAM map creation, saving, and loading
 - **2D Grid Mapping**: LIDAR-based occupancy grid mapping with real-time preview
 
-### SDK 2.0 Enhanced Features
+### SDK 2.x Imaging and Recording Features
 - **Semantic Segmentation**: Real-time scene understanding with multiple models and timestamp correlation
 - **Unified ImageFrame Interface**: Single interface supporting regular images, depth maps, and point clouds
 - **Depth Camera**: Dense depth maps with rectified image correlation and proper data conversion
@@ -22,6 +22,16 @@ This is a Python implementation of the SLAMTEC Aurora Remote SDK which is based 
 - **IMU Integration**: Inertial measurement unit data for robust tracking
 - **Timestamp-based Data Retrieval**: Precise temporal correlation between sensor modalities
 - **Data Recorder**: Record sensor data in RAW format or COLMAP-compatible datasets for offline processing
+
+### SDK 2.1.1 Device Management and Timing
+- **Time Synchronization**: Standalone software time sync client for translating Aurora timestamps into client steady-clock or wall-clock domains
+- **Pose Augmentation**: High-frequency IMU-assisted pose output with listener callbacks and polling access
+- **Pose Covariance**: Pose uncertainty retrieval with conversion to readable confidence metrics
+- **Persistent Configuration**: JSON-based configuration enumerate/get/set/reset APIs
+- **Transform Manager**: Device-side SE3 transform list/get/set/reset operations
+- **Camera Mask Manager**: Static mask enable control plus grayscale mask upload/download
+- **Dashcam Recorder**: Status, storage, and session management for the on-device datalogger
+- **System Power Control**: Reboot and shutdown requests through the controller API
 
 ### Python Ecosystem Integration
 - **NumPy/OpenCV**: Efficient image and point cloud processing
@@ -73,16 +83,16 @@ python tools/build_package.py --all-platforms --clean
 
 # Install the appropriate wheel for your platform
 # Linux x86_64:
-pip install wheels/slamtec_aurora_python_sdk_linux_x86_64-2.0.0a0-py3-none-any.whl
+pip install wheels/slamtec_aurora_python_sdk_linux_x86_64-2.1.1-py3-none-any.whl
 
 # Linux ARM64:
-pip install wheels/slamtec_aurora_python_sdk_linux_aarch64-2.0.0a0-py3-none-any.whl
+pip install wheels/slamtec_aurora_python_sdk_linux_aarch64-2.1.1-py3-none-any.whl
 
 # macOS ARM64 (Apple Silicon):
-pip install wheels/slamtec_aurora_python_sdk_macos_arm64-2.0.0a0-py3-none-any.whl
+pip install wheels/slamtec_aurora_python_sdk_macos_arm64-2.1.1-py3-none-any.whl
 
 # Windows x64:
-pip install wheels/slamtec_aurora_python_sdk_win64-2.0.0a0-py3-none-any.whl
+pip install wheels/slamtec_aurora_python_sdk_win64-2.1.1-py3-none-any.whl
 ```
 
 **Sample Commands:**
@@ -90,7 +100,7 @@ pip install wheels/slamtec_aurora_python_sdk_win64-2.0.0a0-py3-none-any.whl
 # Run examples using installed package (auto-discovery)
 python examples/simple_pose.py
 python examples/camera_preview.py
-python examples/semantic_segmentation.py --device 192.168.1.212
+python examples/semantic_segmentation.py --device 192.168.11.1
 
 # Verify installation
 python -c "import slamtec_aurora_sdk; print('Aurora SDK installed successfully')"
@@ -113,7 +123,7 @@ pip install -r requirements-demo.txt
 
 # Run examples directly from source (auto-discovery)
 python examples/simple_pose.py
-python examples/device_info_monitor.py --device 192.168.1.212
+python examples/device_info_monitor.py --device 192.168.11.1
 ```
 
 **Sample Commands:**
@@ -122,8 +132,8 @@ python examples/device_info_monitor.py --device 192.168.1.212
 cd Aurora-Remote-Python-SDK
 
 # Run any example (fallback to source automatically)
-python examples/lidar_scan_plot.py 192.168.1.212
-python examples/dense_point_cloud.py --device 192.168.1.212 --headless
+python examples/lidar_scan_plot.py 192.168.11.1
+python examples/dense_point_cloud.py --device 192.168.11.1 --headless
 python examples/semantic_segmentation.py --device auto
 
 # Build your own wheels during development
@@ -146,7 +156,7 @@ python tools/build_package.py --platforms linux_x86_64 linux_aarch64 macos_arm64
 ls -la wheels/
 
 # Install your custom-built wheel
-pip install wheels/slamtec_aurora_python_sdk_linux_x86_64-2.0.0a0-py3-none-any.whl
+pip install wheels/slamtec_aurora_python_sdk_linux_x86_64-2.1.1-py3-none-any.whl
 ```
 
 **Sample Commands:**
@@ -197,7 +207,14 @@ Warning: Aurora SDK package not found, using source code from parent directory
 usage: simple_pose.py [-h] [connection_string]
 ```
 
-## Recent Improvements (SDK 2.0)
+## Recent Improvements (SDK 2.1.1)
+
+### New in SDK 2.1.1
+- **Standalone TimeSyncClient**: Sync Aurora timestamps to client steady-clock or wall-clock domains without attaching extra state to `AuroraSDK`
+- **Listener-backed Session Creation**: `AuroraSDK(listener=..., creation_flags=...)` and `Controller.create_session(...)` now expose the native 2.1.1 listener/session-config surface
+- **Pose Quality APIs**: `get_recent_pose_covariance()`, readable covariance conversion, and high-rate pose augmentation are now available in Python
+- **Device Configuration Managers**: persistent config, transform manager, camera mask, dashcam recorder, and system power control now match the public C++ SDK surface
+- **New Examples**: added `time_sync.py`, `pose_augmentation.py`, `pose_covariance.py`, `persistent_config.py`, `transform_manager.py`, `camera_mask.py`, `dashcam_recorder.py`, and `system_power.py`
 
 ### Enhanced ImageFrame Interface
 - **Unified Data Handling**: Single `ImageFrame` class now supports regular images, depth maps, and point clouds
@@ -215,6 +232,7 @@ usage: simple_pose.py [-h] [connection_string]
 - **Depth Map Conversion**: Examples demonstrate proper depth-to-point-cloud conversion
 - **Timestamp Correlation**: Semantic segmentation examples show proper camera preview correlation
 - **Named Constants**: Eliminated magic numbers with proper depth camera frame type constants
+- **Notebook Scope**: The existing notebooks remain unchanged for this release; the 2.1.1 additions are covered by standalone example scripts
 
 ## Quick Start
 
@@ -248,7 +266,7 @@ from slamtec_aurora_sdk import AuroraSDK
 
 # Automatic cleanup with context manager (recommended)
 with AuroraSDK() as sdk:  # Session created automatically
-    sdk.connect(connection_string="192.168.1.212")
+    sdk.connect(connection_string="192.168.11.1")
     
     # Get current pose with timestamp
     position, rotation, timestamp = sdk.data_provider.get_current_pose()
@@ -264,7 +282,7 @@ with AuroraSDK() as sdk:  # Session created automatically
 ```python
 # Direct component access for advanced features
 sdk = AuroraSDK()  # Session created automatically
-sdk.connect(connection_string="192.168.1.212")
+sdk.connect(connection_string="192.168.11.1")
 
 # VSLAM operations via MapManager
 sdk.map_manager.save_vslam_map("my_map.vslam")
@@ -288,6 +306,41 @@ if seg_frame:
     left_img, right_img = sdk.data_provider.get_camera_preview(
         seg_frame.timestamp_ns, allow_nearest_frame=False
     )
+```
+
+### Listener and Session Creation Flags
+
+```python
+from slamtec_aurora_sdk import (
+    AuroraSDK,
+    SDKListener,
+    SESSION_FLAG_NO_PREVIEW_IMAGE_SUBSCRIPTION,
+)
+
+class PoseListener(SDKListener):
+    def on_pose_covariance(self, timestamp_ns, covariance):
+        readable = covariance.to_readable()
+        print(timestamp_ns, readable.as_dict())
+
+with AuroraSDK(
+    listener=PoseListener(),
+    creation_flags=SESSION_FLAG_NO_PREVIEW_IMAGE_SUBSCRIPTION,
+) as sdk:
+    sdk.connect(connection_string="192.168.11.1")
+    sdk.data_provider.get_recent_pose_covariance()
+```
+
+### Standalone Time Synchronization
+
+```python
+from slamtec_aurora_sdk import TimeSyncClient, TIMESYNC_DOMAIN_STEADY_CLOCK
+
+with TimeSyncClient(TIMESYNC_DOMAIN_STEADY_CLOCK) as client:
+    client.connect("192.168.11.1")
+    client.initialize()
+    if client.is_synchronized():
+        translated_ns = client.translate_timestamp(aurora_timestamp_ns=123456789)
+        print(translated_ns)
 ```
 
 ## Interactive Tutorials
@@ -347,7 +400,7 @@ The SDK also includes standalone example scripts demonstrating all features:
    python examples/lidar_scan_plot_vector.py [device_ip]
    ```
 
-### Advanced SDK 2.0 Features
+### Advanced Imaging and Sensors
 6. **Semantic Segmentation** - Real-time scene understanding with timestamp correlation
    ```bash
    python examples/semantic_segmentation.py [--device device_ip] [--headless]
@@ -445,6 +498,52 @@ The SDK also includes standalone example scripts demonstrating all features:
     python examples/colmap_recorder.py --output OUTPUT_DIR [--device device_ip] [options]
     ```
 
+### SDK 2.1.1 Timing and Device Management
+25. **Time Synchronization** - Translate Aurora timestamps into client time domains
+    ```bash
+    python examples/time_sync.py [--device device_ip] [--mode steady|wallclock]
+    ```
+
+26. **Wall Clock Synchronization** - Query device wall clock offset, apply sync, and evaluate accuracy
+    ```bash
+    python examples/wallclock_sync.py [device_ip] [--force-sync] [--samples N]
+    ```
+
+27. **Pose Augmentation** - High-frequency IMU-assisted pose output
+    ```bash
+    python examples/pose_augmentation.py [--device device_ip] [options]
+    ```
+
+28. **Pose Covariance** - Poll and interpret pose uncertainty metrics
+    ```bash
+    python examples/pose_covariance.py [--device device_ip] [options]
+    ```
+
+29. **Persistent Configuration** - Enumerate, get, set, and reset persistent JSON config entries
+    ```bash
+    python examples/persistent_config.py [--device device_ip] <command> [options]
+    ```
+
+30. **Transform Manager** - List, query, update, and reset device transforms
+    ```bash
+    python examples/transform_manager.py [--device device_ip] <command> [options]
+    ```
+
+31. **Camera Mask Manager** - Enable masks and upload/download grayscale mask images
+    ```bash
+    python examples/camera_mask.py [--device device_ip] <command> [options]
+    ```
+
+32. **Dashcam Recorder** - Monitor storage and control datalogger state
+    ```bash
+    python examples/dashcam_recorder.py [--device device_ip] <command> [options]
+    ```
+
+33. **System Power** - Query status and request reboot or shutdown
+    ```bash
+    python examples/system_power.py [--device device_ip] <status|reboot|shutdown> [--yes]
+    ```
+
 
 ## Architecture
 
@@ -460,8 +559,14 @@ AuroraSDK
 ├── LIDAR2DMapBuilder   # 2D occupancy grid mapping
 ├── EnhancedImaging     # Depth camera and semantic segmentation
 ├── FloorDetector       # Multi-floor detection
-└── DataRecorder        # Dataset recording (RAW/COLMAP formats)
+├── DataRecorder        # Dataset recording (RAW/COLMAP formats)
+├── PersistentConfig    # Persistent JSON configuration management
+├── TransformManager    # Device-side SE3 transforms
+├── CameraMask          # Static camera mask management
+└── DashcamRecorder     # Datalogger control and storage queries
 ```
+
+`TimeSyncClient` is exposed as a standalone utility rather than a session component.
 
 ## API Reference
 
@@ -648,7 +753,7 @@ class DataRecorder:
 from slamtec_aurora_sdk import AuroraSDK, DATARECORDER_TYPE_COLMAP_DATASET
 
 with AuroraSDK() as sdk:
-    sdk.connect(connection_string="192.168.1.212")
+    sdk.connect(connection_string="192.168.11.1")
     sdk.controller.enable_map_data_syncing(True)
 
     # Configure COLMAP recorder
@@ -665,7 +770,7 @@ with AuroraSDK() as sdk:
 ```
 
 #### **EnhancedImaging**
-SDK 2.0 advanced imaging capabilities with unified ImageFrame interface.
+Advanced imaging capabilities with the unified ImageFrame interface.
 
 ```python
 class EnhancedImaging:
@@ -800,7 +905,7 @@ from slamtec_aurora_sdk import AuroraSDK, DataNotReadyError
 
 # Real-time pose tracking with automatic cleanup
 with AuroraSDK() as sdk:  # Session created automatically
-    sdk.connect(connection_string="192.168.1.212")
+    sdk.connect(connection_string="192.168.11.1")
     
     while True:
         try:

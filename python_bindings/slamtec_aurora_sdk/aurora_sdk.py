@@ -1,3 +1,13 @@
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: python_bindings/slamtec_aurora_sdk/aurora_sdk.py
+#  *
+#  */
 """
 Aurora SDK v2 - Component-based architecture.
 
@@ -11,13 +21,18 @@ from .lidar_2d_map_builder import LIDAR2DMapBuilder
 from .floor_detector import FloorDetector
 from .enhanced_imaging import EnhancedImaging
 from .data_recorder import DataRecorder
+from .persistent_config import PersistentConfigManager
+from .transform_manager import TransformManager
+from .camera_mask import CameraMaskManager
+from .dashcam_recorder import DashcamRecorderManager
+from .data_types import SESSION_FLAG_DEFAULT
 from .exceptions import AuroraSDKError
 
 
 class AuroraSDK:
     """
     Aurora SDK main class with component-based architecture.
-    
+
     This class provides access to Aurora device functionality through separate
     components following the C++ SDK design pattern:
     - Controller: Device connection and control
@@ -26,30 +41,46 @@ class AuroraSDK:
     - LIDAR2DMapBuilder: CoMap (2D LIDAR mapping) operations
     - EnhancedImaging: Enhanced imaging features (depth camera, semantic segmentation)
     - DataRecorder: Sensor data recording for dataset generation
-    
+    - PersistentConfigManager: JSON-backed persistent device configuration
+    - TransformManager: configurable SE3 transforms on the device
+    - CameraMaskManager: static camera mask upload/download and enable control
+    - DashcamRecorderManager: dashcam/datalogger status and session management
+
+    Standalone utilities such as TimeSyncClient are exposed by the package but
+    are not attached to an AuroraSDK session object.
+
     Example usage:
         sdk = AuroraSDK()
-        sdk.controller.connect(connection_string="192.168.1.212")
-        
+        sdk.controller.connect(connection_string="192.168.11.1")
+
         # Get camera preview and tracking data
         left_img, right_img = sdk.data_provider.get_camera_preview()
         tracking_frame = sdk.data_provider.get_tracking_frame()
-        
+
         # VSLAM operations
         sdk.map_manager.save_vslam_map("my_map.vslam")
-        
+
         # 2D LIDAR mapping (CoMap)
         sdk.lidar_2d_map_builder.start_lidar_2d_map_preview()
     """
-    
-    def __init__(self):
-        """Initialize Aurora SDK with component-based architecture."""
+
+    def __init__(self, listener=None, creation_flags=SESSION_FLAG_DEFAULT):
+        """
+        Initialize Aurora SDK with component-based architecture.
+
+        Args:
+            listener: Optional SDKListener instance for asynchronous callbacks.
+            creation_flags: Optional session creation flags such as
+                SESSION_FLAG_NO_PREVIEW_IMAGE_SUBSCRIPTION.
+        """
         # Create core controller
         self._controller = Controller()
+        self._listener = listener
+        self._creation_flags = creation_flags
         
         # Create session automatically - one session per SDK object
         try:
-            self._controller.create_session()
+            self._controller.create_session(listener=listener, creation_flags=creation_flags)
         except Exception as e:
             raise AuroraSDKError("Failed to initialize Aurora SDK session: {}".format(e))
         
@@ -60,6 +91,10 @@ class AuroraSDK:
         self._enhanced_imaging = EnhancedImaging(self._controller)
         self._floor_detector = FloorDetector(self._controller)
         self._data_recorder = DataRecorder(self._controller)
+        self._persistent_config = PersistentConfigManager(self._controller)
+        self._transform_manager = TransformManager(self._controller)
+        self._camera_mask = CameraMaskManager(self._controller)
+        self._dashcam_recorder = DashcamRecorderManager(self._controller)
 
         # Set cross-component references
         self._enhanced_imaging._set_data_provider(self._data_provider)
@@ -147,7 +182,7 @@ class AuroraSDK:
     @property
     def enhanced_imaging(self):
         """
-        Get the EnhancedImaging component (SDK 2.0).
+        Get the EnhancedImaging component.
 
         The EnhancedImaging component handles:
         - Depth camera frame retrieval and processing
@@ -178,6 +213,26 @@ class AuroraSDK:
         """
         return self._data_recorder
 
+    @property
+    def persistent_config(self):
+        """Get the persistent configuration manager."""
+        return self._persistent_config
+
+    @property
+    def transform_manager(self):
+        """Get the transform manager."""
+        return self._transform_manager
+
+    @property
+    def camera_mask(self):
+        """Get the camera mask manager."""
+        return self._camera_mask
+
+    @property
+    def dashcam_recorder(self):
+        """Get the dashcam recorder manager."""
+        return self._dashcam_recorder
+
     def __enter__(self):
         """Context manager entry."""
         return self
@@ -193,6 +248,10 @@ class AuroraSDK:
     def _cleanup(self):
         """Internal cleanup method called by both __exit__ and __del__."""
         try:
+            for manager_name in ("_camera_mask", "_transform_manager"):
+                manager = getattr(self, manager_name, None)
+                if manager is not None and hasattr(manager, "close"):
+                    manager.close()
             if hasattr(self, '_controller') and self._controller:
                 if self._controller.is_connected():
                     self._controller.disconnect()

@@ -20,7 +20,11 @@ Low-level C bindings for Aurora SDK.
 
 Get SDK version information.
 
-**create_session**(self)
+**convert_pose_covariance_to_readable**(self, covariance)
+
+Convert raw pose covariance to human-readable metrics.
+
+**create_session**(self, listener, creation_flags)
 
 Create a new SDK session.
 
@@ -264,7 +268,7 @@ Check if semantic segmentation is using alternative model.
 
 Set semantic segmentation model type.
 
-**calc_depth_aligned_segmentation_map**(self, handle, segmentation_data, seg_width, seg_height)
+**calc_depth_aligned_segmentation_map**(self, handle, segmentation_data, seg_width, seg_height, seg_stride)
 
 Calculate depth camera aligned segmentation map (matching C++ implementation).
 
@@ -295,6 +299,34 @@ Get relocalization status information.
 **get_mapping_flags**(self, handle)
 
 Get current mapping flags.
+
+**get_recent_pose_covariance**(self, handle)
+
+Get the most recent pose covariance and timestamp.
+
+**start_pose_augmentation**(self, handle, mode, config)
+
+Start pose augmentation.
+
+**stop_pose_augmentation**(self, handle)
+
+Stop pose augmentation.
+
+**get_pose_augmentation_mode**(self, handle)
+
+Get the current pose augmentation mode.
+
+**get_pose_augmentation_config**(self, handle)
+
+Get the current pose augmentation config.
+
+**get_augmented_pose**(self, handle)
+
+Get the current augmented pose and timestamp.
+
+**request_power_operation**(self, handle, operation, timeout_ms)
+
+Request a power operation on the device.
 
 **convert_quaternion_to_euler**(self, qx, qy, qz, qw)
 

@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/device_info_monitor.py
+#  *
+#  */
 """
 SLAMTEC Aurora Python SDK Demo - Device Information Monitor
 
@@ -11,7 +21,7 @@ Features:
 - Optional JSON export of device information
 
 Requirements:
-- Aurora device with SDK 2.0 support
+- Aurora device with Aurora Remote SDK support
 """
 
 import sys
@@ -29,23 +39,23 @@ def setup_sdk_import():
     Import the Aurora SDK, trying installed package first, then falling back to source.
     
     Returns:
-        tuple: (AuroraSDK, AuroraSDKError)
+        tuple: (AuroraSDK, AuroraSDKError, SDK_VERSION)
     """
     try:
         # Try to import from installed package first
-        from slamtec_aurora_sdk import AuroraSDK
+        from slamtec_aurora_sdk import AuroraSDK, __version__ as SDK_VERSION
         from slamtec_aurora_sdk.exceptions import AuroraSDKError
-        return AuroraSDK, AuroraSDKError
+        return AuroraSDK, AuroraSDKError, SDK_VERSION
     except ImportError:
         # Fall back to source code in parent directory
         print("Warning: Aurora SDK package not found, using source code from parent directory")
         sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'python_bindings'))
-        from slamtec_aurora_sdk import AuroraSDK
+        from slamtec_aurora_sdk import AuroraSDK, __version__ as SDK_VERSION
         from slamtec_aurora_sdk.exceptions import AuroraSDKError
-        return AuroraSDK, AuroraSDKError
+        return AuroraSDK, AuroraSDKError, SDK_VERSION
 
 # Setup SDK import
-AuroraSDK, AuroraSDKError = setup_sdk_import()
+AuroraSDK, AuroraSDKError, SDK_VERSION = setup_sdk_import()
 
 # Global variables
 is_ctrl_c = False
@@ -398,7 +408,7 @@ def export_device_info_json(basic_info, timestamp_ns, filepath):
             },
             "export_info": {
                 "export_time": datetime.now().isoformat(),
-                "sdk_version": "2.0.0"
+                "sdk_version": SDK_VERSION
             }
         }
         

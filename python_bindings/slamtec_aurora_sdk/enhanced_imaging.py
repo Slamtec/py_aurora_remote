@@ -1,8 +1,18 @@
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: python_bindings/slamtec_aurora_sdk/enhanced_imaging.py
+#  *
+#  */
 """
-Aurora SDK Enhanced Imaging component (SDK 2.0).
+Aurora SDK Enhanced Imaging component.
 
-Handles Enhanced Imaging operations including depth camera frames, semantic segmentation,
-camera calibration, and transform calibration.
+Handles enhanced imaging operations including depth camera frames, semantic
+segmentation, camera calibration, and transform calibration.
 """
 
 import time
@@ -16,8 +26,8 @@ from .exceptions import AuroraSDKError, ConnectionError, DataNotReadyError
 
 class EnhancedImaging:
     """
-    Enhanced Imaging component for Aurora SDK 2.0.
-    
+    Enhanced Imaging component for Aurora SDK.
+
     Responsible for:
     - Depth camera frame retrieval and processing
     - Semantic segmentation frame retrieval and processing
@@ -165,7 +175,8 @@ class EnhancedImaging:
                     height=frame_desc.image_desc.height,
                     pixel_format=frame_desc.image_desc.format,
                     timestamp_ns=frame_desc.timestamp_ns,
-                    data=frame_data
+                    data=frame_data,
+                    stride=frame_desc.image_desc.stride
                 )
                 return image_frame
             return None
@@ -300,7 +311,8 @@ class EnhancedImaging:
                     height=frame_desc.image_desc.height,
                     pixel_format=frame_desc.image_desc.format,
                     timestamp_ns=frame_desc.timestamp_ns,
-                    data=segmentation_data
+                    data=segmentation_data,
+                    stride=frame_desc.image_desc.stride
                 )
                 return image_frame
             return None
@@ -346,7 +358,8 @@ class EnhancedImaging:
                 self._controller.session_handle,
                 segmentation_frame.data,
                 segmentation_frame.width,
-                segmentation_frame.height
+                segmentation_frame.height,
+                getattr(segmentation_frame, 'stride', 0)
             )
             
             return aligned_data, aligned_width, aligned_height

@@ -1,3 +1,13 @@
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: python_bindings/slamtec_aurora_sdk/__init__.py
+#  *
+#  */
 """
 SLAMTEC Aurora Remote SDK Python Bindings
 
@@ -23,12 +33,18 @@ from .map_manager import MapManager
 from .lidar_2d_map_builder import LIDAR2DMapBuilder
 from .enhanced_imaging import EnhancedImaging
 from .data_recorder import DataRecorder
+from .persistent_config import ConfigData, PersistentConfigManager
+from .transform_manager import TransformManager
+from .camera_mask import CameraMaskManager
+from .dashcam_recorder import DashcamRecorderManager, DashcamStorageInfo
+from .listener import SDKListener
+from .timesync import TimeSyncClient
 
 # Data types and exceptions
 from .data_types import *
 from .exceptions import *
 
-__version__ = "2.0.0"
+__version__ = "2.1.1"
 __author__ = "SLAMTEC Co., Ltd."
 
 __all__ = [
@@ -42,6 +58,14 @@ __all__ = [
     'LIDAR2DMapBuilder',
     'EnhancedImaging',
     'DataRecorder',
+    'PersistentConfigManager',
+    'TransformManager',
+    'CameraMaskManager',
+    'DashcamRecorderManager',
+    'TimeSyncClient',
+    'SDKListener',
+    'ConfigData',
+    'DashcamStorageInfo',
 
     # Exceptions
     'AuroraSDKError',
@@ -50,11 +74,22 @@ __all__ = [
     
     # Data types
     'Pose',
-    'PoseSE3', 
+    'PoseSE3',
+    'PoseCovariance',
+    'PoseCovarianceReadable',
+    'PoseAugmentationConfig',
     'DeviceInfo',
     'ImageFrame',
     'TrackingFrame',
     'ScanData',
+    'DashcamStatus',
+    'DashcamStorageStatus',
+    'DashcamSessionInfo',
+    'TimeSyncOptions',
+    'TimeSyncQuality',
+    'WallclockOffsetResult',
+    'WallclockSyncResult',
+    'WallclockAccuracyResult',
     
     # Enhanced Imaging data types (SDK 2.0)
     'SemanticSegmentationFrame',
@@ -70,5 +105,26 @@ __all__ = [
     'DEPTHCAM_FRAME_TYPE_POINT3D',
     
     # Device capability checking (SDK 2.0)
-    'DeviceBasicInfo'
+    'DeviceBasicInfo',
+
+    # Session configuration
+    'SESSION_FLAG_DEFAULT',
+    'SESSION_FLAG_NO_PREVIEW_IMAGE_SUBSCRIPTION',
+
+    # Pose augmentation
+    'POSE_AUGMENTATION_MODE_VISUAL_ONLY',
+    'POSE_AUGMENTATION_MODE_IMU_VISION_MIXED',
+    'POSE_OUTPUT_FREQ_HIGHEST_POSSIBLE',
+    'POSE_OUTPUT_FREQ_50HZ',
+    'POSE_OUTPUT_FREQ_100HZ',
+    'POSE_OUTPUT_FREQ_200HZ',
+
+    # Power operations
+    'POWER_OP_REBOOT',
+    'POWER_OP_SHUTDOWN',
+
+    # Time synchronization
+    'TIMESYNC_DEFAULT_PORT',
+    'TIMESYNC_DOMAIN_STEADY_CLOCK',
+    'TIMESYNC_DOMAIN_WALL_CLOCK',
 ]

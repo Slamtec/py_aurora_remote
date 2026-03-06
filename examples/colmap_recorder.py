@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/colmap_recorder.py
+#  *
+#  */
 """
 COLMAP Dataset Recorder Example
 
@@ -32,7 +42,7 @@ COLMAP Recorder Options:
 
 Example:
     python colmap_recorder.py --output /data/colmap_dataset_001 --stereo-recording --image-quality raw
-    python colmap_recorder.py --output /data/colmap_dataset_002 --device 192.168.1.212 --timeout 60
+    python colmap_recorder.py --output /data/colmap_dataset_002 --device 192.168.11.1 --timeout 60
 """
 
 import sys

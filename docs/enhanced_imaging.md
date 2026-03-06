@@ -1,9 +1,9 @@
 # enhanced_imaging
 
-Aurora SDK Enhanced Imaging component (SDK 2.0).
+Aurora SDK Enhanced Imaging component.
 
-Handles Enhanced Imaging operations including depth camera frames, semantic segmentation,
-camera calibration, and transform calibration.
+Handles enhanced imaging operations including depth camera frames, semantic
+segmentation, camera calibration, and transform calibration.
 
 ## Import
 
@@ -15,7 +15,7 @@ from slamtec_aurora_sdk import enhanced_imaging
 
 ### EnhancedImaging
 
-Enhanced Imaging component for Aurora SDK 2.0.
+Enhanced Imaging component for Aurora SDK.
 
 Responsible for:
 - Depth camera frame retrieval and processing

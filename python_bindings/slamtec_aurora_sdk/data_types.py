@@ -1,3 +1,13 @@
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: python_bindings/slamtec_aurora_sdk/data_types.py
+#  *
+#  */
 """
 Data types and structures for Aurora SDK Python bindings.
 """
@@ -233,6 +243,206 @@ class VersionInfo(ctypes.Structure):
     ]
 
 
+class SessionConfig(ctypes.Structure):
+    """Session configuration structure (slamtec_aurora_sdk_session_config_t)."""
+    _fields_ = [
+        ("version", ctypes.c_uint32),
+        ("creation_flags", ctypes.c_uint64)
+    ]
+
+
+class CameraMaskImageBuffer(ctypes.Structure):
+    """Camera mask image buffer (slamtec_aurora_sdk_camera_mask_image_buffer_t)."""
+    _fields_ = [
+        ("image_data", ctypes.c_void_p),
+        ("image_data_size", ctypes.c_size_t)
+    ]
+
+
+class DashcamStatus(ctypes.Structure):
+    """Dashcam recorder status (slamtec_aurora_sdk_dashcam_status_t)."""
+    _fields_ = [
+        ("enabled", ctypes.c_int),
+        ("recording", ctypes.c_int),
+        ("size_limit_gb", ctypes.c_float),
+        ("current_size_bytes", ctypes.c_uint64),
+        ("working_state", ctypes.c_uint32),
+        ("working_message", ctypes.c_char * 256),
+        ("working_timestamp", ctypes.c_uint64)
+    ]
+
+    @property
+    def message(self):
+        return self.working_message.decode("utf-8", errors="ignore").rstrip("\0")
+
+
+class DashcamStorageStatus(ctypes.Structure):
+    """Dashcam storage status (slamtec_aurora_sdk_dashcam_storage_status_t)."""
+    _fields_ = [
+        ("external_storage_present", ctypes.c_int),
+        ("external_storage_mounted", ctypes.c_int),
+        ("using_external_storage", ctypes.c_int),
+        ("total_space_bytes", ctypes.c_uint64),
+        ("free_space_bytes", ctypes.c_uint64),
+        ("used_by_dashcam_bytes", ctypes.c_uint64),
+        ("last_update_time", ctypes.c_uint64)
+    ]
+
+
+class DashcamSessionInfo(ctypes.Structure):
+    """Dashcam session info (slamtec_aurora_sdk_dashcam_session_info_t)."""
+    _fields_ = [
+        ("session_id", ctypes.c_uint32),
+        ("start_time", ctypes.c_uint64),
+        ("end_time", ctypes.c_uint64),
+        ("size", ctypes.c_uint64),
+        ("start_blob_index", ctypes.c_uint64),
+        ("end_blob_index", ctypes.c_uint64),
+        ("blob_idx_count", ctypes.c_uint64)
+    ]
+
+
+class PoseCovariance(ctypes.Structure):
+    """Raw pose covariance matrix (slamtec_aurora_sdk_pose_covariance_t)."""
+    _fields_ = [
+        ("covariance_matrix", ctypes.c_float * 36)
+    ]
+
+    def to_list(self):
+        return [float(value) for value in self.covariance_matrix]
+
+    def to_numpy(self):
+        if not NUMPY_AVAILABLE:
+            raise ImportError("NumPy is required for to_numpy() method")
+
+        return np.array(self.to_list(), dtype=np.float32).reshape((6, 6), order="F")
+
+    def copy(self):
+        copied = PoseCovariance()
+        ctypes.memmove(ctypes.byref(copied), ctypes.byref(self), ctypes.sizeof(PoseCovariance))
+        return copied
+
+    def to_readable(self):
+        from .c_bindings import get_c_bindings
+
+        readable = PoseCovarianceReadable()
+        error_code = get_c_bindings().lib.slamtec_aurora_sdk_convert_pose_covariance_to_readable(
+            ctypes.byref(self),
+            ctypes.byref(readable)
+        )
+        if error_code != ERRORCODE_OK:
+            raise RuntimeError(
+                "Failed to convert pose covariance to readable format (error code: {})".format(error_code)
+            )
+        return readable
+
+
+class PoseCovarianceReadable(ctypes.Structure):
+    """Human-readable pose covariance metrics (slamtec_aurora_sdk_pose_covariance_readable_t)."""
+    _fields_ = [
+        ("position_ellipsoid_95_xyz", ctypes.c_float * 3),
+        ("position_radius_95_xy", ctypes.c_float),
+        ("rotation_1sigma_rpy_deg", ctypes.c_float * 3)
+    ]
+
+    def as_dict(self):
+        return {
+            "position_ellipsoid_95_xyz": [float(v) for v in self.position_ellipsoid_95_xyz],
+            "position_radius_95_xy": float(self.position_radius_95_xy),
+            "rotation_1sigma_rpy_deg": [float(v) for v in self.rotation_1sigma_rpy_deg],
+        }
+
+
+class PoseAugmentationConfig(ctypes.Structure):
+    """Pose augmentation config (slamtec_aurora_sdk_pose_augmentation_config_t)."""
+    _fields_ = [
+        ("output_frequency", ctypes.c_int),
+        ("enable_smoothing", ctypes.c_int),
+        ("smoothing_factor", ctypes.c_float)
+    ]
+
+
+class TimeSyncOptions(ctypes.Structure):
+    """Time synchronization client options (slamtec_aurora_sdk_timesync_options_t)."""
+    _fields_ = [
+        ("synchronization_interval_ms", ctypes.c_uint32),
+        ("sample_window_size", ctypes.c_uint32),
+        ("outlier_threshold", ctypes.c_double),
+        ("min_samples_for_sync", ctypes.c_uint32),
+        ("timeout_ms", ctypes.c_uint32),
+        ("max_rtt_ms", ctypes.c_double),
+        ("initialize_timeout_ms", ctypes.c_uint32)
+    ]
+
+    def as_dict(self):
+        return {
+            "synchronization_interval_ms": int(self.synchronization_interval_ms),
+            "sample_window_size": int(self.sample_window_size),
+            "outlier_threshold": float(self.outlier_threshold),
+            "min_samples_for_sync": int(self.min_samples_for_sync),
+            "timeout_ms": int(self.timeout_ms),
+            "max_rtt_ms": float(self.max_rtt_ms),
+            "initialize_timeout_ms": int(self.initialize_timeout_ms),
+        }
+
+
+class TimeSyncQuality(ctypes.Structure):
+    """Time synchronization quality metrics (slamtec_aurora_sdk_timesync_quality_t)."""
+    _fields_ = [
+        ("rmse_ms", ctypes.c_double),
+        ("max_error_ms", ctypes.c_double),
+        ("scale", ctypes.c_double),
+        ("offset_ns", ctypes.c_double),
+        ("scale_std_dev", ctypes.c_double),
+        ("offset_std_dev_ns", ctypes.c_double),
+        ("sample_count", ctypes.c_uint32),
+        ("total_sync_count", ctypes.c_uint32),
+        ("failed_sync_count", ctypes.c_uint32)
+    ]
+
+    def as_dict(self):
+        return {
+            "rmse_ms": float(self.rmse_ms),
+            "max_error_ms": float(self.max_error_ms),
+            "scale": float(self.scale),
+            "offset_ns": float(self.offset_ns),
+            "scale_std_dev": float(self.scale_std_dev),
+            "offset_std_dev_ns": float(self.offset_std_dev_ns),
+            "sample_count": int(self.sample_count),
+            "total_sync_count": int(self.total_sync_count),
+            "failed_sync_count": int(self.failed_sync_count),
+        }
+
+
+class WallclockOffsetResult(ctypes.Structure):
+    """Wall clock offset query result (slamtec_aurora_sdk_wallclock_offset_result_t)."""
+    _fields_ = [
+        ("success", ctypes.c_int),
+        ("offset_ns", ctypes.c_int64),
+        ("rtt_ns", ctypes.c_double),
+        ("server_offset_ns", ctypes.c_int64)
+    ]
+
+
+class WallclockSyncResult(ctypes.Structure):
+    """Wall clock sync result (slamtec_aurora_sdk_wallclock_sync_result_t)."""
+    _fields_ = [
+        ("success", ctypes.c_int),
+        ("applied_offset_ns", ctypes.c_int64),
+        ("server_utc_ns", ctypes.c_uint64)
+    ]
+
+
+class WallclockAccuracyResult(ctypes.Structure):
+    """Wall clock sync accuracy result (slamtec_aurora_sdk_wallclock_accuracy_result_t)."""
+    _fields_ = [
+        ("success", ctypes.c_int),
+        ("offset_error_ns", ctypes.c_int64),
+        ("rtt_ns", ctypes.c_double),
+        ("server_utc_ns", ctypes.c_uint64)
+    ]
+
+
 # Error codes
 ERRORCODE_OK = 0
 ERRORCODE_OP_FAILED = -1
@@ -242,6 +452,7 @@ ERRORCODE_NOT_IMPLEMENTED = -4
 ERRORCODE_TIMEOUT = -5
 ERRORCODE_IO_ERROR = -6
 ERRORCODE_NOT_READY = -7
+ERRORCODE_INSUFFICIENT_BUFFER = -8
 
 # Enhanced Image Types (SDK 2.0)
 ENHANCED_IMAGE_TYPE_NONE = 0
@@ -256,6 +467,60 @@ DEPTHCAM_FRAME_TYPE_POINT3D = 1
 DATARECORDER_TYPE_NONE = 0
 DATARECORDER_TYPE_RAW_DATASET = 1
 DATARECORDER_TYPE_COLMAP_DATASET = 2
+
+# Session creation flags (SDK 2.1.1)
+SESSION_FLAG_DEFAULT = 0
+SESSION_FLAG_NO_PREVIEW_IMAGE_SUBSCRIPTION = (1 << 0)
+
+# Power operation types (SDK 2.1.1)
+POWER_OP_REBOOT = 0
+POWER_OP_SHUTDOWN = 1
+
+# Pose augmentation constants (SDK 2.1.1)
+POSE_AUGMENTATION_MODE_VISUAL_ONLY = 0
+POSE_AUGMENTATION_MODE_IMU_VISION_MIXED = 1
+
+POSE_OUTPUT_FREQ_HIGHEST_POSSIBLE = 0
+POSE_OUTPUT_FREQ_50HZ = 50
+POSE_OUTPUT_FREQ_100HZ = 100
+POSE_OUTPUT_FREQ_200HZ = 200
+
+# Time synchronization constants (SDK 2.1.1)
+TIMESYNC_DEFAULT_PORT = 9527
+TIMESYNC_DOMAIN_STEADY_CLOCK = 0
+TIMESYNC_DOMAIN_WALL_CLOCK = 1
+
+# Dashcam recorder states (SDK 2.1.1)
+DASHCAM_STATE_UNKNOWN = 0
+DASHCAM_STATE_INITIALIZING = 1
+DASHCAM_STATE_READY = 2
+DASHCAM_STATE_RECORDING = 3
+DASHCAM_STATE_ERROR_INIT = 4
+DASHCAM_STATE_ERROR_STORAGE_FULL = 5
+DASHCAM_STATE_ERROR_WRITE_FAILED = 6
+
+# Device and connection status enums used by listener callbacks
+CONNECTION_STATUS_LOST = 0
+CONNECTION_STATUS_RESTORED = 1
+CONNECTION_STATUS_DEVICE_CONFIG_CHANGED = 2
+
+DEVICE_STATUS_INITED = 0
+DEVICE_STATUS_INIT_FAILED = 1
+DEVICE_STATUS_LOOP_CLOSURE = 2
+DEVICE_STATUS_OPTIMIZATION_COMPLETED = 3
+DEVICE_STATUS_TRACKING_LOST = 4
+DEVICE_STATUS_TRACKING_RECOVERED = 5
+DEVICE_STATUS_MAP_UPDATED = 6
+DEVICE_STATUS_MAP_CLEARED = 7
+DEVICE_STATUS_MAP_SWITCHED = 8
+DEVICE_STATUS_MAP_LOADING_STARTED = 9
+DEVICE_STATUS_MAP_SAVING_STARTED = 10
+DEVICE_STATUS_MAP_LOADING_COMPLETED = 11
+DEVICE_STATUS_MAP_SAVING_COMPLETED = 12
+DEVICE_STATUS_RELOCALIZATION_SUCCESS = 13
+DEVICE_STATUS_RELOCALIZATION_FAILED = 14
+DEVICE_STATUS_RELOCALIZATION_CANCELLED = 15
+DEVICE_STATUS_RELOCALIZATION_STARTED = 16
 
 # Device Relocalization Status Types
 DEVICE_RELOCALIZATION_STATUS_NONE = 0
@@ -410,6 +675,72 @@ class IMUData(ctypes.Structure):
             'acceleration': np.array(self.get_acceleration()),
             'gyroscope': np.array(self.get_gyroscope())
         }
+
+
+ImageDataCallback = ctypes.CFUNCTYPE(
+    None,
+    ctypes.c_void_p,
+    ctypes.c_uint64,
+    ctypes.POINTER(ImageDesc),
+    ctypes.c_void_p,
+    ctypes.POINTER(ImageDesc),
+    ctypes.c_void_p,
+)
+
+TrackingDataCallback = ctypes.CFUNCTYPE(
+    None,
+    ctypes.c_void_p,
+    ctypes.POINTER(TrackingInfo),
+    ctypes.POINTER(TrackingDataBuffer),
+)
+
+PoseAugmentationResultCallback = ctypes.CFUNCTYPE(
+    None,
+    ctypes.c_void_p,
+    ctypes.c_uint64,
+    ctypes.c_int,
+    ctypes.POINTER(PoseSE3),
+)
+
+IMUDataCallback = ctypes.CFUNCTYPE(
+    None,
+    ctypes.c_void_p,
+    ctypes.POINTER(IMUData),
+    ctypes.c_size_t,
+)
+
+MappingFlagsCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint32)
+DeviceStatusCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64, ctypes.c_uint32)
+LidarScanCallback = ctypes.CFUNCTYPE(
+    None,
+    ctypes.c_void_p,
+    ctypes.c_void_p,
+    ctypes.c_void_p,
+)
+CameraPreviewImageCallback = ImageDataCallback
+ConnectionStatusCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint32)
+DepthcamImageArrivedCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64)
+SemanticSegmentationImageArrivedCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64)
+PoseCovarianceCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64, ctypes.POINTER(ctypes.c_float))
+
+
+class SDKListenerStruct(ctypes.Structure):
+    """Native listener structure (slamtec_aurora_sdk_listener_t)."""
+    _fields_ = [
+        ("user_data", ctypes.c_void_p),
+        ("on_raw_image_data", ImageDataCallback),
+        ("on_tracking_data", TrackingDataCallback),
+        ("on_pose_augmentation_result", PoseAugmentationResultCallback),
+        ("on_imu_data", IMUDataCallback),
+        ("on_mapping_flags", MappingFlagsCallback),
+        ("on_device_status", DeviceStatusCallback),
+        ("on_lidar_scan", LidarScanCallback),
+        ("on_camera_preview_image", CameraPreviewImageCallback),
+        ("on_connection_status", ConnectionStatusCallback),
+        ("on_depthcam_image_arrived", DepthcamImageArrivedCallback),
+        ("on_semantic_segmentation_image_arrived", SemanticSegmentationImageArrivedCallback),
+        ("on_pose_covariance", PoseCovarianceCallback),
+    ]
 
 
 # Python wrapper classes for easier use
@@ -652,37 +983,23 @@ class DeviceInfo:
         return cls.from_device_basic_info(wrapper)
 
 
-# New data types for missing API functions - ADDED
-class DeviceStatus(ctypes.Structure):
-    """Device status information structure."""
-    _fields_ = [
-        ("device_state", ctypes.c_uint32),
-        ("battery_level", ctypes.c_float),
-        ("temperature", ctypes.c_float),
-        ("cpu_usage", ctypes.c_float),
-        ("memory_usage", ctypes.c_float),
-        ("tracking_quality", ctypes.c_uint32),
-        ("error_flags", ctypes.c_uint32),
-        ("reserved", ctypes.c_uint8 * 32)
-    ]
+# Device status and relocalization status are enum values in the C API.
+DeviceStatus = ctypes.c_uint32
+RelocalizationStatus = ctypes.c_uint32
 
 
-class RelocalizationStatus(ctypes.Structure):
-    """Relocalization status information structure."""
+class DeviceStatusDesc(ctypes.Structure):
+    """Device status descriptor (slamtec_aurora_sdk_device_status_desc_t)."""
     _fields_ = [
-        ("is_relocalization_active", ctypes.c_int),
-        ("relocalization_progress", ctypes.c_float),
-        ("confidence_score", ctypes.c_float),
-        ("match_count", ctypes.c_uint32),
-        ("time_elapsed_ms", ctypes.c_uint64),
-        ("reserved", ctypes.c_uint8 * 16)
+        ("status", ctypes.c_uint32),
+        ("timestamp_ns", ctypes.c_uint64)
     ]
 
 
 class ImageFrame:
     """Python wrapper for image frame data.
     
-    This class handles various image formats including regular images (grayscale, RGB, RGBA)
+    This class handles various image formats including regular images (grayscale, BGR, RGBA)
     and depth data (float32 depth maps).
     """
     
@@ -691,13 +1008,14 @@ class ImageFrame:
     FORMAT_POINT3D_FLOAT32 = 101  # Float32 point3d data (x,y,z triplets)
     
     def __init__(self, width, height, pixel_format,
-                 timestamp_ns, data = None, depth_scale=1.0, 
-                 min_depth=0.0, max_depth=10.0):
+                 timestamp_ns, data = None, depth_scale=1.0,
+                 min_depth=0.0, max_depth=10.0, stride=0):
         self.width = width
         self.height = height
         self.pixel_format = pixel_format
         self.timestamp_ns = timestamp_ns
         self.data = data
+        self.stride = stride
         # Additional fields for depth data
         self.depth_scale = depth_scale
         self.min_depth = min_depth
@@ -710,7 +1028,8 @@ class ImageFrame:
             height=desc.height,
             pixel_format=desc.format,  # Use the format field from C structure
             timestamp_ns=0,  # Timestamp is in the parent stereo pair structure
-            data=data
+            data=data,
+            stride=desc.stride
         )
     
     @classmethod
@@ -724,7 +1043,8 @@ class ImageFrame:
             data=frame_data,
             depth_scale=1.0,  # Default scale
             min_depth=0.0,    # Will be calculated from data
-            max_depth=10.0    # Will be calculated from data
+            max_depth=10.0,   # Will be calculated from data
+            stride=frame_desc.image_desc.stride
         )
     
     @classmethod
@@ -735,8 +1055,106 @@ class ImageFrame:
             height=frame_desc.image_desc.height,
             pixel_format=cls.FORMAT_POINT3D_FLOAT32,  # Mark as point3d data
             timestamp_ns=frame_desc.timestamp_ns,
-            data=frame_data
+            data=frame_data,
+            stride=frame_desc.image_desc.stride
         )
+
+    def _resolve_row_stride(self, packed_row_bytes):
+        """Return the row stride in bytes, falling back to tightly packed rows."""
+        return self.stride or packed_row_bytes
+
+    def _has_required_buffer_size(self, row_stride, packed_row_bytes):
+        """Check the raw frame buffer is large enough for a strided view."""
+        if not self.data:
+            return False
+
+        required_size = packed_row_bytes
+        if self.height > 1:
+            required_size += row_stride * (self.height - 1)
+        return len(self.data) >= required_size
+
+    def _to_numpy_view(self, shape, dtype, strides, packed_row_bytes):
+        """Create a NumPy view over the raw buffer honoring frame stride."""
+        if not NUMPY_AVAILABLE:
+            raise ImportError("NumPy is required for frame conversion")
+
+        import numpy as np
+
+        row_stride = self._resolve_row_stride(packed_row_bytes)
+        if row_stride < packed_row_bytes or not self._has_required_buffer_size(row_stride, packed_row_bytes):
+            return None
+
+        try:
+            return np.ndarray(shape=shape, dtype=dtype, buffer=self.data, strides=strides)
+        except (TypeError, ValueError, BufferError):
+            return None
+
+    def to_numpy_image(self, color_order="rgb"):
+        """
+        Convert regular image data to a NumPy array while honoring row stride.
+
+        Args:
+            color_order (str): `gray`, `rgb`, `bgr`, or `rgba`
+
+        Returns:
+            numpy.ndarray: Image array in the requested color order, or None if not applicable
+        """
+        if not self.data or len(self.data) == 0:
+            return None
+
+        if not NUMPY_AVAILABLE:
+            raise ImportError("NumPy is required for image conversion")
+
+        import numpy as np
+
+        if self.pixel_format == 0:  # Grayscale
+            gray = self._to_numpy_view(
+                shape=(self.height, self.width),
+                dtype=np.uint8,
+                strides=(self._resolve_row_stride(self.width), 1),
+                packed_row_bytes=self.width
+            )
+            if gray is None:
+                return None
+            if color_order == "gray":
+                return gray.copy()
+            if color_order in ("rgb", "bgr"):
+                return np.repeat(gray[:, :, np.newaxis], 3, axis=2)
+            raise ValueError("Unsupported color order '{}' for grayscale frame".format(color_order))
+
+        if self.pixel_format == 1:  # BGR in the C++ wrapper/OpenCV path
+            bgr = self._to_numpy_view(
+                shape=(self.height, self.width, 3),
+                dtype=np.uint8,
+                strides=(self._resolve_row_stride(self.width * 3), 3, 1),
+                packed_row_bytes=self.width * 3
+            )
+            if bgr is None:
+                return None
+            if color_order == "bgr":
+                return bgr.copy()
+            if color_order == "rgb":
+                return bgr[:, :, ::-1].copy()
+            raise ValueError("Unsupported color order '{}' for 3-channel frame".format(color_order))
+
+        if self.pixel_format == 2:  # RGBA
+            rgba = self._to_numpy_view(
+                shape=(self.height, self.width, 4),
+                dtype=np.uint8,
+                strides=(self._resolve_row_stride(self.width * 4), 4, 1),
+                packed_row_bytes=self.width * 4
+            )
+            if rgba is None:
+                return None
+            if color_order == "rgba":
+                return rgba.copy()
+            if color_order == "rgb":
+                return rgba[:, :, :3].copy()
+            if color_order == "bgr":
+                return rgba[:, :, 2::-1].copy()
+            raise ValueError("Unsupported color order '{}' for RGBA frame".format(color_order))
+
+        return None
     
     def to_opencv_image(self):
         """
@@ -746,46 +1164,9 @@ class ImageFrame:
             numpy.ndarray: BGR image array ready for OpenCV, or None if no data
             
         Note:
-            Requires opencv-python and numpy to be installed.
+            Requires NumPy to be installed.
         """
-        if not self.data or len(self.data) == 0:
-            return None
-            
-        try:
-            import numpy as np
-            import cv2
-        except ImportError as e:
-            raise ImportError("OpenCV and NumPy are required for image conversion: {}".format(e))
-        
-        # Convert image data to numpy array based on format
-        if self.pixel_format == 0:  # Grayscale
-            img_array = np.frombuffer(self.data, dtype=np.uint8)
-            if len(img_array) >= self.width * self.height:
-                img = img_array[:self.width * self.height].reshape((self.height, self.width))
-                # Make writable copy before converting (frombuffer creates read-only array)
-                img = img.copy()
-                # Convert grayscale to BGR for OpenCV
-                return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-
-        elif self.pixel_format == 1:  # BGR (Aurora sends BGR directly)
-            img_array = np.frombuffer(self.data, dtype=np.uint8)
-            if len(img_array) >= self.width * self.height * 3:
-                img = img_array[:self.width * self.height * 3].reshape((self.height, self.width, 3))
-                # Aurora already sends BGR format, no conversion needed
-                # Return a writable copy so OpenCV can draw on it (frombuffer creates read-only array)
-                return img.copy()
-
-        elif self.pixel_format == 2:  # RGBA
-            img_array = np.frombuffer(self.data, dtype=np.uint8)
-            if len(img_array) >= self.width * self.height * 4:
-                img = img_array[:self.width * self.height * 4].reshape((self.height, self.width, 4))
-                # Make writable copy before converting (frombuffer creates read-only array)
-                img = img.copy()
-                # Convert RGBA to BGR for OpenCV
-                return cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
-        
-        # If we get here, format is unsupported or data is insufficient
-        return None
+        return self.to_numpy_image(color_order="bgr")
     
     def has_image_data(self):
         """Check if this frame contains actual image data."""
@@ -812,11 +1193,12 @@ class ImageFrame:
             return None
             
         import numpy as np
-        # Convert bytes to float32 array
-        depth_array = np.frombuffer(self.data, dtype=np.float32)
-        if len(depth_array) >= self.width * self.height:
-            return depth_array[:self.width * self.height].reshape((self.height, self.width))
-        return None
+        return self._to_numpy_view(
+            shape=(self.height, self.width),
+            dtype=np.float32,
+            strides=(self._resolve_row_stride(self.width * 4), 4),
+            packed_row_bytes=self.width * 4
+        )
     
     def to_colorized_depth_map(self, colormap=None):
         """
@@ -870,17 +1252,10 @@ class ImageFrame:
         if not self.is_point3d_frame() or not self.data:
             return None
             
-        import numpy as np
-        # Convert bytes to float32 array
-        float_array = np.frombuffer(self.data, dtype=np.float32)
-        
-        # Calculate expected number of points
-        expected_floats = self.width * self.height * 3
-        if len(float_array) >= expected_floats:
-            # Reshape to Nx3 array of points
-            points = float_array[:expected_floats].reshape((self.width * self.height, 3))
-            return points
-        return None
+        points_xyz, _ = self.to_point_cloud_data()
+        if points_xyz is None:
+            return None
+        return points_xyz.reshape((self.width * self.height, 3))
     
     def to_point_cloud_data(self):
         """Convert point3d data to point cloud format.
@@ -892,18 +1267,21 @@ class ImageFrame:
         if not self.is_point3d_frame():
             return None, None
             
-        points_flat = self.to_point3d_array()
-        if points_flat is None:
-            return None, None
-            
         import numpy as np
-        # Reshape to height x width x 3
-        points_xyz = points_flat.reshape((self.height, self.width, 3))
+
+        points_xyz = self._to_numpy_view(
+            shape=(self.height, self.width, 3),
+            dtype=np.float32,
+            strides=(self._resolve_row_stride(self.width * 12), 12, 4),
+            packed_row_bytes=self.width * 12
+        )
+        if points_xyz is None:
+            return None, None
         
         # Create mask for valid points (non-zero points)
         valid_mask = np.any(points_xyz != 0, axis=2)
         
-        return points_xyz, valid_mask
+        return points_xyz.copy(), valid_mask.copy()
 
 
 class TrackingFrame:
@@ -1376,10 +1754,15 @@ class GridMap2DGenerationOptions(ctypes.Structure):
     ]
 
 
-# Callback function types for LiDAR scan
-LidarScanCallback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, 
-                                     ctypes.POINTER(LidarSinglelayerScanDataInfo), 
-                                     ctypes.POINTER(LidarScanPoint))
+# Callback function type with resolved LiDAR pointer types.
+# Keep this separate from the listener-struct callback typedef above so the
+# native listener layout continues to use the forward-declaration-safe variant.
+TypedLidarScanCallback = ctypes.CFUNCTYPE(
+    None,
+    ctypes.c_void_p,
+    ctypes.POINTER(LidarSinglelayerScanDataInfo),
+    ctypes.POINTER(LidarScanPoint),
+)
 
 
 # Enhanced Imaging data structures for SDK 2.0 - Matching C++ API exactly

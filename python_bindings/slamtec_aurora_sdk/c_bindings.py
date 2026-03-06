@@ -1,3 +1,13 @@
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: python_bindings/slamtec_aurora_sdk/c_bindings.py
+#  *
+#  */
 """
 Low-level C bindings for Aurora SDK using ctypes.
 """
@@ -96,11 +106,17 @@ class CBindings:
             ctypes.POINTER(EulerAngle)     # euler_out*
         ]
         self.lib.slamtec_aurora_sdk_convert_quaternion_to_euler.restype = ctypes.c_int
-        
+
+        self.lib.slamtec_aurora_sdk_convert_pose_covariance_to_readable.argtypes = [
+            ctypes.POINTER(PoseCovariance),
+            ctypes.POINTER(PoseCovarianceReadable)
+        ]
+        self.lib.slamtec_aurora_sdk_convert_pose_covariance_to_readable.restype = ctypes.c_int
+
         self.lib.slamtec_aurora_sdk_create_session.argtypes = [
-            ctypes.c_void_p,  # config
+            ctypes.POINTER(SessionConfig),  # config
             ctypes.c_size_t,  # config_size
-            ctypes.c_void_p,  # listener
+            ctypes.POINTER(SDKListenerStruct),  # listener
             ctypes.POINTER(ctypes.c_int)  # error_code
         ]
         self.lib.slamtec_aurora_sdk_create_session.restype = ctypes.c_void_p
@@ -151,6 +167,15 @@ class CBindings:
             ctypes.c_uint64  # timeout_ms
         ]
         self.lib.slamtec_aurora_sdk_controller_require_mapping_mode.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_controller_request_power_operation.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_uint32,  # power operation
+            ctypes.c_uint64,  # timeout_ms
+            ctypes.c_void_p,  # reserved
+            ctypes.c_size_t,  # reserved_size
+        ]
+        self.lib.slamtec_aurora_sdk_controller_request_power_operation.restype = ctypes.c_int
 
         self.lib.slamtec_aurora_sdk_controller_require_local_relocalization.argtypes = [
             ctypes.c_void_p,  # handle
@@ -241,18 +266,17 @@ class CBindings:
         ]
         self.lib.slamtec_aurora_sdk_dataprovider_access_map_data.restype = ctypes.c_int
         
-        from .data_types import DeviceStatus, RelocalizationStatus
-        
         self.lib.slamtec_aurora_sdk_dataprovider_get_last_device_status.argtypes = [
             ctypes.c_void_p,  # handle
-            ctypes.POINTER(DeviceStatus),  # status_out
+            ctypes.POINTER(ctypes.c_uint32),  # status_out
             ctypes.POINTER(ctypes.c_uint64)  # timestamp_ns_out
         ]
         self.lib.slamtec_aurora_sdk_dataprovider_get_last_device_status.restype = ctypes.c_int
         
         self.lib.slamtec_aurora_sdk_dataprovider_get_relocalization_status.argtypes = [
             ctypes.c_void_p,  # handle
-            ctypes.POINTER(RelocalizationStatus)  # status_out
+            ctypes.POINTER(ctypes.c_uint32),  # status_out
+            ctypes.POINTER(ctypes.c_uint64),  # timestamp_ns_out
         ]
         self.lib.slamtec_aurora_sdk_dataprovider_get_relocalization_status.restype = ctypes.c_int
         
@@ -290,7 +314,43 @@ class CBindings:
             ctypes.c_uint64   # max_time_diff_ns
         ]
         self.lib.slamtec_aurora_sdk_dataprovider_peek_history_pose.restype = ctypes.c_int
-        
+
+        self.lib.slamtec_aurora_sdk_dataprovider_get_recent_pose_covariance.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.POINTER(PoseCovariance),  # covariance_out
+            ctypes.POINTER(ctypes.c_uint64),  # timestamp_ns_out
+        ]
+        self.lib.slamtec_aurora_sdk_dataprovider_get_recent_pose_covariance.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dataprovider_start_pose_augmentation.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.c_int,  # mode
+            ctypes.POINTER(PoseAugmentationConfig),  # config
+        ]
+        self.lib.slamtec_aurora_sdk_dataprovider_start_pose_augmentation.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dataprovider_stop_pose_augmentation.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_dataprovider_stop_pose_augmentation.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dataprovider_get_pose_augmentation_mode.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.POINTER(ctypes.c_int),  # mode_out
+        ]
+        self.lib.slamtec_aurora_sdk_dataprovider_get_pose_augmentation_mode.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dataprovider_get_pose_augmentation_config.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.POINTER(PoseAugmentationConfig),  # config_out
+        ]
+        self.lib.slamtec_aurora_sdk_dataprovider_get_pose_augmentation_config.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dataprovider_get_augmented_pose.argtypes = [
+            ctypes.c_void_p,  # handle
+            ctypes.POINTER(PoseSE3),  # pose_out
+            ctypes.POINTER(ctypes.c_uint64),  # timestamp_ns_out
+        ]
+        self.lib.slamtec_aurora_sdk_dataprovider_get_augmented_pose.restype = ctypes.c_int
+
         # slamtec_aurora_sdk_dataprovider_peek_imu_data (Line 608 in C API)
         self.lib.slamtec_aurora_sdk_dataprovider_peek_imu_data.argtypes = [
             ctypes.c_void_p,  # handle
@@ -626,6 +686,326 @@ class CBindings:
         ]
         self.lib.slamtec_aurora_sdk_datarecorder_query_status_float64.restype = ctypes.c_int
 
+        # Persistent config operations (SDK 2.1.1)
+        self.lib.slamtec_aurora_sdk_config_entry_list_destroy.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_config_entry_list_destroy.restype = None
+
+        self.lib.slamtec_aurora_sdk_config_entry_list_get_count.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_config_entry_list_get_count.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_config_entry_list_get_entry.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        self.lib.slamtec_aurora_sdk_config_entry_list_get_entry.restype = ctypes.c_char_p
+
+        self.lib.slamtec_aurora_sdk_config_data_create.argtypes = []
+        self.lib.slamtec_aurora_sdk_config_data_create.restype = ctypes.c_void_p
+
+        self.lib.slamtec_aurora_sdk_config_data_destroy.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_config_data_destroy.restype = None
+
+        self.lib.slamtec_aurora_sdk_config_data_load_from_string.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        self.lib.slamtec_aurora_sdk_config_data_load_from_string.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_config_data_create_string_dump.argtypes = [
+            ctypes.c_void_p,
+            ctypes.POINTER(ctypes.c_size_t),
+        ]
+        self.lib.slamtec_aurora_sdk_config_data_create_string_dump.restype = ctypes.c_char_p
+
+        self.lib.slamtec_aurora_sdk_config_data_destroy_string_dump.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_config_data_destroy_string_dump.restype = None
+
+        self.lib.slamtec_aurora_sdk_config_data_load_from_file.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        self.lib.slamtec_aurora_sdk_config_data_load_from_file.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_config_data_save_to_file.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        self.lib.slamtec_aurora_sdk_config_data_save_to_file.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_persistent_config_enum_all_entries.argtypes = [ctypes.c_void_p, ctypes.c_uint64]
+        self.lib.slamtec_aurora_sdk_persistent_config_enum_all_entries.restype = ctypes.c_void_p
+
+        self.lib.slamtec_aurora_sdk_persistent_config_reset_config.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_char_p,
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_persistent_config_reset_config.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_persistent_config_reset_all_config.argtypes = [ctypes.c_void_p, ctypes.c_uint64]
+        self.lib.slamtec_aurora_sdk_persistent_config_reset_all_config.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_persistent_config_set_config.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_char_p,
+            ctypes.c_char_p,
+            ctypes.c_void_p,
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_persistent_config_set_config.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_persistent_config_get_config.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_char_p,
+            ctypes.c_void_p,
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_persistent_config_get_config.restype = ctypes.c_int
+
+        # Transform manager operations (SDK 2.1.1)
+        self.lib.slamtec_aurora_sdk_transform_manager_create.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_transform_manager_create.restype = ctypes.c_void_p
+
+        self.lib.slamtec_aurora_sdk_transform_manager_destroy.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_transform_manager_destroy.restype = None
+
+        self.lib.slamtec_aurora_sdk_transform_manager_name_list_destroy.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_transform_manager_name_list_destroy.restype = None
+
+        self.lib.slamtec_aurora_sdk_transform_manager_name_list_get_count.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_transform_manager_name_list_get_count.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_transform_manager_name_list_get_entry.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        self.lib.slamtec_aurora_sdk_transform_manager_name_list_get_entry.restype = ctypes.c_char_p
+
+        self.lib.slamtec_aurora_sdk_transform_manager_get_all_transform_names.argtypes = [ctypes.c_void_p, ctypes.c_uint64]
+        self.lib.slamtec_aurora_sdk_transform_manager_get_all_transform_names.restype = ctypes.c_void_p
+
+        self.lib.slamtec_aurora_sdk_transform_manager_get_transform.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_char_p,
+            ctypes.POINTER(PoseSE3),
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_transform_manager_get_transform.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_transform_manager_set_transform.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_char_p,
+            ctypes.POINTER(PoseSE3),
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_transform_manager_set_transform.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_transform_manager_reset_transform.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_char_p,
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_transform_manager_reset_transform.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_transform_manager_has_transform.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_char_p,
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_transform_manager_has_transform.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_transform_manager_refresh.argtypes = [ctypes.c_void_p, ctypes.c_uint64]
+        self.lib.slamtec_aurora_sdk_transform_manager_refresh.restype = ctypes.c_int
+
+        # Camera mask operations (SDK 2.1.1)
+        self.lib.slamtec_aurora_sdk_camera_mask_create.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_camera_mask_create.restype = ctypes.c_void_p
+
+        self.lib.slamtec_aurora_sdk_camera_mask_destroy.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_camera_mask_destroy.restype = None
+
+        self.lib.slamtec_aurora_sdk_camera_mask_is_static_mask_enabled.argtypes = [ctypes.c_void_p, ctypes.c_uint64]
+        self.lib.slamtec_aurora_sdk_camera_mask_is_static_mask_enabled.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_camera_mask_set_static_mask_enable.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int,
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_camera_mask_set_static_mask_enable.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_camera_mask_get_static_camera_mask_image_id_count.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_camera_mask_get_static_camera_mask_image_id_count.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_camera_mask_get_static_camera_mask_image_indices.argtypes = [
+            ctypes.c_void_p,
+            ctypes.POINTER(ctypes.c_int),
+            ctypes.c_int,
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_camera_mask_get_static_camera_mask_image_indices.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_camera_mask_get_static_camera_mask_image.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int,
+            ctypes.POINTER(ImageDesc),
+            ctypes.POINTER(CameraMaskImageBuffer),
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_camera_mask_get_static_camera_mask_image.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_camera_mask_set_static_camera_mask_image.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int,
+            ctypes.POINTER(ImageDesc),
+            ctypes.c_void_p,
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_camera_mask_set_static_camera_mask_image.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_camera_mask_remove_static_camera_mask_image.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int,
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_camera_mask_remove_static_camera_mask_image.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_camera_mask_refresh.argtypes = [ctypes.c_void_p, ctypes.c_uint64]
+        self.lib.slamtec_aurora_sdk_camera_mask_refresh.restype = ctypes.c_int
+
+        # Dashcam recorder operations (SDK 2.1.1)
+        self.lib.slamtec_aurora_sdk_dashcam_recorder_get_status.argtypes = [
+            ctypes.c_void_p,
+            ctypes.POINTER(DashcamStatus),
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_dashcam_recorder_get_status.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dashcam_recorder_get_storage_info.argtypes = [ctypes.c_void_p, ctypes.c_uint64]
+        self.lib.slamtec_aurora_sdk_dashcam_recorder_get_storage_info.restype = ctypes.c_void_p
+
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_destroy.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_destroy.restype = None
+
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_get_path.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_get_path.restype = ctypes.c_char_p
+
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_has_storage_status.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_has_storage_status.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_get_storage_status.argtypes = [
+            ctypes.c_void_p,
+            ctypes.POINTER(DashcamStorageStatus),
+        ]
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_get_storage_status.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_get_session_count.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_get_session_count.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_get_session.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int,
+            ctypes.POINTER(DashcamSessionInfo),
+        ]
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_get_session.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_has_current_session.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_has_current_session.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_get_current_session.argtypes = [
+            ctypes.c_void_p,
+            ctypes.POINTER(DashcamSessionInfo),
+        ]
+        self.lib.slamtec_aurora_sdk_dashcam_storage_info_get_current_session.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dashcam_recorder_set_enable.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int,
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_dashcam_recorder_set_enable.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dashcam_recorder_set_size_limit.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_float,
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_dashcam_recorder_set_size_limit.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_dashcam_recorder_invalidate_sessions.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_uint64,
+        ]
+        self.lib.slamtec_aurora_sdk_dashcam_recorder_invalidate_sessions.restype = ctypes.c_int
+
+        # Time synchronization operations (SDK 2.1.1)
+        self.lib.slamtec_aurora_sdk_timesync_create_instance.argtypes = [
+            ctypes.c_int,
+            ctypes.POINTER(ctypes.c_int),
+        ]
+        self.lib.slamtec_aurora_sdk_timesync_create_instance.restype = ctypes.c_void_p
+
+        self.lib.slamtec_aurora_sdk_timesync_destroy_instance.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_timesync_destroy_instance.restype = None
+
+        self.lib.slamtec_aurora_sdk_timesync_connect.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_char_p,
+            ctypes.c_uint16,
+        ]
+        self.lib.slamtec_aurora_sdk_timesync_connect.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_timesync_get_default_options.argtypes = [ctypes.POINTER(TimeSyncOptions)]
+        self.lib.slamtec_aurora_sdk_timesync_get_default_options.restype = None
+
+        self.lib.slamtec_aurora_sdk_timesync_set_options.argtypes = [
+            ctypes.c_void_p,
+            ctypes.POINTER(TimeSyncOptions),
+        ]
+        self.lib.slamtec_aurora_sdk_timesync_set_options.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_timesync_initialize.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_timesync_initialize.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_timesync_is_synchronized.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_timesync_is_synchronized.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_timesync_translate_timestamp.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_uint64,
+            ctypes.POINTER(ctypes.c_uint64),
+        ]
+        self.lib.slamtec_aurora_sdk_timesync_translate_timestamp.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_timesync_get_quality.argtypes = [
+            ctypes.c_void_p,
+            ctypes.POINTER(TimeSyncQuality),
+        ]
+        self.lib.slamtec_aurora_sdk_timesync_get_quality.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_timesync_get_current_server_timestamp.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_uint32,
+            ctypes.POINTER(ctypes.c_uint64),
+            ctypes.POINTER(ctypes.c_uint64),
+        ]
+        self.lib.slamtec_aurora_sdk_timesync_get_current_server_timestamp.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_timesync_stop.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_timesync_stop.restype = None
+
+        self.lib.slamtec_aurora_sdk_timesync_is_running.argtypes = [ctypes.c_void_p]
+        self.lib.slamtec_aurora_sdk_timesync_is_running.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_timesync_get_wallclock_offset.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_uint32,
+            ctypes.POINTER(WallclockOffsetResult),
+        ]
+        self.lib.slamtec_aurora_sdk_timesync_get_wallclock_offset.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_timesync_sync_server_wallclock.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_uint32,
+            ctypes.POINTER(WallclockSyncResult),
+        ]
+        self.lib.slamtec_aurora_sdk_timesync_sync_server_wallclock.restype = ctypes.c_int
+
+        self.lib.slamtec_aurora_sdk_timesync_evaluate_wallclock_accuracy.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_uint32,
+            ctypes.POINTER(WallclockAccuracyResult),
+        ]
+        self.lib.slamtec_aurora_sdk_timesync_evaluate_wallclock_accuracy.restype = ctypes.c_int
+
         # Map manager operations
         from .data_types import MapStorageSessionResultCallback, MapStorageSessionStatus
 
@@ -761,11 +1141,38 @@ class CBindings:
             raise AuroraSDKError("Failed to get version info, error code: {}".format(error_code))
         return version_info
     
-    def create_session(self):
+    def convert_pose_covariance_to_readable(self, covariance):
+        """Convert raw pose covariance to human-readable metrics."""
+        readable = PoseCovarianceReadable()
+        error_code = self.lib.slamtec_aurora_sdk_convert_pose_covariance_to_readable(
+            ctypes.byref(covariance), ctypes.byref(readable)
+        )
+        if error_code != ERRORCODE_OK:
+            raise AuroraSDKError(
+                "Failed to convert pose covariance, error code: {}".format(error_code)
+            )
+        return readable
+
+    def create_session(self, listener=None, creation_flags=SESSION_FLAG_DEFAULT):
         """Create a new SDK session."""
         error_code = ctypes.c_int()
+        config = None
+        config_ptr = None
+        config_size = 0
+        listener_ptr = None
+
+        if creation_flags != SESSION_FLAG_DEFAULT:
+            config = SessionConfig()
+            config.version = 0
+            config.creation_flags = creation_flags
+            config_ptr = ctypes.byref(config)
+            config_size = ctypes.sizeof(SessionConfig)
+
+        if listener is not None:
+            listener_ptr = ctypes.byref(listener)
+
         handle = self.lib.slamtec_aurora_sdk_create_session(
-            None, 0, None, ctypes.byref(error_code)
+            config_ptr, config_size, listener_ptr, ctypes.byref(error_code)
         )
         if error_code.value != ERRORCODE_OK or not handle:
             raise AuroraSDKError("Failed to create session, error code: {}".format(error_code.value))
@@ -1026,7 +1433,7 @@ class CBindings:
         if tracking_info.left_image_desc.width > 0 and tracking_info.left_image_desc.height > 0:
             # Calculate expected image size
             expected_size = tracking_info.left_image_desc.width * tracking_info.left_image_desc.height
-            if tracking_info.left_image_desc.format == 1:  # RGB
+            if tracking_info.left_image_desc.format == 1:  # BGR / 3-channel color
                 expected_size *= 3
             elif tracking_info.left_image_desc.format == 2:  # RGBA
                 expected_size *= 4
@@ -1038,7 +1445,7 @@ class CBindings:
         if tracking_info.right_image_desc.width > 0 and tracking_info.right_image_desc.height > 0:
             # Calculate expected image size
             expected_size = tracking_info.right_image_desc.width * tracking_info.right_image_desc.height
-            if tracking_info.right_image_desc.format == 1:  # RGB
+            if tracking_info.right_image_desc.format == 1:  # BGR / 3-channel color
                 expected_size *= 3
             elif tracking_info.right_image_desc.format == 2:  # RGBA
                 expected_size *= 4
@@ -1825,13 +2232,13 @@ class CBindings:
         # This function doesn't exist in the actual library - removing for now
         raise AuroraSDKError("set_semantic_segmentation_model function not available in this SDK version")
     
-    def calc_depth_aligned_segmentation_map(self, handle, segmentation_data, seg_width, seg_height):
+    def calc_depth_aligned_segmentation_map(self, handle, segmentation_data, seg_width, seg_height, seg_stride=None):
         """Calculate depth camera aligned segmentation map (matching C++ implementation)."""
         # Create input image descriptor
         desc_in = ImageDesc()
         desc_in.width = seg_width
         desc_in.height = seg_height
-        desc_in.stride = seg_width  # Assuming 1 byte per pixel
+        desc_in.stride = seg_stride or seg_width
         desc_in.format = 0  # Assuming grayscale format for segmentation
         desc_in.data_size = len(segmentation_data)
         
@@ -1866,10 +2273,28 @@ class CBindings:
         if error_code != ERRORCODE_OK:
             raise AuroraSDKError("Failed to calculate depth aligned segmentation map, error code: {}".format(error_code))
         
-        # Extract the actual aligned data using output descriptor
-        actual_size = desc_out.width * desc_out.height
-        if actual_size > 0 and desc_out.width > 0 and desc_out.height > 0:
-            aligned_data = bytes(aligned_buffer[:actual_size])
+        # Return tightly packed rows so callers can keep using width/height reshape safely.
+        actual_width = desc_out.width
+        actual_height = desc_out.height
+        actual_stride = desc_out.stride or actual_width
+        actual_size = desc_out.data_size
+        if actual_size <= 0 and actual_width > 0 and actual_height > 0:
+            actual_size = actual_stride * (actual_height - 1) + actual_width
+
+        if actual_size > 0 and actual_width > 0 and actual_height > 0:
+            raw_data = bytes(aligned_buffer[:actual_size])
+            if actual_stride == actual_width:
+                aligned_data = raw_data[:actual_width * actual_height]
+            else:
+                packed_rows = []
+                for row in range(actual_height):
+                    row_start = row * actual_stride
+                    row_end = row_start + actual_width
+                    if row_end > len(raw_data):
+                        raise AuroraSDKError("Failed to unpack aligned segmentation map: insufficient row data")
+                    packed_rows.append(raw_data[row_start:row_end])
+                aligned_data = b"".join(packed_rows)
+
             return aligned_data, desc_out.width, desc_out.height
         else:
             return None, 0, 0
@@ -1897,9 +2322,7 @@ class CBindings:
     # Missing high-priority DataProvider operations - IMPLEMENTATION ADDED
     def get_last_device_status(self, handle):
         """Get the last device status information."""
-        from .data_types import DeviceStatus
-        
-        status = DeviceStatus()
+        status = ctypes.c_uint32()
         timestamp = ctypes.c_uint64()
         error_code = self.lib.slamtec_aurora_sdk_dataprovider_get_last_device_status(
             handle, ctypes.byref(status), ctypes.byref(timestamp)
@@ -1907,20 +2330,19 @@ class CBindings:
         if error_code != ERRORCODE_OK:
             raise AuroraSDKError("Failed to get device status, error code: {}".format(error_code))
         
-        return status, timestamp.value
+        return status.value, timestamp.value
     
     def get_relocalization_status(self, handle):
         """Get relocalization status information."""
-        from .data_types import RelocalizationStatus
-        
-        status = RelocalizationStatus()
+        status = ctypes.c_uint32()
+        timestamp = ctypes.c_uint64()
         error_code = self.lib.slamtec_aurora_sdk_dataprovider_get_relocalization_status(
-            handle, ctypes.byref(status)
+            handle, ctypes.byref(status), ctypes.byref(timestamp)
         )
         if error_code != ERRORCODE_OK:
             raise AuroraSDKError("Failed to get relocalization status, error code: {}".format(error_code))
         
-        return status
+        return status.value, timestamp.value
     
     def get_mapping_flags(self, handle):
         """Get current mapping flags."""
@@ -1932,6 +2354,76 @@ class CBindings:
             raise AuroraSDKError("Failed to get mapping flags, error code: {}".format(error_code))
         
         return flags.value
+
+    def get_recent_pose_covariance(self, handle):
+        """Get the most recent pose covariance and timestamp."""
+        covariance = PoseCovariance()
+        timestamp = ctypes.c_uint64()
+        error_code = self.lib.slamtec_aurora_sdk_dataprovider_get_recent_pose_covariance(
+            handle, ctypes.byref(covariance), ctypes.byref(timestamp)
+        )
+        if error_code != ERRORCODE_OK:
+            raise AuroraSDKError(
+                "Failed to get recent pose covariance, error code: {}".format(error_code)
+            )
+        return covariance, timestamp.value
+
+    def start_pose_augmentation(self, handle, mode, config):
+        """Start pose augmentation."""
+        error_code = self.lib.slamtec_aurora_sdk_dataprovider_start_pose_augmentation(
+            handle, mode, ctypes.byref(config)
+        )
+        if error_code != ERRORCODE_OK:
+            raise AuroraSDKError("Failed to start pose augmentation, error code: {}".format(error_code))
+
+    def stop_pose_augmentation(self, handle):
+        """Stop pose augmentation."""
+        error_code = self.lib.slamtec_aurora_sdk_dataprovider_stop_pose_augmentation(handle)
+        if error_code != ERRORCODE_OK:
+            raise AuroraSDKError("Failed to stop pose augmentation, error code: {}".format(error_code))
+
+    def get_pose_augmentation_mode(self, handle):
+        """Get the current pose augmentation mode."""
+        mode = ctypes.c_int()
+        error_code = self.lib.slamtec_aurora_sdk_dataprovider_get_pose_augmentation_mode(
+            handle, ctypes.byref(mode)
+        )
+        if error_code != ERRORCODE_OK:
+            raise AuroraSDKError(
+                "Failed to get pose augmentation mode, error code: {}".format(error_code)
+            )
+        return mode.value
+
+    def get_pose_augmentation_config(self, handle):
+        """Get the current pose augmentation config."""
+        config = PoseAugmentationConfig()
+        error_code = self.lib.slamtec_aurora_sdk_dataprovider_get_pose_augmentation_config(
+            handle, ctypes.byref(config)
+        )
+        if error_code != ERRORCODE_OK:
+            raise AuroraSDKError(
+                "Failed to get pose augmentation config, error code: {}".format(error_code)
+            )
+        return config
+
+    def get_augmented_pose(self, handle):
+        """Get the current augmented pose and timestamp."""
+        pose = PoseSE3()
+        timestamp = ctypes.c_uint64()
+        error_code = self.lib.slamtec_aurora_sdk_dataprovider_get_augmented_pose(
+            handle, ctypes.byref(pose), ctypes.byref(timestamp)
+        )
+        if error_code != ERRORCODE_OK:
+            raise AuroraSDKError("Failed to get augmented pose, error code: {}".format(error_code))
+        return pose, timestamp.value
+
+    def request_power_operation(self, handle, operation, timeout_ms=5000):
+        """Request a power operation on the device."""
+        error_code = self.lib.slamtec_aurora_sdk_controller_request_power_operation(
+            handle, operation, timeout_ms, None, 0
+        )
+        if error_code != ERRORCODE_OK:
+            raise AuroraSDKError("Failed to request power operation, error code: {}".format(error_code))
     def convert_quaternion_to_euler(self, qx, qy, qz, qw):
         """Convert quaternion to Euler angles."""
         from .data_types import Quaternion, EulerAngle

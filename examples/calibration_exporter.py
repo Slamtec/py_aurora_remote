@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/calibration_exporter.py
+#  *
+#  */
 """
 SLAMTEC Aurora Python SDK Demo - Calibration Data Exporter
 
@@ -435,7 +445,7 @@ Examples:
   python calibration_exporter.py -o calibration.json -f json
   
   # Connect to specific device and export
-  python calibration_exporter.py -d 192.168.1.212 -o cal.xml
+  python calibration_exporter.py -d 192.168.11.1 -o cal.xml
 
 Dependencies:
   Required: slamtec_aurora_sdk
@@ -460,7 +470,7 @@ Export formats:
 Examples:
   %(prog)s --display-only
   %(prog)s -o calibration.xml -f opencv
-  %(prog)s -d 192.168.1.212 -o cal.yaml -f yaml
+  %(prog)s -d 192.168.11.1 -o cal.yaml -f yaml
         """
     )
     

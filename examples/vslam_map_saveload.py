@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/vslam_map_saveload.py
+#  *
+#  */
 """
 SLAMTEC Aurora Python SDK Demo - VSLAM Map Save/Load
 
@@ -208,7 +218,7 @@ Examples:
   python3 vslam_map_saveload.py -d my_map.stcm
   
   # Upload map to specific device
-  python3 vslam_map_saveload.py -s 192.168.1.212 -u existing_map.stcm
+  python3 vslam_map_saveload.py -s 192.168.11.1 -u existing_map.stcm
   
   # Download with default filename
   python3 vslam_map_saveload.py -d
@@ -226,7 +236,7 @@ Examples:
   python3 vslam_map_saveload.py -d my_map.stcm
   
   # Upload map to specific device  
-  python3 vslam_map_saveload.py -s 192.168.1.212 -u existing_map.stcm
+  python3 vslam_map_saveload.py -s 192.168.11.1 -u existing_map.stcm
   
   # Download with default filename
   python3 vslam_map_saveload.py -d

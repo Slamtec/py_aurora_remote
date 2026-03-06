@@ -37,9 +37,13 @@ Get SDK version information.
 Returns:
     dict containing version information
 
-**create_session**(self)
+**create_session**(self, listener, creation_flags)
 
 Create SDK session.
+
+Args:
+    listener: Optional SDKListener instance for async callbacks
+    creation_flags: Session creation flags bitmask
 
 Raises:
     AuroraSDKError: If session creation fails
@@ -113,6 +117,26 @@ Reset the connected device.
 Raises:
     ConnectionError: If not connected to a device
     AuroraSDKError: If reset fails
+
+**request_power_operation**(self, operation, timeout_ms)
+
+Request a power operation on the connected device.
+
+Args:
+    operation: Power operation enum value
+    timeout_ms: Timeout in milliseconds
+
+Raises:
+    ConnectionError: If not connected to a device
+    AuroraSDKError: If the operation fails
+
+**reboot_device**(self, timeout_ms)
+
+Request a device reboot.
+
+**shutdown_device**(self, timeout_ms)
+
+Request a device shutdown.
 
 **enable_map_data_syncing**(self, enable)
 

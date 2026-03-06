@@ -1,3 +1,13 @@
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: python_bindings/slamtec_aurora_sdk/controller.py
+#  *
+#  */
 """
 Aurora SDK Controller component.
 
@@ -5,7 +15,12 @@ Handles device connection, session management, and control operations.
 """
 
 from .c_bindings import get_c_bindings
-from .data_types import DeviceInfo
+from .data_types import (
+    DeviceInfo,
+    POWER_OP_REBOOT,
+    POWER_OP_SHUTDOWN,
+    SESSION_FLAG_DEFAULT,
+)
 from .exceptions import AuroraSDKError, ConnectionError
 
 
@@ -33,6 +48,8 @@ class Controller:
         self._connected = False
         self._device_info = None
         self._current_server_info = None
+        self._listener = None
+        self._creation_flags = SESSION_FLAG_DEFAULT
     
     def _ensure_c_bindings(self):
         """Ensure C bindings are available or raise appropriate error."""
@@ -55,10 +72,14 @@ class Controller:
             'feature_flags': version_info.sdk_feature_flags
         }
     
-    def create_session(self):
+    def create_session(self, listener=None, creation_flags=SESSION_FLAG_DEFAULT):
         """
         Create SDK session.
         
+        Args:
+            listener: Optional SDKListener instance for async callbacks
+            creation_flags: Session creation flags bitmask
+
         Raises:
             AuroraSDKError: If session creation fails
         """
@@ -68,7 +89,13 @@ class Controller:
             raise AuroraSDKError("Session already created")
         
         try:
-            self._session_handle = self._c_bindings.create_session()
+            native_listener = listener.native_listener if listener is not None else None
+            self._session_handle = self._c_bindings.create_session(
+                listener=native_listener,
+                creation_flags=creation_flags,
+            )
+            self._listener = listener
+            self._creation_flags = creation_flags
         except Exception as e:
             raise AuroraSDKError("Failed to create session: {}".format(e))
     
@@ -84,6 +111,8 @@ class Controller:
                 self._connected = False
                 self._device_info = None
                 self._current_server_info = None
+                self._listener = None
+                self._creation_flags = SESSION_FLAG_DEFAULT
     
     def discover_devices(self, timeout=10.0):
         """
@@ -219,6 +248,35 @@ class Controller:
             raise AuroraSDKError("Device reset not implemented in C SDK")
         except Exception as e:
             raise AuroraSDKError("Failed to reset device: {}".format(e))
+
+    def request_power_operation(self, operation, timeout_ms=5000):
+        """
+        Request a power operation on the connected device.
+
+        Args:
+            operation: Power operation enum value
+            timeout_ms: Timeout in milliseconds
+
+        Raises:
+            ConnectionError: If not connected to a device
+            AuroraSDKError: If the operation fails
+        """
+        self._ensure_c_bindings()
+        if not self.is_connected():
+            raise ConnectionError("Not connected to any device")
+
+        try:
+            self._c_bindings.request_power_operation(self._session_handle, operation, timeout_ms)
+        except Exception as e:
+            raise AuroraSDKError("Failed to request power operation: {}".format(e))
+
+    def reboot_device(self, timeout_ms=5000):
+        """Request a device reboot."""
+        self.request_power_operation(POWER_OP_REBOOT, timeout_ms=timeout_ms)
+
+    def shutdown_device(self, timeout_ms=5000):
+        """Request a device shutdown."""
+        self.request_power_operation(POWER_OP_SHUTDOWN, timeout_ms=timeout_ms)
     
     def enable_map_data_syncing(self, enable):
         """

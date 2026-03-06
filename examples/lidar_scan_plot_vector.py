@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/lidar_scan_plot_vector.py
+#  *
+#  */
 """
 Vector-based LiDAR Scan Plot Example
 
@@ -17,7 +27,7 @@ Usage:
     python lidar_scan_plot_vector.py [device_ip]
     
 Example:
-    python lidar_scan_plot_vector.py 192.168.1.212
+    python lidar_scan_plot_vector.py 192.168.11.1
 """
 
 import sys
@@ -444,8 +454,8 @@ class VectorLidarPlotter:
 def main():
     """Main function."""
     parser = argparse.ArgumentParser(description='Vector-based LiDAR Scan Visualization')
-    parser.add_argument('device_ip', nargs='?', default='192.168.1.212',
-                       help='IP address of Aurora device (default: 192.168.1.212)')
+    parser.add_argument('device_ip', nargs='?', default='192.168.11.1',
+                       help='IP address of Aurora device (default: 192.168.11.1)')
     parser.add_argument('--max-range', type=float, default=10.0,
                        help='Maximum display range in meters (default: 10.0)')
     parser.add_argument('--update-rate', type=int, default=20,

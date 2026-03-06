@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# /*
+#  *  SLAMTEC Aurora
+#  *  Copyright 2013 - 2025 SLAMTEC Co., Ltd.
+#  *
+#  *  http://www.slamtec.com
+#  *
+#  *  Aurora Remote SDK Python
+#  *  File: examples/context_manager_demo.py
+#  *
+#  */
 """
 Context Manager Demo
 
@@ -13,7 +23,7 @@ Usage:
     python context_manager_demo.py [connection_string]
     
 Example:
-    python context_manager_demo.py 192.168.1.212
+    python context_manager_demo.py 192.168.11.1
 """
 
 import sys
@@ -48,7 +58,7 @@ def run_demo(connection_string=None):
     Run the context manager demo.
     
     Args:
-        connection_string: Optional connection string (e.g., "192.168.1.212")
+        connection_string: Optional connection string (e.g., "192.168.11.1")
     """
     print("=== Aurora SDK Context Manager Demo ===")
     print("This demo shows how to use AuroraSDK with automatic cleanup.")
@@ -132,7 +142,7 @@ def main():
         epilog="""
 Examples:
     python context_manager_demo.py                    # Auto-discover device
-    python context_manager_demo.py 192.168.1.212     # Connect to specific IP
+    python context_manager_demo.py 192.168.11.1     # Connect to specific IP
 
 Benefits of using context manager:
     - Automatic cleanup even if exceptions occur
@@ -143,7 +153,7 @@ Benefits of using context manager:
     parser.add_argument(
         'connection_string',
         nargs='?',
-        help='Aurora device connection string (e.g., 192.168.1.212)'
+        help='Aurora device connection string (e.g., 192.168.11.1)'
     )
     
     args = parser.parse_args()

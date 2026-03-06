@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dashcam_recorder - Aurora Python SDK</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 1px solid #ecf0f1; padding-bottom: 5px; }
+        h3 { color: #2980b9; }
+        h4 { color: #7f8c8d; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Consolas', monospace; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        .nav { background: #34495e; color: white; padding: 10px 0; margin: -40px -40px 40px -40px; border-radius: 8px 8px 0 0; }
+        .nav ul { list-style: none; padding: 0 20px; margin: 0; }
+        .nav li { display: inline-block; margin-right: 20px; }
+        .nav a { color: #3498db; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+        .signature { background: #e8f4fd; padding: 10px; border-left: 4px solid #3498db; margin: 10px 0; }
+        .docstring { margin: 15px 0; }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #3498db; color: white; padding: 10px; border-radius: 50%; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="aurora_sdk.html">aurora_sdk</a></li>\n<li><a href="c_bindings.html">c_bindings</a></li>\n<li><a href="camera_mask.html">camera_mask</a></li>\n<li><a href="controller.html">controller</a></li>\n<li><a href="dashcam_recorder.html">dashcam_recorder</a></li>\n<li><a href="data_provider.html">data_provider</a></li>\n<li><a href="data_recorder.html">data_recorder</a></li>\n<li><a href="data_types.html">data_types</a></li>\n<li><a href="enhanced_imaging.html">enhanced_imaging</a></li>\n<li><a href="exceptions.html">exceptions</a></li>\n<li><a href="floor_detector.html">floor_detector</a></li>\n<li><a href="lidar_2d_map_builder.html">lidar_2d_map_builder</a></li>\n<li><a href="listener.html">listener</a></li>\n<li><a href="map_manager.html">map_manager</a></li>\n<li><a href="persistent_config.html">persistent_config</a></li>\n<li><a href="timesync.html">timesync</a></li>\n<li><a href="transform_manager.html">transform_manager</a></li>\n<li><a href="utils.html">utils</a></li>
+            </ul>
+        </nav>
+        <h1>dashcam_recorder</h1>
+<div class='docstring'>Dashcam recorder management for Aurora SDK 2.1.1.</div>
+<h2>Classes</h2>
+<h3>DashcamStorageInfo</h3>
+<div class='docstring'>Wrapper around a dashcam storage info handle.</div>
+<h4>Methods</h4>
+<div class='signature'><code>is_valid(self)</code></div>
+<div class='signature'><code>close(self)</code></div>
+<div class='signature'><code>has_storage_status(self)</code></div>
+<div class='signature'><code>get_storage_status(self)</code></div>
+<div class='signature'><code>get_session_count(self)</code></div>
+<div class='signature'><code>get_session(self, index)</code></div>
+<div class='signature'><code>has_current_session(self)</code></div>
+<div class='signature'><code>get_current_session(self)</code></div>
+<h3>DashcamRecorderManager</h3>
+<div class='docstring'>Monitor and control the device dashcam recorder.</div>
+<h4>Methods</h4>
+<div class='signature'><code>get_status(self, timeout_ms)</code></div>
+<div class='signature'><code>get_storage_info(self, timeout_ms)</code></div>
+<div class='signature'><code>set_enable(self, enable, timeout_ms)</code></div>
+<div class='signature'><code>set_size_limit(self, size_limit_gb, timeout_ms)</code></div>
+<div class='signature'><code>invalidate_sessions(self, timeout_ms)</code></div>
+        <a href="#" class="back-to-top">↑</a>
+    </div>
+</body>
+</html>
